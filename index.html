@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信二维码生成工具</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入QRCode.js库用于生成二维码 -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <!-- 配置文件 -->
+    <script src="config.js"></script>
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#07C160', // 微信绿
+                        secondary: '#F7F7F7',
+                        dark: '#333333',
+                        light: '#FFFFFF',
+                        accent: '#1677FF',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'custom': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                        'hover': '0 8px 30px rgba(0, 0, 0, 0.12)',
+                    }
+                },
+            }
+        }
+    </script>
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .bg-gradient-wechat {
+                background: linear-gradient(135deg, #07C160 0%, #06B055 100%);
+            }
+            .transition-all-300 {
+                transition: all 0.3s ease;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+    <style>
+        /* 自定义动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .animate-slideIn {
+            animation: slideIn 0.5s ease forwards;
+        }
+        .animate-pulse-slow {
+            animation: pulse 2s infinite;
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        .animate-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        /* 输入框聚焦效果 */
+        .form-input:focus {
+            border-color: #07C160;
+            box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.1);
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
+        }
+        
+        /* 输入框错误状态 */
+        .form-input.error {
+            border-color: #f87171;
+            box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1);
+        }
+        
+        /* 按钮悬停和点击效果 */
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+        }
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        /* 卡片悬停效果 */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* 加载动画 */
+        .loader {
+            border: 3px solid rgba(7, 193, 96, 0.1);
+            border-top: 3px solid #07C160;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        /* 表单标签动画 */
+        .form-group {
+            position: relative;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 640px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .card-hover:hover {
+                transform: none;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+        }
+        
+        /* Toast 通知样式 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            background-color: #10b981;
+        }
+        
+        .toast.error {
+            background-color: #ef4444;
+        }
+        
+        .toast.info {
+            background-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- 页面头部 -->
+    <header class="bg-gradient-wechat text-white shadow-md">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa fa-qrcode text-2xl"></i>
+                    <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-shadow">微信二维码生成工具</h1>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <button class="text-white hover:text-gray-200 transition-all-300">
+                        <i class="fa fa-github text-xl"></i>
+                    </button>
+                    <button class="text-white hover:text-gray-200 transition-all-300">
+                        <i class="fa fa-info-circle text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 表单区域 -->
+            <div class="bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover">
+                <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
+                    <i class="fa fa-sliders mr-2 text-primary"></i>参数设置
+                </h2>
+                <form id="qrForm" class="space-y-5">
+                    <!-- 错误提示区域 -->
+                    <div id="errorMessage" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm animate-fadeIn">
+                        <i class="fa fa-exclamation-circle mr-2"></i>
+                        <span id="errorText">错误信息将显示在这里</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="appid" class="block text-sm font-medium text-gray-700 mb-1">AppID <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-key"></i>
+                            </span>
+                            <select id="appid" name="appid" 
+                                   class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white" required>
+                                <!-- AppID选项将通过JavaScript动态生成 -->
+                            </select>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">请从下拉列表中选择AppID</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mcid" class="block text-sm font-medium text-gray-700 mb-1">MCID <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-code"></i>
+                            </span>
+                            <input type="text" id="mcid" name="mcid" placeholder="请输入MCID" 
+                                   class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                   required>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">例如: 41941</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bustype" class="block text-sm font-medium text-gray-700 mb-1">业务类型</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-briefcase"></i>
+                            </span>
+                            <select id="bustype" name="bustype" 
+                                    class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
+                                <!-- 选项将通过JavaScript动态生成 -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 路径不再需要手动输入，由配置文件中的pathTemplate自动生成 -->
+
+                    <div class="form-group">
+                        <label for="qrsize" class="block text-sm font-medium text-gray-700 mb-1">二维码大小</label>
+                        <div class="flex items-center space-x-4">
+                            <input type="range" id="qrsize" name="qrsize" min="100" max="500" value="250" step="10"
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary">
+                            <span id="qrsizeValue" class="text-sm font-medium text-gray-700">250px</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="btn-primary bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center w-full">
+                            <i class="fa fa-refresh mr-2"></i>
+                            生成二维码
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 二维码预览区域 -->
+            <div class="bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover" style="animation-delay: 0.2s;">
+                <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
+                    <i class="fa fa-qrcode mr-2 text-primary"></i>二维码预览
+                </h2>
+                
+                <!-- 成功提示区域 -->
+                <div id="successMessage" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm animate-fadeIn mb-6">
+                    <i class="fa fa-check-circle mr-2"></i>
+                    <span id="successText">操作成功！</span>
+                </div>
+                
+                <div class="flex flex-col items-center justify-center">
+                    <div id="qrcodeContainer" class="bg-white p-6 rounded-xl shadow-custom mb-6 flex items-center justify-center relative">
+                        <!-- 二维码图片将在这里生成 -->
+                        <div id="qrcode" class="border border-gray-100"></div>
+                        <!-- 加载指示器 -->
+                        <div id="loadingIndicator" class="absolute hidden">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">生成的链接</h3>
+                        <div class="relative">
+                            <input type="text" id="generatedUrl" readonly 
+                                   class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm overflow-x-auto"
+                                   value="https://open.weixin.qq.com/sns/getexpappinfo?appid=wx713931c9accc58f1&path=pages%2Findex%2Findex.html%3Fcontext%3DWM%26mcid%3D41941&iswxtpa=1#wechat-redirect">
+                            <button id="copyButton" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors p-2">
+                                <i class="fa fa-copy"></i>
+                            </button>
+                        </div>
+                        <p id="copySuccess" class="hidden mt-1 text-xs text-green-500">
+                            <i class="fa fa-check-circle"></i> 链接已复制到剪贴板
+                        </p>
+                    </div>
+
+                    <div class="mt-6 flex flex-wrap gap-3 justify-center">
+                        <button id="downloadButton" class="bg-accent hover:bg-accent/90 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 flex items-center transform hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="fa fa-download mr-2"></i>
+                            下载二维码
+                        </button>
+                        <button id="resetButton" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 flex items-center transform hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="fa fa-undo mr-2"></i>
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-400 text-sm">© 2024 微信二维码生成工具. 保留所有权利.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-github"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-linkedin"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast 通知元素 -->
+    <div id="toast" class="toast">
+        <i class="fa fa-info-circle mr-2"></i>
+        <span id="toastMessage">消息内容</span>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // Toast 通知函数
+        function showToast(type, message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            // 移除之前的类型类
+            toast.classList.remove('success', 'error', 'info');
+            
+            // 添加新的类型类
+            toast.classList.add(type);
+            
+            // 更新消息内容
+            toastMessage.textContent = message;
+            
+            // 更新图标
+            const icon = toast.querySelector('i');
+            icon.className = 'fa mr-2';
+            
+            if (type === 'success') {
+                icon.classList.add('fa-check-circle');
+            } else if (type === 'error') {
+                icon.classList.add('fa-exclamation-circle');
+            } else {
+                icon.classList.add('fa-info-circle');
+            }
+            
+            // 显示Toast
+            toast.classList.add('show');
+            
+            // 设置定时器自动隐藏
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+        
+        // 表单验证函数
+        function validateForm() {
+            let isValid = true;
+            const errorMessageElement = document.getElementById('errorMessage');
+            const errorTextElement = document.getElementById('errorText');
+            
+            // 隐藏之前的错误消息
+            errorMessageElement.classList.add('hidden');
+            
+            // 验证AppID (下拉选择)
+            const appidSelect = document.getElementById('appid');
+            const appid = appidSelect.value;
+            
+            if (!appid) {
+                showError(appidSelect, '请选择AppID');
+                isValid = false;
+            } else {
+                removeError(appidSelect);
+            }
+            
+            // 验证MCID（非必填，但如果填写必须是数字）
+            const mcidInput = document.getElementById('mcid');
+            const mcid = mcidInput.value.trim();
+            
+            if (mcid && !/^[0-9]+$/.test(mcid)) {
+                showError(mcidInput, 'MCID只能包含数字');
+                isValid = false;
+            } else {
+                removeError(mcidInput);
+            }
+            
+            return isValid;
+        }
+        
+        // 显示输入框错误
+        function showError(inputElement, message) {
+            inputElement.classList.add('error', 'animate-shake');
+            
+            // 移除动画类，以便下次可以重新触发
+            setTimeout(() => {
+                inputElement.classList.remove('animate-shake');
+            }, 500);
+            
+            const errorMessageElement = document.getElementById('errorMessage');
+            const errorTextElement = document.getElementById('errorText');
+            
+            errorTextElement.textContent = message;
+            errorMessageElement.classList.remove('hidden');
+        }
+        
+        // 移除输入框错误
+        function removeError(inputElement) {
+            inputElement.classList.remove('error');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化AppID下拉选择框
+            initAppidDropdown();
+            
+            // 初始化业务类型下拉框
+            initBustypeDropdown();
+            
+            // 初始化默认二维码
+            generateQRCode();
+            
+            // 为必填字段添加输入事件监听器
+            const requiredInputs = ['appid', 'mcid'];
+            requiredInputs.forEach(id => {
+                const input = document.getElementById(id);
+                input.addEventListener('change', function() {
+                    if (this.classList.contains('error')) {
+                        removeError(this);
+                        document.getElementById('errorMessage').classList.add('hidden');
+                    }
+                });
+                
+                // 为mcid添加input事件
+                if (id === 'mcid') {
+                    input.addEventListener('input', function() {
+                        if (this.classList.contains('error')) {
+                            removeError(this);
+                            document.getElementById('errorMessage').classList.add('hidden');
+                        }
+                    });
+                }
+            });
+            
+            // 初始化AppID下拉选择框
+            function initAppidDropdown() {
+                const appidSelect = document.getElementById('appid');
+                
+                // 清空现有选项
+                appidSelect.innerHTML = '';
+                
+                // 添加默认占位选项
+                const placeholderOption = document.createElement('option');
+                placeholderOption.value = '';
+                placeholderOption.textContent = '-- 请选择AppID --';
+                placeholderOption.selected = true;
+                placeholderOption.disabled = true;
+                appidSelect.appendChild(placeholderOption);
+                
+                // 从配置中添加AppID选项
+                if (typeof config !== 'undefined' && config.appidList && config.appidList.length > 0) {
+                    config.appidList.forEach((app, index) => {
+                        const option = document.createElement('option');
+                        option.value = app.value;
+                        option.textContent = app.name + ' (' + app.value + ')';
+                        
+                        // 默认选中第一个有效选项
+                        if (index === 0) {
+                            option.selected = true;
+                        }
+                        
+                        appidSelect.appendChild(option);
+                    });
+                } else {
+                    // 如果配置未定义，添加默认选项
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = 'wx713931c9accc58f1';
+                    defaultOption.textContent = '默认应用 (wx713931c9accc58f1)';
+                    defaultOption.selected = true;
+                    appidSelect.appendChild(defaultOption);
+                }
+            }
+            
+            // 初始化业务类型下拉框
+            function initBustypeDropdown() {
+                const bustypeSelect = document.getElementById('bustype');
+                
+                // 清空现有选项
+                bustypeSelect.innerHTML = '';
+                
+                // 添加默认占位选项
+                const placeholderOption = document.createElement('option');
+                placeholderOption.value = '';
+                placeholderOption.textContent = '-- 请选择业务类型 --';
+                placeholderOption.selected = true;
+                placeholderOption.disabled = true;
+                bustypeSelect.appendChild(placeholderOption);
+                
+                // 从配置中添加业务类型选项
+                if (typeof config !== 'undefined' && config.bustypeList && config.bustypeList.length > 0) {
+                    config.bustypeList.forEach((bustype, index) => {
+                        const option = document.createElement('option');
+                        option.value = bustype.value;
+                        option.textContent = bustype.name + ' (' + bustype.value + ')';
+                        
+                        // 默认选中第一个有效选项
+                        if (index === 0) {
+                            option.selected = true;
+                        }
+                        
+                        bustypeSelect.appendChild(option);
+                    });
+                } else {
+                    // 如果配置未定义，添加默认选项
+                    const defaultOptions = [
+                        {value: 'WM', name: '外卖'},
+                        {value: 'JD', name: '京东'},
+                        {value: 'EL', name: '饿了么'},
+                        {value: 'OTHER', name: '其他'}
+                    ];
+                    
+                    defaultOptions.forEach((opt, index) => {
+                        const option = document.createElement('option');
+                        option.value = opt.value;
+                        option.textContent = opt.name + ' (' + opt.value + ')';
+                        
+                        // 默认选中第一个选项
+                        if (index === 0) {
+                            option.selected = true;
+                        }
+                        
+                        bustypeSelect.appendChild(option);
+                    });
+                }
+                
+                // 设置默认值（如果配置中有指定）
+                if (typeof config !== 'undefined' && config.defaultParams && config.defaultParams.bustype) {
+                    bustypeSelect.value = config.defaultParams.bustype;
+                }
+            }
+            
+            // 监听表单提交事件
+            document.getElementById('qrForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // 验证表单
+                if (validateForm()) {
+                    generateQRCode();
+                    
+                    // 显示成功消息
+                    const successMessage = document.getElementById('successMessage');
+                    const successText = document.getElementById('successText');
+                    successText.textContent = '二维码生成成功！';
+                    successMessage.classList.remove('hidden');
+                    
+                    // 3秒后隐藏成功消息
+                    setTimeout(() => {
+                        successMessage.classList.add('hidden');
+                    }, 3000);
+                    
+                    // 添加提交动画效果
+                    const submitButton = this.querySelector('button[type="submit"]');
+                    submitButton.classList.add('animate-pulse');
+                    setTimeout(() => {
+                        submitButton.classList.remove('animate-pulse');
+                    }, 1000);
+                }
+            });
+            
+            // 监听滑块变化
+            document.getElementById('qrsize').addEventListener('input', function() {
+                document.getElementById('qrsizeValue').textContent = this.value + 'px';
+            });
+            
+            // 复制链接功能
+            document.getElementById('copyButton').addEventListener('click', function() {
+                const urlInput = document.getElementById('generatedUrl');
+                
+                try {
+                    // 尝试使用现代的 Clipboard API
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(urlInput.value).then(() => {
+                            showToast('success', '链接已复制到剪贴板');
+                        }).catch(() => {
+                            // 降级到传统方法
+                            fallbackCopyTextToClipboard(urlInput);
+                        });
+                    } else {
+                        // 降级到传统方法
+                        fallbackCopyTextToClipboard(urlInput);
+                    }
+                } catch (err) {
+                    showToast('error', '复制失败，请手动复制');
+                }
+            });
+            
+            // 传统的复制文本方法
+            function fallbackCopyTextToClipboard(inputElement) {
+                inputElement.select();
+                inputElement.setSelectionRange(0, 99999); // 兼容移动设备
+                
+                if (document.execCommand('copy')) {
+                    showToast('success', '链接已复制到剪贴板');
+                } else {
+                    showToast('error', '复制失败，请手动复制');
+                }
+            }
+            
+            // 下载二维码功能
+            document.getElementById('downloadButton').addEventListener('click', function() {
+                const canvas = document.querySelector('#qrcode canvas');
+                if (canvas) {
+                    try {
+                        const link = document.createElement('a');
+                        link.download = 'wechat_qrcode_' + new Date().getTime() + '.png';
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        showToast('success', '二维码下载成功');
+                    } catch (err) {
+                        showToast('error', '下载失败，请重试');
+                    }
+                } else {
+                    showToast('error', '二维码未生成，请先生成二维码');
+                }
+            });
+            
+            // 重置功能
+          document.getElementById('resetButton').addEventListener('click', function() {
+                // 重置表单
+                document.getElementById('qrForm').reset();
+                document.getElementById('qrsizeValue').textContent = '250px';
+                
+                // 重置下拉框
+                initAppidDropdown();
+                initBustypeDropdown();
+                
+                // 如果有默认参数配置，应用默认值
+                if (typeof config !== 'undefined' && config.defaultParams) {
+                    const defaults = config.defaultParams;
+                    // mcid不再设置默认值，保持为空
+                    document.getElementById('qrsize').value = defaults.qrsize || 250;
+                    document.getElementById('qrsizeValue').textContent = (defaults.qrsize || 250) + 'px';
+                }
+                
+                // 移除所有错误状态
+                document.querySelectorAll('.form-input').forEach(input => {
+                    removeError(input);
+                });
+                document.getElementById('errorMessage').classList.add('hidden');
+                
+                // 重置后重新生成默认二维码
+                generateQRCode();
+                showToast('info', '已重置为默认值');
+            });
+        });
+        
+        // 生成二维码的函数
+        function generateQRCode() {
+            // 显示加载指示器
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.classList.remove('hidden');
+            
+            // 获取表单值
+            const appid = document.getElementById('appid').value.trim() || 'wx713931c9accc58f1';
+            const mcid = document.getElementById('mcid').value.trim(); // 非必填，不设置默认值
+            const bustype = document.getElementById('bustype').value || 'WM';
+            const qrsize = parseInt(document.getElementById('qrsize').value) || 250;
+            
+            try {
+                // 根据bustype从配置中获取pathTemplate
+                let path;
+                
+                if (typeof config !== 'undefined' && config.bustypeList) {
+                    const selectedBustype = config.bustypeList.find(item => item.value === bustype);
+                    if (selectedBustype && selectedBustype.pathTemplate) {
+                        // 使用pathTemplate并根据mcid是否存在决定是否替换占位符
+                        if (mcid) {
+                            path = selectedBustype.pathTemplate.replace('{{mcid}}', mcid);
+                        } else {
+                            // 如果mcid为空，移除包含占位符的参数部分
+                            path = selectedBustype.pathTemplate.replace(/(&|\?)mcid={{mcid}}/, '');
+                        }
+                    } else {
+                        // 默认构建路径，根据mcid是否存在决定是否添加参数
+                        path = 'pages/index/index.html?context=' + bustype + (mcid ? '&mcid=' + mcid : '') + '&iswxtpa=1#wechat-redirect';
+                    }
+                } else {
+                    // 默认构建路径，根据mcid是否存在决定是否添加参数
+                    path = 'pages/index/index.html?context=' + bustype + (mcid ? '&mcid=' + mcid : '') + '&iswxtpa=1#wechat-redirect';
+                }
+                
+                // 对整个路径进行URL编码
+                const encodedPath = encodeURIComponent(path);
+                
+                // 构建最终的URL
+                const url = `https://open.weixin.qq.com/sns/getexpappinfo?appid=${appid}&path=${encodedPath}&iswxtpa=1#wechat-redirect`;
+                
+                // 更新显示的URL
+                document.getElementById('generatedUrl').value = url;
+                
+                // 清空之前的二维码
+                const qrcodeElement = document.getElementById('qrcode');
+                qrcodeElement.innerHTML = '<canvas></canvas>';
+                const canvas = qrcodeElement.querySelector('canvas');
+                
+                // 生成新的二维码
+                QRCode.toCanvas(canvas, url, {
+                    width: qrsize,
+                    margin: 1,
+                    color: {
+                        dark: '#000000',
+                        light: '#ffffff'
+                    }
+                }, function(error) {
+                    // 隐藏加载指示器
+                    loadingIndicator.classList.add('hidden');
+                    
+                    if (error) {
+                        console.error('二维码生成错误:', error);
+                        qrcodeElement.innerHTML = '<p class="text-red-500">生成二维码时出错，请重试</p>';
+                        showToast('error', '生成二维码失败，请检查参数并重试');
+                    } else {
+                        // 添加生成成功的动画效果
+                        qrcodeElement.classList.add('animate-fadeIn');
+                        setTimeout(() => {
+                            qrcodeElement.classList.remove('animate-fadeIn');
+                        }, 500);
+                    }
+                });
+            } catch (err) {
+                // 隐藏加载指示器
+                loadingIndicator.classList.add('hidden');
+                console.error('生成过程中发生错误:', err);
+                showToast('error', '生成二维码时发生错误，请重试');
+            }
+        }
+    </script>
+</body>
+</html>
