@@ -261,6 +261,17 @@
                         </div>
                         <p class="mt-1 text-xs text-gray-500">例如: 41941</p>
                     </div>
+                    <div class="form-group">
+                        <label for="tableno" class="block text-sm font-medium text-gray-700 mb-1">桌位号</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-cutlery"></i>
+                            </span>
+                            <input type="text" id="tableno" name="tableno" placeholder="请输入桌位号" value="001"
+                                   class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">非必填，默认值为001</p>
+                    </div>
 
                     <div class="form-group">
                         <label for="bustype" class="block text-sm font-medium text-gray-700 mb-1">业务类型</label>
@@ -695,6 +706,7 @@
                 if (typeof config !== 'undefined' && config.defaultParams) {
                     const defaults = config.defaultParams;
                     // mcid不再设置默认值，保持为空
+                    document.getElementById('tableno').value = defaults.tableno || '001';
                     document.getElementById('qrsize').value = defaults.qrsize || 250;
                     document.getElementById('qrsizeValue').textContent = (defaults.qrsize || 250) + 'px';
                 }
@@ -719,7 +731,8 @@
             
             // 获取表单值
             const appid = document.getElementById('appid').value.trim() || 'wx713931c9accc58f1';
-            const mcid = document.getElementById('mcid').value.trim(); // 非必填，不设置默认值
+            const mcid = document.getElementById('mcid').value.trim();
+            const tableno = document.getElementById('tableno').value.trim() || '001'; // 非必填，不设置默认值
             const bustype = document.getElementById('bustype').value || 'WM';
             const qrsize = parseInt(document.getElementById('qrsize').value) || 250;
             
@@ -732,18 +745,18 @@
                     if (selectedBustype && selectedBustype.pathTemplate) {
                         // 使用pathTemplate并根据mcid是否存在决定是否替换占位符
                         if (mcid) {
-                            path = selectedBustype.pathTemplate.replace('{{mcid}}', mcid);
+                            path = selectedBustype.pathTemplate.replace('{{mcid}}', mcid).replace('{{tableno}}', tableno);
                         } else {
                             // 如果mcid为空，移除包含占位符的参数部分
                             path = selectedBustype.pathTemplate.replace(/(&|\?)mcid={{mcid}}/, '');
                         }
                     } else {
                         // 默认构建路径，根据mcid是否存在决定是否添加参数
-                        path = 'pages/index/index.html?context=' + bustype + (mcid ? '&mcid=' + mcid : '') + '&iswxtpa=1#wechat-redirect';
+                        path = 'pages/index/index.html?context=' + bustype + (mcid ? '&mcid=' + mcid : '') + '&tableno=' + tableno + '&iswxtpa=1#wechat-redirect';
                     }
                 } else {
                     // 默认构建路径，根据mcid是否存在决定是否添加参数
-                    path = 'pages/index/index.html?context=' + bustype + (mcid ? '&mcid=' + mcid : '') + '&iswxtpa=1#wechat-redirect';
+                    path = 'pages/index/index.html?context=' + bustype + (mcid ? '&mcid=' + mcid : '') + '&tableno=' + tableno + '&iswxtpa=1#wechat-redirect';
                 }
                 
                 // 对整个路径进行URL编码
