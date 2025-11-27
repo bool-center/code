@@ -692,8 +692,20 @@
                 }
             });
             
+            // 为二维码大小滑块添加实时更新功能
+            document.getElementById('qrsize').addEventListener('input', function() {
+                // 更新显示的大小值
+                const sizeValue = this.value;
+                document.getElementById('qrsizeValue').textContent = sizeValue + 'px';
+                
+                // 验证表单并实时更新二维码大小
+                if (validateForm()) {
+                    generateQRCode();
+                }
+            });
+            
             // 重置功能
-          document.getElementById('resetButton').addEventListener('click', function() {
+            document.getElementById('resetButton').addEventListener('click', function() {
                 // 重置表单
                 document.getElementById('qrForm').reset();
                 document.getElementById('qrsizeValue').textContent = '250px';
