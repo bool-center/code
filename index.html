@@ -342,9 +342,9 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex overflow-hidden">
+<body class="bg-gray-50 min-h-screen flex">
     <!-- 左侧导航栏 -->
-    <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:block">
+    <aside class="w-auto bg-white shadow-lg flex-shrink-0 hidden md:block">
         <div class="p-4 border-b border-gray-200">
             <div class="flex items-center space-x-2">
                 <i class="fa fa-qrcode text-2xl text-primary"></i>
@@ -354,14 +354,14 @@
         <nav class="mt-4">
             <ul>
                 <li>
-                    <a href="#generate" id="nav-generate" class="flex items-center px-6 py-4 text-primary bg-primary/5 border-l-4 border-primary hover:bg-primary/10 transition-colors">
-                        <i class="fa fa-plus-circle w-5 mr-3"></i>
+                    <a href="#generate" id="nav-generate" class="flex items-center px-4 py-3 text-primary bg-primary/5 border-l-4 border-primary hover:bg-primary/10 transition-colors">
+                        <i class="fa fa-plus-circle w-5 mr-2"></i>
                         <span>生码工具</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#decode" id="nav-decode" class="flex items-center px-6 py-4 text-gray-600 hover:bg-gray-50 border-l-4 border-transparent transition-colors">
-                        <i class="fa fa-qrcode w-5 mr-3"></i>
+                    <a href="#decode" id="nav-decode" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 border-l-4 border-transparent transition-colors">
+                        <i class="fa fa-qrcode w-5 mr-2"></i>
                         <span>解码工具</span>
                     </a>
                 </li>
@@ -378,7 +378,7 @@
     
     <!-- 移动端侧边栏 -->
     <div id="mobile-nav" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden">
-        <div class="bg-white h-full w-64 shadow-xl transform transition-transform duration-300 -translate-x-full" id="mobile-nav-content">
+        <div class="bg-white h-full w-auto shadow-xl transform transition-transform duration-300 -translate-x-full" id="mobile-nav-content">
             <div class="p-4 border-b border-gray-200 flex justify-between items-center">
                 <div class="flex items-center space-x-2">
                     <i class="fa fa-qrcode text-2xl text-primary"></i>
@@ -426,8 +426,10 @@
         </div>
     </header>
 
-    <!-- 主要内容 -->
-    <main class="flex-grow container mx-auto px-4 py-8">
+    <!-- 内容区域和页脚的容器 -->
+    <div class="flex-grow flex flex-col">
+        <!-- 主要内容 -->
+        <main class="flex-grow container mx-auto px-4 py-8">
         <!-- 生码工具模块 -->
         <div id="generate-module" class="tool-module">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -565,91 +567,58 @@
                 </div>
             </div>
         </div>
+        </div>
         
-        <!-- 解码工具模块 (初始隐藏) -->
-        <div id="decode-module" class="tool-module hidden">
-            <div class="bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover">
-                <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
-                    <i class="fa fa-qrcode mr-2 text-primary"></i>二维码解码
-                </h2>
-                
-                <!-- 错误提示区域 -->
-                <div id="decode-errorMessage" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm animate-fadeIn">
-                    <i class="fa fa-exclamation-circle mr-2"></i>
-                    <span id="decode-errorText">错误信息将显示在这里</span>
+        <!-- 解码工具模块 -->
+        <div id="decode-module" class="tool-module hidden bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover">
+            <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
+                <i class="fa fa-qrcode mr-2 text-primary"></i>二维码解码
+            </h2>
+            
+            <!-- 图片上传区域 -->
+            <div class="mb-8">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">上传二维码图片</label>
+                <div id="drop-area" class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all duration-300 hover:border-primary hover:shadow-md">
+                    <input type="file" id="qr-image-input" accept="image/*" style="display: none;">
+                    <i class="fa fa-upload text-6xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-600 mb-2 text-base">点击或拖拽图片到此处上传</p>
+                    <p class="text-xs text-gray-500">支持 JPG, PNG, GIF 等图片格式</p>
                 </div>
-                
-                <!-- 成功提示区域 -->
-                <div id="decode-successMessage" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm animate-fadeIn mb-6">
-                    <i class="fa fa-check-circle mr-2"></i>
-                    <span id="decode-successText">解码成功！</span>
+            </div>
+            
+            <!-- 预览区域 -->
+            <div id="image-preview-container" class="mb-6 hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-2">图片预览</label>
+                <div class="bg-white rounded-xl border border-gray-200 p-6 flex justify-center min-h-[200px]">
+                    <img id="image-preview" src="" alt="二维码预览" class="max-w-full max-h-[256px] object-contain hidden">
                 </div>
-                
-                <!-- 图片上传区域 -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">上传二维码图片</label>
-                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary transition-colors cursor-pointer bg-gray-50" id="drop-area">
-                        <input type="file" id="qr-image-input" accept="image/*" class="hidden">
-                        <i class="fa fa-upload text-4xl text-gray-400 mb-3"></i>
-                        <p class="text-gray-600 mb-2">点击或拖拽图片到此处上传</p>
-                        <p class="text-xs text-gray-500">支持 JPG, PNG, GIF 等图片格式</p>
-                    </div>
-                </div>
-                
-                <!-- 预览区域 -->
-                <div id="image-preview-container" class="mb-6 hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">图片预览</label>
-                    <div class="bg-white rounded-lg border border-gray-200 p-4 flex justify-center" style="min-height: 200px;">
-                        <img id="image-preview" src="" alt="二维码预览" class="max-w-full max-h-64 object-contain">
-                    </div>
-                </div>
-                
-                <!-- 解码结果区域 -->
-                <div id="decode-result-container" class="mb-6 hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">解码结果</label>
-                    <div class="relative">
-                        <textarea id="decode-result" readonly class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-sm overflow-auto min-h-[100px] font-mono" placeholder="解码结果将显示在这里..."></textarea>
-                        <button id="decode-copy-button" class="absolute right-2 bottom-2 bg-primary/10 text-primary hover:bg-primary/20 transition-colors p-2 rounded">
-                            <i class="fa fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="pt-4 flex gap-4">
-                    <button id="decode-button" class="btn-primary bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center flex-1 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        <i class="fa fa-search mr-2"></i>
-                        解码二维码
-                    </button>
-                    <button id="decode-reset-button" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg shadow transition-all duration-300 flex items-center justify-center flex-1 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        <i class="fa fa-undo mr-2"></i>
-                        重置
+            </div>
+            
+            <!-- 解码结果区域 -->
+            <div id="decode-result-container" class="mb-6 hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-2">解码结果</label>
+                <div class="relative">
+                    <textarea id="decode-result" readonly class="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 font-mono text-sm min-h-[120px] resize-vertical focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
+                    <button id="decode-copy-button" class="absolute right-3 bottom-3 bg-primary/10 text-primary rounded-md p-2 hover:bg-primary/20 transition-colors">
+                        <i class="fa fa-copy"></i>
                     </button>
                 </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-3">
+                <button id="decode-button" class="btn-primary bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center flex-1 opacity-50 cursor-not-allowed">
+                    <i class="fa fa-search mr-2"></i> 解码二维码
+                </button>
+                <button id="decode-reset-button" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center flex-1 opacity-50 cursor-not-allowed">
+                    <i class="fa fa-undo mr-2"></i> 重置
+                </button>
             </div>
         </div>
     </main>
 
     <!-- 页脚 -->
-    <footer class="bg-dark text-white py-6">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <p class="text-gray-400 text-sm">© 2024 微信二维码工具集. 保留所有权利.</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fa fa-github"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fa fa-twitter"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fa fa-linkedin"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
+
+    </div>
 
     <!-- Toast 通知元素 -->
     <div id="toast" class="toast">
@@ -668,6 +637,10 @@
         function switchToGenerate() {
             generateModule.classList.remove('hidden');
             decodeModule.classList.add('hidden');
+            // 清除解码模块的内联样式，确保hidden类正常工作
+            decodeModule.style.display = '';
+            decodeModule.style.visibility = '';
+            decodeModule.style.opacity = '';
             pageTitle.textContent = '微信二维码生码工具';
             
             // 更新导航状态
@@ -688,9 +661,16 @@
         
         // 切换到解码工具
         function switchToDecode() {
+            // 确保生成模块被隐藏，解码模块显示
             generateModule.classList.add('hidden');
             decodeModule.classList.remove('hidden');
             pageTitle.textContent = '微信二维码解码工具';
+            
+            // 添加调试信息
+            console.log('切换到解码工具');
+            console.log('generateModule hidden class:', generateModule.classList.contains('hidden'));
+            console.log('decodeModule hidden class:', decodeModule.classList.contains('hidden'));
+            console.log('decodeModule innerHTML length:', decodeModule.innerHTML.length);
             
             // 更新导航状态
             navDecode.classList.add('text-primary', 'bg-primary/5', 'border-primary');
@@ -749,13 +729,13 @@
             closeMobileNav = document.getElementById('close-mobile-nav');
             
             // 绑定事件监听器
-            if (navGenerate) navGenerate.addEventListener('click', (e) => { e.preventDefault(); switchToGenerate(); });
-            if (navDecode) navDecode.addEventListener('click', (e) => { e.preventDefault(); switchToDecode(); });
-            if (mobileNavGenerate) mobileNavGenerate.addEventListener('click', (e) => { e.preventDefault(); switchToGenerate(); });
-            if (mobileNavDecode) mobileNavDecode.addEventListener('click', (e) => { e.preventDefault(); switchToDecode(); });
-            if (mobileNavToggle) mobileNavToggle.addEventListener('click', openMobileMenu);
-            if (closeMobileNav) closeMobileNav.addEventListener('click', closeMobileMenu);
-            if (mobileNav) mobileNav.addEventListener('click', (e) => { if (e.target === mobileNav) closeMobileMenu(); });
+            navGenerate.addEventListener('click', (e) => { e.preventDefault(); switchToGenerate(); });
+            navDecode.addEventListener('click', (e) => { e.preventDefault(); switchToDecode(); });
+            mobileNavGenerate.addEventListener('click', (e) => { e.preventDefault(); switchToGenerate(); });
+            mobileNavDecode.addEventListener('click', (e) => { e.preventDefault(); switchToDecode(); });
+            mobileNavToggle.addEventListener('click', openMobileMenu);
+            closeMobileNav.addEventListener('click', closeMobileMenu);
+            mobileNav.addEventListener('click', (e) => { if (e.target === mobileNav) closeMobileMenu(); });
             
             // 监听hash变化
             window.addEventListener('hashchange', handleHashChange);
@@ -766,6 +746,7 @@
         
         // 初始化解码工具功能
         function initDecodeTool() {
+            // 获取DOM元素
             const dropArea = document.getElementById('drop-area');
             const imageInput = document.getElementById('qr-image-input');
             const imagePreview = document.getElementById('image-preview');
@@ -775,30 +756,8 @@
             const decodeResult = document.getElementById('decode-result');
             const decodeResultContainer = document.getElementById('decode-result-container');
             const decodeCopyButton = document.getElementById('decode-copy-button');
-            const errorMessage = document.getElementById('decode-errorMessage');
-            const errorText = document.getElementById('decode-errorText');
-            const successMessage = document.getElementById('decode-successMessage');
-            const successText = document.getElementById('decode-successText');
             
             let selectedFile = null;
-            
-            // 显示错误信息
-            function showDecodeError(message) {
-                errorText.textContent = message;
-                errorMessage.classList.remove('hidden');
-                setTimeout(() => {
-                    errorMessage.classList.add('hidden');
-                }, 3000);
-            }
-            
-            // 显示成功信息
-            function showDecodeSuccess(message) {
-                successText.textContent = message;
-                successMessage.classList.remove('hidden');
-                setTimeout(() => {
-                    successMessage.classList.add('hidden');
-                }, 3000);
-            }
             
             // 处理图片上传
             function handleImageUpload(file) {
@@ -806,13 +765,13 @@
                 
                 // 验证文件类型
                 if (!file.type.match('image.*')) {
-                    showDecodeError('请上传有效的图片文件');
+                    alert('请上传有效的图片文件');
                     return;
                 }
                 
                 // 验证文件大小 (最大 5MB)
                 if (file.size > 5 * 1024 * 1024) {
-                    showDecodeError('图片文件大小不能超过 5MB');
+                    alert('图片文件大小不能超过 5MB');
                     return;
                 }
                 
@@ -822,10 +781,13 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     imagePreview.src = e.target.result;
-                    imagePreviewContainer.classList.remove('hidden');
-                    decodeButton.disabled = false;
-                    decodeResetButton.disabled = false;
-                    decodeResultContainer.classList.add('hidden');
+                    imagePreview.style.display = 'block';
+                    imagePreviewContainer.style.display = 'block';
+                    decodeButton.style.opacity = '1';
+                    decodeButton.style.cursor = 'pointer';
+                    decodeResetButton.style.opacity = '1';
+                    decodeResetButton.style.cursor = 'pointer';
+                    decodeResultContainer.style.display = 'none';
                 };
                 reader.readAsDataURL(file);
             }
@@ -833,7 +795,7 @@
             // 解码二维码
             function decodeQRCode() {
                 if (!selectedFile) {
-                    showDecodeError('请先上传图片');
+                    alert('请先上传图片');
                     return;
                 }
                 
@@ -861,15 +823,14 @@
                     // 处理解码结果
                     if (code) {
                         decodeResult.value = code.data;
-                        decodeResultContainer.classList.remove('hidden');
-                        showDecodeSuccess('二维码解码成功');
+                        decodeResultContainer.style.display = 'block';
                     } else {
-                        showDecodeError('未检测到二维码或解码失败，请尝试其他图片');
+                        alert('未检测到二维码或解码失败，请尝试其他图片');
                     }
                 };
                 
                 img.onerror = function() {
-                    showDecodeError('图片加载失败，请重试');
+                    alert('图片加载失败，请重试');
                 };
                 
                 img.src = imagePreview.src;
@@ -879,17 +840,16 @@
             function resetDecodeTool() {
                 imageInput.value = '';
                 imagePreview.src = '';
-                imagePreviewContainer.classList.add('hidden');
+                imagePreview.style.display = 'none';
+                imagePreviewContainer.style.display = 'none';
                 decodeResult.value = '';
-                decodeResultContainer.classList.add('hidden');
+                decodeResultContainer.style.display = 'none';
                 selectedFile = null;
-                decodeButton.disabled = true;
-                decodeResetButton.disabled = true;
-                errorMessage.classList.add('hidden');
-                successMessage.classList.add('hidden');
+                decodeButton.style.opacity = '0.5';
+                decodeButton.style.cursor = 'not-allowed';
+                decodeResetButton.style.opacity = '0.5';
+                decodeResetButton.style.cursor = 'not-allowed';
             }
-            
-            // 解码工具的成功和错误消息显示已在上方定义
             
             // 复制解码结果
             function copyDecodeResult() {
@@ -899,72 +859,32 @@
                     
                     try {
                         document.execCommand('copy');
-                        showToast('success', '解码结果已复制到剪贴板');
+                        alert('解码结果已复制到剪贴板');
                     } catch (err) {
-                        showToast('error', '复制失败，请手动复制');
+                        alert('复制失败，请手动复制');
                     }
                 }
             }
             
             // 绑定事件监听器
-            if (dropArea) {
-                // 点击上传区域触发文件选择
-                dropArea.addEventListener('click', () => {
-                    imageInput.click();
-                });
-                
-                // 拖拽上传
-                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, preventDefaults, false);
-                });
-                
-                function preventDefaults(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-                
-                ['dragenter', 'dragover'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, highlight, false);
-                });
-                
-                ['dragleave', 'drop'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, unhighlight, false);
-                });
-                
-                function highlight() {
-                    dropArea.classList.add('border-primary', 'bg-primary/5');
-                }
-                
-                function unhighlight() {
-                    dropArea.classList.remove('border-primary', 'bg-primary/5');
-                }
-                
-                dropArea.addEventListener('drop', handleDrop, false);
-                
-                function handleDrop(e) {
-                    const dt = e.dataTransfer;
-                    const file = dt.files[0];
-                    handleImageUpload(file);
-                }
-            }
+            // 点击上传区域触发文件选择
+            dropArea.addEventListener('click', () => {
+                imageInput.click();
+            });
             
-            if (imageInput) {
-                imageInput.addEventListener('change', () => {
-                    handleImageUpload(imageInput.files[0]);
-                });
-            }
+            // 文件选择事件
+            imageInput.addEventListener('change', () => {
+                handleImageUpload(imageInput.files[0]);
+            });
             
-            if (decodeButton) {
-                decodeButton.addEventListener('click', decodeQRCode);
-            }
+            // 解码按钮事件
+            decodeButton.addEventListener('click', decodeQRCode);
             
-            if (decodeResetButton) {
-                decodeResetButton.addEventListener('click', resetDecodeTool);
-            }
+            // 重置按钮事件
+            decodeResetButton.addEventListener('click', resetDecodeTool);
             
-            if (decodeCopyButton) {
-                decodeCopyButton.addEventListener('click', copyDecodeResult);
-            }
+            // 复制按钮事件
+            decodeCopyButton.addEventListener('click', copyDecodeResult);
         }
         // Toast 通知函数
         function showToast(type, message, duration = 3000) {
@@ -1077,6 +997,9 @@
             console.log('decode-module element:', document.getElementById('decode-module'));
             console.log('nav-decode element:', document.getElementById('nav-decode'));
             console.log('switchToDecode function:', typeof switchToDecode);
+            
+            // 页面加载完成后默认显示生码模块
+            // 注释掉自动调用switchToDecode()的代码，确保默认显示生码模块
             
             // 为必填字段添加输入事件监听器
             const requiredInputs = ['appid', 'mcid'];
