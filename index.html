@@ -100,6 +100,45 @@
             transition: all 0.2s ease;
         }
         
+        /* 下拉框样式优化 */
+        select.form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        
+        select.form-input::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        select.form-input::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        select.form-input::-webkit-scrollbar-thumb {
+            background: #07C160;
+            border-radius: 3px;
+        }
+        
+        select.form-input::-webkit-scrollbar-thumb:hover {
+            background: #06B055;
+        }
+        
+        /* 下拉框选项样式 */
+        select.form-input option {
+            padding: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+        
+        select.form-input option:hover,
+        select.form-input option:checked {
+            background-color: rgba(7, 193, 96, 0.1);
+        }
+        
         /* 输入框错误状态 */
         .form-input.error {
             border-color: #f87171;
@@ -242,7 +281,8 @@
                                 <i class="fa fa-key"></i>
                             </span>
                             <select id="appid" name="appid" 
-                                   class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white" required>
+                                   class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white" 
+                                   style="max-height: 180px; overflow-y: auto; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #07C160 #f1f1f1;" required>
                                 <!-- AppID选项将通过JavaScript动态生成 -->
                             </select>
                         </div>
@@ -280,7 +320,8 @@
                                 <i class="fa fa-briefcase"></i>
                             </span>
                             <select id="bustype" name="bustype" 
-                                    class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
+                                    class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white" 
+                                    style="max-height: 180px; overflow-y: auto; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #07C160 #f1f1f1;">
                                 <!-- 选项将通过JavaScript动态生成 -->
                             </select>
                         </div>
