@@ -659,79 +659,94 @@
     
     <!-- JavaScript -->
     <script>
-        // 模块切换功能
+        // 模块切换功能 - 全局变量
+        let generateModule, decodeModule, pageTitle;
+        let navGenerate, navDecode;
+        let mobileNavGenerate, mobileNavDecode, mobileNavToggle, mobileNav, mobileNavContent, closeMobileNav;
+        
+        // 切换到生码工具
+        function switchToGenerate() {
+            generateModule.classList.remove('hidden');
+            decodeModule.classList.add('hidden');
+            pageTitle.textContent = '微信二维码生码工具';
+            
+            // 更新导航状态
+            navGenerate.classList.add('text-primary', 'bg-primary/5', 'border-primary');
+            navGenerate.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
+            navDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            navDecode.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
+            
+            // 更新移动端导航状态
+            mobileNavGenerate.classList.add('text-primary', 'bg-primary/5', 'border-primary');
+            mobileNavGenerate.classList.remove('text-gray-600', 'border-transparent');
+            mobileNavDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            mobileNavDecode.classList.add('text-gray-600', 'border-transparent');
+            
+            // 关闭移动端导航
+            closeMobileMenu();
+        }
+        
+        // 切换到解码工具
+        function switchToDecode() {
+            generateModule.classList.add('hidden');
+            decodeModule.classList.remove('hidden');
+            pageTitle.textContent = '微信二维码解码工具';
+            
+            // 更新导航状态
+            navDecode.classList.add('text-primary', 'bg-primary/5', 'border-primary');
+            navDecode.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
+            navGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            navGenerate.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
+            
+            // 更新移动端导航状态
+            mobileNavDecode.classList.add('text-primary', 'bg-primary/5', 'border-primary');
+            mobileNavDecode.classList.remove('text-gray-600', 'border-transparent');
+            mobileNavGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            mobileNavGenerate.classList.add('text-gray-600', 'border-transparent');
+            
+            // 关闭移动端导航
+            closeMobileMenu();
+        }
+        
+        // 打开移动端菜单
+        function openMobileMenu() {
+            mobileNav.classList.remove('hidden');
+            mobileNavContent.classList.remove('-translate-x-full');
+        }
+        
+        // 关闭移动端菜单
+        function closeMobileMenu() {
+            mobileNav.classList.add('hidden');
+            mobileNavContent.classList.add('-translate-x-full');
+        }
+        
+        // 处理URL hash
+        function handleHashChange() {
+            const hash = window.location.hash;
+            if (hash === '#decode') {
+                switchToDecode();
+            } else {
+                switchToGenerate();
+            }
+        }
+        
+        // 模块切换功能初始化
         function initModuleNavigation() {
-            const generateModule = document.getElementById('generate-module');
-            const decodeModule = document.getElementById('decode-module');
-            const pageTitle = document.getElementById('page-title');
+            generateModule = document.getElementById('generate-module');
+            decodeModule = document.getElementById('decode-module');
+            pageTitle = document.getElementById('page-title');
             
             // 桌面端导航
-            const navGenerate = document.getElementById('nav-generate');
-            const navDecode = document.getElementById('nav-decode');
+            navGenerate = document.getElementById('nav-generate');
+            navDecode = document.getElementById('nav-decode');
             
             // 移动端导航
-            const mobileNavGenerate = document.getElementById('mobile-nav-generate');
-            const mobileNavDecode = document.getElementById('mobile-nav-decode');
-            const mobileNavToggle = document.getElementById('mobile-nav-toggle');
-            const mobileNav = document.getElementById('mobile-nav');
-            const mobileNavContent = document.getElementById('mobile-nav-content');
-            const closeMobileNav = document.getElementById('close-mobile-nav');
-            
-            // 切换到生码工具
-            function switchToGenerate() {
-                generateModule.classList.remove('hidden');
-                decodeModule.classList.add('hidden');
-                pageTitle.textContent = '微信二维码生码工具';
-                
-                // 更新导航状态
-                navGenerate.classList.add('text-primary', 'bg-primary/5', 'border-primary');
-                navGenerate.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-                navDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-                navDecode.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-                
-                // 更新移动端导航状态
-                mobileNavGenerate.classList.add('text-primary', 'bg-primary/5', 'border-primary');
-                mobileNavGenerate.classList.remove('text-gray-600', 'border-transparent');
-                mobileNavDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-                mobileNavDecode.classList.add('text-gray-600', 'border-transparent');
-                
-                // 关闭移动端导航
-                closeMobileMenu();
-            }
-            
-            // 切换到解码工具
-            function switchToDecode() {
-                generateModule.classList.add('hidden');
-                decodeModule.classList.remove('hidden');
-                pageTitle.textContent = '微信二维码解码工具';
-                
-                // 更新导航状态
-                navDecode.classList.add('text-primary', 'bg-primary/5', 'border-primary');
-                navDecode.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-                navGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-                navGenerate.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-                
-                // 更新移动端导航状态
-                mobileNavDecode.classList.add('text-primary', 'bg-primary/5', 'border-primary');
-                mobileNavDecode.classList.remove('text-gray-600', 'border-transparent');
-                mobileNavGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-                mobileNavGenerate.classList.add('text-gray-600', 'border-transparent');
-                
-                // 关闭移动端导航
-                closeMobileMenu();
-            }
-            
-            // 打开移动端菜单
-            function openMobileMenu() {
-                mobileNav.classList.remove('hidden');
-                mobileNavContent.classList.remove('-translate-x-full');
-            }
-            
-            // 关闭移动端菜单
-            function closeMobileMenu() {
-                mobileNav.classList.add('hidden');
-                mobileNavContent.classList.add('-translate-x-full');
-            }
+            mobileNavGenerate = document.getElementById('mobile-nav-generate');
+            mobileNavDecode = document.getElementById('mobile-nav-decode');
+            mobileNavToggle = document.getElementById('mobile-nav-toggle');
+            mobileNav = document.getElementById('mobile-nav');
+            mobileNavContent = document.getElementById('mobile-nav-content');
+            closeMobileNav = document.getElementById('close-mobile-nav');
             
             // 绑定事件监听器
             if (navGenerate) navGenerate.addEventListener('click', (e) => { e.preventDefault(); switchToGenerate(); });
@@ -741,16 +756,6 @@
             if (mobileNavToggle) mobileNavToggle.addEventListener('click', openMobileMenu);
             if (closeMobileNav) closeMobileNav.addEventListener('click', closeMobileMenu);
             if (mobileNav) mobileNav.addEventListener('click', (e) => { if (e.target === mobileNav) closeMobileMenu(); });
-            
-            // 处理URL hash
-            function handleHashChange() {
-                const hash = window.location.hash;
-                if (hash === '#decode') {
-                    switchToDecode();
-                } else {
-                    switchToGenerate();
-                }
-            }
             
             // 监听hash变化
             window.addEventListener('hashchange', handleHashChange);
@@ -1066,6 +1071,12 @@
             
             // 初始化默认二维码
             generateQRCode();
+            
+            // 添加调试信息
+            console.log('DOMContentLoaded event fired');
+            console.log('decode-module element:', document.getElementById('decode-module'));
+            console.log('nav-decode element:', document.getElementById('nav-decode'));
+            console.log('switchToDecode function:', typeof switchToDecode);
             
             // 为必填字段添加输入事件监听器
             const requiredInputs = ['appid', 'mcid'];
