@@ -179,24 +179,56 @@
             background-position: right 0.5rem center;
             background-size: 1.5em 1.5em;
             padding-right: 2.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
         }
         
+        /* 下拉框交互效果增强 */
+        select.form-input:hover {
+            border-color: #07C160;
+            transform: translateY(-1px);
+        }
+        
+        /* 下拉框聚焦效果增强 */
+        select.form-input:focus {
+            border-color: #07C160;
+            box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.2);
+            outline: none;
+        }
+        
+        /* 自定义滚动条样式 - 增强视觉效果 */
         select.form-input::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
+            height: 8px;
         }
         
         select.form-input::-webkit-scrollbar-track {
             background: #f1f1f1;
-            border-radius: 3px;
+            border-radius: 4px;
         }
         
         select.form-input::-webkit-scrollbar-thumb {
             background: #07C160;
-            border-radius: 3px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
         }
         
         select.form-input::-webkit-scrollbar-thumb:hover {
             background: #06B055;
+            transform: scaleX(1.1);
+        }
+        
+        /* 针对AppID和业务类型下拉框的特定样式 */
+        #appid, #bustype {
+            min-height: 46px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        /* 下拉框选项悬停效果 */
+        option:hover {
+            background-color: #07C160;
+            color: white;
         }
         
         /* 下拉框选项样式 */
@@ -850,6 +882,40 @@
                 decodeResetButton.disabled = true;
                 errorMessage.classList.add('hidden');
                 successMessage.classList.add('hidden');
+            }
+            
+            // 显示解码成功消息
+            function showDecodeSuccess(message) {
+                const successMessage = document.getElementById('successMessage');
+                const successText = document.getElementById('successText');
+                
+                successText.textContent = message;
+                successMessage.classList.remove('hidden');
+                
+                // 3秒后隐藏成功消息
+                setTimeout(() => {
+                    successMessage.classList.add('hidden');
+                }, 3000);
+                
+                // 同时显示Toast通知
+                showToast('success', message);
+            }
+            
+            // 显示解码错误消息
+            function showDecodeError(message) {
+                const errorMessage = document.getElementById('errorMessage');
+                const errorText = document.getElementById('errorText');
+                
+                errorText.textContent = message;
+                errorMessage.classList.remove('hidden');
+                
+                // 3秒后隐藏错误消息
+                setTimeout(() => {
+                    errorMessage.classList.add('hidden');
+                }, 3000);
+                
+                // 同时显示Toast通知
+                showToast('error', message);
             }
             
             // 复制解码结果
