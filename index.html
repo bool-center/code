@@ -1400,8 +1400,8 @@
                 // 对整个路径进行URL编码
                 const encodedPath = encodeURIComponent(path);
                 
-                // 构建最终的URL
-                const url = `https://open.weixin.qq.com/sns/getexpappinfo?appid=${appid}&path=${encodedPath}`;
+                // 构建最终的URL，确保包含必要的iswxtpa参数
+                const url = `https://open.weixin.qq.com/sns/getexpappinfo?appid=${appid}&path=${encodedPath}&iswxtpa=1#wechat-redirect`;
                 
                 // 更新显示的URL
                 requiredElements.generatedUrl.value = url;
