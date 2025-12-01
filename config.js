@@ -15,9 +15,9 @@ const config = {
     
     // Business Type配置列表，格式：{name: '显示名称', value: '实际值', pathTemplate: '路径模板'}
     bustypeList: [
-        { name: '外卖', value: 'WM', pathTemplate: 'pages/index/index.html?context=WM&mcid={{mcid}}&iswxtpa=1#wechat-redirect' },
-        { name: '自提', value: 'ZT', pathTemplate: 'pages/index/index.html?context=ZT&mcid={{mcid}}&iswxtpa=1#wechat-redirect' },
-        { name: '点餐', value: 'DC', pathTemplate: 'pages/index/index.html?context=DC&mcid={{mcid}}&iswxtpa=1#wechat-redirect' },
+        { name: '外卖', value: 'WM', pathTemplate: 'pages/index/index.html?context=WM&mcid={{mcid}}&tableno={{tableno}}&iswxtpa=1#wechat-redirect' },
+        { name: '自提', value: 'ZT', pathTemplate: 'pages/index/index.html?context=ZT&mcid={{mcid}}&tableno={{tableno}}&iswxtpa=1#wechat-redirect' },
+        { name: '点餐', value: 'DC', pathTemplate: 'pages/index/index.html?context=DC&mcid={{mcid}}&tableno={{tableno}}&iswxtpa=1#wechat-redirect' },
         { name: '我的订单', value: 'OD', pathTemplate: 'pages/index/index.html?context=OD&page=myOrder&mcid={{mcid}}&tableno={{tableno}}&iswxtpa=1#wechat-redirect' },
         { name: '首页', value: 'HOME', pathTemplate: 'pages/index/index.html?context=HOME&page=home&mcid={{mcid}}&tableno={{tableno}}&iswxtpa=1#wechat-redirect' },
         { name: '卡主页', value: 'CD', pathTemplate: 'pages/index/index.html?context=CD&page=cardHome&mcid={{mcid}}&tableno={{tableno}}&iswxtpa=1#wechat-redirect' }
