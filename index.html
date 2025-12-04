@@ -29,14 +29,14 @@
                     reject(new Error('无法加载QRCode库'));
                 } else {
                     // 主要CDN加载失败，尝试备用CDN
-                    loadScript('https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js', true);
+                    loadScript('https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js', true);
                 }
             };
             document.head.appendChild(script);
         };
 
-        // 开始加载
-        loadScript('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js');
+        // 开始加载 - 使用更可靠的CDN源
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js');
     });
 
     // 添加全局标记，用于快速检查
@@ -52,15 +52,38 @@
             // 使用官方QRCode库生成真实的二维码
             try {
                 console.log('使用官方QRCode库生成二维码，文本:', text);
-                QRCode.toCanvas(canvas, text, options, (error) => {
-                    if (error) {
-                        console.error('QRCode生成错误:', error);
-                        callback(error);
-                    } else {
-                        console.log('二维码生成成功');
-                        callback(null);
-                    }
-                });
+                
+                // 检查QRCode库的API类型并使用相应的方法
+                if (typeof QRCode.toCanvas === 'function') {
+                    // 使用qrcode@1.5.3的API
+                    QRCode.toCanvas(canvas, text, options, (error) => {
+                        if (error) {
+                            console.error('QRCode生成错误:', error);
+                            callback(error);
+                        } else {
+                            console.log('二维码生成成功 (使用toCanvas API)');
+                            callback(null);
+                        }
+                    });
+                } else {
+                    // 使用qrcodejs@1.0.0的API
+                    // 首先清除画布
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // 创建QRCode实例
+                    const qr = new QRCode(canvas, {
+                        text: text,
+                        width: options.width || 256,
+                        height: options.height || 256,
+                        colorDark: options.color.dark || '#000000',
+                        colorLight: options.color.light || '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H // 高纠错级别
+                    });
+                    
+                    console.log('二维码生成成功 (使用构造函数API)');
+                    callback(null);
+                }
             } catch (err) {
                 console.error('QRCode生成异常:', err);
                 callback(err);
