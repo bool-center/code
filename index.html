@@ -10,114 +10,77 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- 引入QRCode.js库用于生成二维码 - 使用多个CDN源确保可靠性 -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- QRCode.js库加载和二维码生成机制 -->
     <script>
-    // 如果第一个CDN加载失败，尝试第二个CDN
-    if (typeof QRCode === 'undefined') {
-        var script = document.createElement('script');
-        script.src = 'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js';
-        script.onload = function() {
-            console.log('QRCode库从备用CDN加载成功');
-        };
-        script.onerror = function() {
+    // 二维码库加载状态
+    let qrCodeLibraryAvailable = false;
+    const CDN_SOURCES = [
+        'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+        'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js'
+    ];
+    
+    // 尝试加载QRCode库
+    function loadQRCodeLibrary(sources, index = 0) {
+        if (index >= sources.length) {
             console.error('所有QRCode CDN加载失败');
-        };
-        document.head.appendChild(script);
-    }
-    </script>
-    <!-- 备用QRCode实现 - 如果所有CDN都加载失败 -->
-    <script>
-    // 检查QRCode库是否加载成功
-    if (typeof QRCode === 'undefined') {
-        console.warn('QRCode CDN加载失败，正在使用本地备用实现...');
-        
-        // 简单的Base64编码函数
-        function base64Encode(str) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-            let result = '';
-            let i = 0;
-            
-            while (i < str.length) {
-                const a = str.charCodeAt(i++);
-                const b = i < str.length ? str.charCodeAt(i++) : 0;
-                const c = i < str.length ? str.charCodeAt(i++) : 0;
-                
-                result += chars.charAt(a >> 2);
-                result += chars.charAt(((a & 3) << 4) | (b >> 4));
-                result += chars.charAt(i > str.length + 1 ? 64 : ((b & 15) << 2) | (c >> 6));
-                result += chars.charAt(i > str.length ? 64 : (c & 63));
-            }
-            
-            return result;
+            return;
         }
         
-        // 简单的二维码生成函数 - 使用SVG格式
-        window.QRCode = {
-            toCanvas: function(canvas, text, options, callback) {
-                try {
-                    const width = options.width || 256;
-                    const height = options.height || 256;
-                    const margin = options.margin || 1;
-                    
-                    canvas.width = width;
-                    canvas.height = height;
-                    
-                    // 使用Canvas绘制一个简单的二维码图案
-                    const ctx = canvas.getContext('2d');
-                    
-                    // 清空画布
-                    ctx.fillStyle = options.color?.light || '#ffffff';
-                    ctx.fillRect(0, 0, width, height);
-                    
-                    // 绘制一个简单的图案表示二维码
-                    ctx.fillStyle = options.color?.dark || '#000000';
-                    
-                    // 计算单元格大小
-                    const cellSize = Math.floor((width - margin * 2) / 21);
-                    const offsetX = (width - cellSize * 21) / 2;
-                    const offsetY = (height - cellSize * 21) / 2;
-                    
-                    // 生成基于文本的简单二维码图案
-                    const hash = text.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-                    
-                    // 绘制定位图案
-                    for (let i = 0; i < 7; i++) {
-                        for (let j = 0; j < 7; j++) {
-                            if ((i < 2 || i > 4) && (j < 2 || j > 4) || (i >= 2 && i <= 4) && (j >= 2 && j <= 4)) {
-                                ctx.fillRect(offsetX + i * cellSize, offsetY + j * cellSize, cellSize, cellSize);
-                                ctx.fillRect(offsetX + (20 - 6 + i) * cellSize, offsetY + j * cellSize, cellSize, cellSize);
-                                ctx.fillRect(offsetX + i * cellSize, offsetY + (20 - 6 + j) * cellSize, cellSize, cellSize);
-                            }
-                        }
-                    }
-                    
-                    // 绘制基于文本内容的随机图案
-                    for (let i = 3; i < 18; i++) {
-                        for (let j = 3; j < 18; j++) {
-                            // 跳过定位图案区域
-                            if ((i < 8 && j < 8) || (i > 12 && j < 8) || (i < 8 && j > 12)) continue;
-                            
-                            // 生成更复杂的基于文本的哈希值，避免规则图案
-                            const charIndex = (i * 21 + j) % text.length;
-                            const charCode = text.charCodeAt(charIndex);
-                            const rowHash = ((hash << 5) + i + charCode) % 13;
-                            const colHash = ((hash << 3) + j + charCode) % 11;
-                            
-                            // 使用更复杂的算法生成随机分布
-                            const random = (rowHash * colHash + i * j + hash) % 3;
-                            if (random === 1) {
-                                ctx.fillRect(offsetX + i * cellSize, offsetY + j * cellSize, cellSize, cellSize);
-                            }
-                        }
-                    }
-                    
-                    console.log('使用备用实现生成了二维码');
-                    callback(null);
-                } catch (err) {
-                    callback(err);
+        const source = sources[index];
+        const script = document.createElement('script');
+        
+        script.onload = function() {
+            qrCodeLibraryAvailable = true;
+            console.log(`QRCode库从 ${source} 加载成功`);
+        };
+        
+        script.onerror = function() {
+            console.warn(`QRCode库从 ${source} 加载失败，尝试第 ${index + 2} 个CDN`);
+            loadQRCodeLibrary(sources, index + 1);
+        };
+        
+        script.src = source;
+        document.head.appendChild(script);
+    }
+    
+    // 当DOM加载完成后开始加载QRCode库
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => loadQRCodeLibrary(CDN_SOURCES));
+    } else {
+        loadQRCodeLibrary(CDN_SOURCES);
+    }
+    
+    // 生成真实二维码的函数
+    function generateRealQRCode(canvas, text, options, callback) {
+        // 检查QRCode库是否可用
+        if (typeof QRCode === 'undefined') {
+            // 给QRCode库一点时间加载
+            setTimeout(() => {
+                if (typeof QRCode === 'undefined') {
+                    callback(new Error('QRCode库加载失败'));
+                } else {
+                    generateRealQRCode(canvas, text, options, callback);
                 }
-            }
+            }, 500);
+            return;
+        }
+        
+        // 使用官方QRCode库生成真实的二维码
+        try {
+            QRCode.toCanvas(canvas, text, options, (error) => {
+                if (error) {
+                    console.error('QRCode生成错误:', error);
+                    callback(error);
+                } else {
+                    console.log('使用官方QRCode库生成了真实二维码');
+                    callback(null);
+                }
+            });
+        } catch (err) {
+            console.error('QRCode生成异常:', err);
+            callback(err);
+        }
+    }
         };
     }
     </script>
@@ -1528,63 +1491,41 @@
                     requiredElements.qrcode.innerHTML = '<canvas></canvas>';
                     const canvas = requiredElements.qrcode.querySelector('canvas');
                     
-                    try {
-                        // 检查QRCode是否已定义
-                        if (typeof QRCode === 'undefined') {
-                            throw new ReferenceError('QRCode library is not loaded');
+                    // 使用新的generateRealQRCode函数生成真实二维码
+                    generateRealQRCode(canvas, url, {
+                        width: qrsize,
+                        margin: 1,
+                        color: {
+                            dark: '#000000',
+                            light: '#ffffff'
                         }
-                        
-                        // 生成新的二维码
-                        QRCode.toCanvas(canvas, url, {
-                            width: qrsize,
-                            margin: 1,
-                            color: {
-                                dark: '#000000',
-                                light: '#ffffff'
-                            }
-                        }, function(error) {
-                            if (error) {
-                                retryCount++;
-                                console.warn(`二维码生成失败 (${retryCount}/${MAX_RETRIES}):`, error);
-                                
-                                if (retryCount < MAX_RETRIES) {
-                                    // 重试
-                                    console.log(`将在 ${RETRY_DELAY}ms 后进行第 ${retryCount + 1} 次重试...`);
-                                    setTimeout(generateWithRetry, RETRY_DELAY);
-                                } else {
-                                    // 达到最大重试次数
-                                    console.error('已达到最大重试次数，二维码生成失败');
-                                    requiredElements.loadingIndicator.classList.add('hidden');
-                                    requiredElements.qrcode.innerHTML = '<p class="text-red-500">生成二维码时出错，请重试</p>';
-                                    showToast('error', '生成二维码失败，请检查参数并重试');
-                                }
+                    }, function(error) {
+                        if (error) {
+                            retryCount++;
+                            console.warn(`二维码生成失败 (${retryCount}/${MAX_RETRIES}):`, error);
+                            
+                            if (retryCount < MAX_RETRIES) {
+                                // 重试
+                                console.log(`将在 ${RETRY_DELAY}ms 后进行第 ${retryCount + 1} 次重试...`);
+                                setTimeout(generateWithRetry, RETRY_DELAY);
                             } else {
-                                // 成功生成二维码
+                                // 达到最大重试次数
+                                console.error('已达到最大重试次数，二维码生成失败');
                                 requiredElements.loadingIndicator.classList.add('hidden');
-                                
-                                // 添加生成成功的动画效果
-                                requiredElements.qrcode.classList.add('animate-fadeIn');
-                                setTimeout(() => {
-                                    requiredElements.qrcode.classList.remove('animate-fadeIn');
-                                }, 500);
+                                requiredElements.qrcode.innerHTML = '<p class="text-red-500">生成二维码时出错，请检查网络连接或稍后重试</p>';
+                                showToast('error', '生成二维码失败，请检查网络连接或稍后重试');
                             }
-                        });
-                    } catch (err) {
-                        retryCount++;
-                        console.warn(`二维码生成失败 (${retryCount}/${MAX_RETRIES}):`, err);
-                        
-                        if (retryCount < MAX_RETRIES) {
-                            // 重试
-                            console.log(`将在 ${RETRY_DELAY}ms 后进行第 ${retryCount + 1} 次重试...`);
-                            setTimeout(generateWithRetry, RETRY_DELAY);
                         } else {
-                            // 达到最大重试次数
-                            console.error('已达到最大重试次数，二维码生成失败');
+                            // 成功生成二维码
                             requiredElements.loadingIndicator.classList.add('hidden');
-                            requiredElements.qrcode.innerHTML = '<p class="text-red-500">生成二维码时出错，请重试</p>';
-                            showToast('error', '生成二维码失败，请检查网络连接或稍后重试');
+                            
+                            // 添加生成成功的动画效果
+                            requiredElements.qrcode.classList.add('animate-fadeIn');
+                            setTimeout(() => {
+                                requiredElements.qrcode.classList.remove('animate-fadeIn');
+                            }, 500);
                         }
-                    }
+                    });
                 }
                 
                 // 开始生成二维码（支持重试）
