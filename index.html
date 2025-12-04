@@ -11,68 +11,39 @@
     <!-- 引入Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <!-- QRCode.js库加载和二维码生成机制 -->
+    <!-- 直接在页面中加载QRCode库，确保它可用 -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- 添加后备CDN -->
     <script>
-    // 二维码库加载状态
-    let qrCodeLibraryAvailable = false;
-    const CDN_SOURCES = [
-        'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
-        'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js'
-    ];
-    
-    // 尝试加载QRCode库
-    function loadQRCodeLibrary(sources, index = 0) {
-        if (index >= sources.length) {
-            console.error('所有QRCode CDN加载失败');
-            return;
-        }
-        
-        const source = sources[index];
+    if (typeof QRCode === 'undefined') {
         const script = document.createElement('script');
-        
+        script.src = 'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js';
         script.onload = function() {
-            qrCodeLibraryAvailable = true;
-            console.log(`QRCode库从 ${source} 加载成功`);
+            console.log('QRCode库从备用CDN加载成功');
         };
-        
-        script.onerror = function() {
-            console.warn(`QRCode库从 ${source} 加载失败，尝试第 ${index + 2} 个CDN`);
-            loadQRCodeLibrary(sources, index + 1);
-        };
-        
-        script.src = source;
         document.head.appendChild(script);
-    }
-    
-    // 当DOM加载完成后开始加载QRCode库
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => loadQRCodeLibrary(CDN_SOURCES));
     } else {
-        loadQRCodeLibrary(CDN_SOURCES);
+        console.log('QRCode库从主要CDN加载成功');
     }
     
     // 生成真实二维码的函数
     function generateRealQRCode(canvas, text, options, callback) {
-        // 检查QRCode库是否可用
+        // 确保QRCode库可用
         if (typeof QRCode === 'undefined') {
-            // 给QRCode库一点时间加载
-            setTimeout(() => {
-                if (typeof QRCode === 'undefined') {
-                    callback(new Error('QRCode库加载失败'));
-                } else {
-                    generateRealQRCode(canvas, text, options, callback);
-                }
-            }, 500);
+            console.error('QRCode库未加载');
+            callback(new Error('QRCode库未加载'));
             return;
         }
         
         // 使用官方QRCode库生成真实的二维码
         try {
+            console.log('使用官方QRCode库生成二维码，文本:', text);
             QRCode.toCanvas(canvas, text, options, (error) => {
                 if (error) {
                     console.error('QRCode生成错误:', error);
                     callback(error);
                 } else {
-                    console.log('使用官方QRCode库生成了真实二维码');
+                    console.log('二维码生成成功');
                     callback(null);
                 }
             });
@@ -80,8 +51,6 @@
             console.error('QRCode生成异常:', err);
             callback(err);
         }
-    }
-        };
     }
     </script>
     <!-- 引入jsQR库用于解码二维码 -->
