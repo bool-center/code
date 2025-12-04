@@ -98,8 +98,14 @@
                             // 跳过定位图案区域
                             if ((i < 8 && j < 8) || (i > 12 && j < 8) || (i < 8 && j > 12)) continue;
                             
-                            // 基于文本内容生成伪随机图案
-                            const random = (hash + i * 21 + j) % 2;
+                            // 生成更复杂的基于文本的哈希值，避免规则图案
+                            const charIndex = (i * 21 + j) % text.length;
+                            const charCode = text.charCodeAt(charIndex);
+                            const rowHash = ((hash << 5) + i + charCode) % 13;
+                            const colHash = ((hash << 3) + j + charCode) % 11;
+                            
+                            // 使用更复杂的算法生成随机分布
+                            const random = (rowHash * colHash + i * j + hash) % 3;
                             if (random === 1) {
                                 ctx.fillRect(offsetX + i * cellSize, offsetY + j * cellSize, cellSize, cellSize);
                             }
