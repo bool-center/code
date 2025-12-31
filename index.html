@@ -1598,11 +1598,11 @@
                         path = selectedBustype.pathTemplate.replace('{{mcid}}', mcid).replace('{{tableno}}', tableno);
                     } else {
                         // 默认构建路径，确保mcid和tableno始终存在
-                        path = 'pages/index/index.html?context=' + bustype + '&mcid=' + mcid + '&tableno=' + tableno + '&iswxtpa=1#wechat-redirect';
+                        path = 'pages/index/index.html?context=' + bustype + '&mcid=' + mcid + '&tableno=' + tableno;
                     }
                 } else {
                     // 默认构建路径，确保mcid和tableno始终存在
-                    path = 'pages/index/index.html?context=' + bustype + '&mcid=' + mcid + '&tableno=' + tableno + '&iswxtpa=1#wechat-redirect';
+                    path = 'pages/index/index.html?context=' + bustype + '&mcid=' + mcid + '&tableno=' + tableno;
                 }
                 
                 // 对整个路径进行URL编码
@@ -1613,6 +1613,19 @@
                 
                 // 更新显示的URL
                 requiredElements.generatedUrl.value = url;
+                
+                // 检查URL长度，QRCode库有字符限制
+                const urlLength = url.length;
+                const MAX_QRCODE_LENGTH = 1056; // QRCode库的最大字符限制
+                
+                if (urlLength > MAX_QRCODE_LENGTH) {
+                    // URL过长，显示友好错误
+                    requiredElements.loadingIndicator.classList.add('hidden');
+                    requiredElements.qrcode.innerHTML = '<p class="text-red-500">生成二维码时出错，链接过长无法生成</p>';
+                    showToast('error', `生成二维码失败：链接长度(${urlLength}字符)超过二维码最大限制(${MAX_QRCODE_LENGTH}字符)`);
+                    console.error(`URL长度超过限制：${urlLength} > ${MAX_QRCODE_LENGTH}`, url);
+                    return;
+                }
                 
                 // 重试配置
                 const MAX_RETRIES = 3;
@@ -1637,6 +1650,15 @@
                         if (error) {
                             retryCount++;
                             console.warn(`二维码生成失败 (${retryCount}/${MAX_RETRIES}):`, error);
+                            
+                            // 检查是否是长度溢出错误
+                            if (error.message && error.message.includes('code length overflow')) {
+                                // 直接显示长度溢出错误，不再重试
+                                requiredElements.loadingIndicator.classList.add('hidden');
+                                requiredElements.qrcode.innerHTML = '<p class="text-red-500">生成二维码时出错，链接过长无法生成</p>';
+                                showToast('error', `生成二维码失败：链接长度超过二维码最大限制`);
+                                return;
+                            }
                             
                             if (retryCount < MAX_RETRIES) {
                                 // 重试
