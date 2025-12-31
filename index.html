@@ -124,7 +124,7 @@
     });
     
     // 生成真实二维码的函数
-    function generateRealQRCode(canvas, text, options, callback) {
+    function generateRealQRCode(container, text, options, callback) {
         // 确保callback是一个函数
         if (typeof callback !== 'function') {
             console.error('generateRealQRCode: callback不是一个函数');
@@ -151,13 +151,23 @@
             try {
                 console.log('使用官方QRCode库生成二维码，文本:', text);
                 
-                // 确保canvas有正确的尺寸
-                canvas.width = options.width || 256;
-                canvas.height = options.height || 256;
-                
                 // 检查QRCode库的API类型并使用相应的方法
                 if (typeof QRCode.toCanvas === 'function') {
-                    // 使用qrcode@1.5.3的API
+                    // 使用qrcode@1.5.3的API - 需要canvas元素
+                    let canvas;
+                    if (container.tagName === 'CANVAS') {
+                        canvas = container;
+                    } else {
+                        // 如果container不是canvas，创建一个canvas元素
+                        canvas = document.createElement('canvas');
+                        container.innerHTML = '';
+                        container.appendChild(canvas);
+                    }
+                    
+                    // 确保canvas有正确的尺寸
+                    canvas.width = options.width || 256;
+                    canvas.height = options.height || 256;
+                    
                     QRCode.toCanvas(canvas, text, options, (error) => {
                         if (error) {
                             console.error('QRCode生成错误:', error);
@@ -169,16 +179,12 @@
                     });
                 } else if (typeof QRCode === 'function') {
                     // 使用qrcodejs@1.0.0的API（构造函数形式）
-                    // 首先清除画布
-                    const ctx = canvas.getContext('2d');
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    // 创建QRCode实例
+                    // 直接使用container元素，QRCode构造函数会自动创建canvas
                     try {
-                        const qr = new QRCode(canvas, {
+                        const qr = new QRCode(container, {
                             text: text,
-                            width: canvas.width,
-                            height: canvas.height,
+                            width: options.width || 256,
+                            height: options.height || 256,
                             colorDark: options.color.dark || '#000000',
                             colorLight: options.color.light || '#ffffff',
                             correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.H : undefined // 高纠错级别
@@ -195,6 +201,16 @@
                     }
                 } else if (typeof QRCode.draw === 'function') {
                     // 使用SimpleQRCode备用实现的API
+                    let canvas;
+                    if (container.tagName === 'CANVAS') {
+                        canvas = container;
+                    } else {
+                        // 如果container不是canvas，创建一个canvas元素
+                        canvas = document.createElement('canvas');
+                        container.innerHTML = '';
+                        container.appendChild(canvas);
+                    }
+                    
                     try {
                         QRCode.draw(canvas, text, options);
                         console.log('二维码生成成功 (使用本地备用实现)');
@@ -1634,12 +1650,14 @@
                 
                 // 创建生成二维码的函数（支持重试）
                 function generateWithRetry() {
-                    // 清空之前的二维码
-                    requiredElements.qrcode.innerHTML = '<canvas></canvas>';
-                    const canvas = requiredElements.qrcode.querySelector('canvas');
+                    // 清空之前的二维码并设置容器样式
+                    requiredElements.qrcode.innerHTML = '';
+                    // 确保容器有正确的尺寸
+                    requiredElements.qrcode.style.width = qrsize + 'px';
+                    requiredElements.qrcode.style.height = qrsize + 'px';
                     
                     // 使用新的generateRealQRCode函数生成真实二维码
-                    generateRealQRCode(canvas, url, {
+                    generateRealQRCode(requiredElements.qrcode, url, {
                         width: qrsize,
                         margin: 1,
                         color: {
