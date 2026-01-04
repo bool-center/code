@@ -657,8 +657,58 @@
         <!-- 生码工具模块 -->
         <div id="generate-module" class="tool-module">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- 表单区域 -->
+            <!-- 二维码预览区域 -->
             <div class="bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover">
+                <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
+                    <i class="fa fa-qrcode mr-2 text-primary"></i>二维码预览
+                </h2>
+                
+                <!-- 成功提示区域 -->
+                <div id="successMessage" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm animate-fadeIn mb-6">
+                    <i class="fa fa-check-circle mr-2"></i>
+                    <span id="successText">操作成功！</span>
+                </div>
+                
+                <div class="flex flex-col items-center justify-center">
+                    <div id="qrcodeContainer" class="bg-white p-6 rounded-xl shadow-custom mb-6 flex items-center justify-center relative">
+                        <!-- 二维码图片将在这里生成 -->
+                        <div id="qrcode" class="border border-gray-100"></div>
+                        <!-- 加载指示器 -->
+                        <div id="loadingIndicator" class="absolute hidden">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">生成的链接</h3>
+                        <div class="relative">
+                            <input type="text" id="generatedUrl" readonly 
+                                   class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm overflow-x-auto"
+                                   value="https://open.weixin.qq.com/sns/getexpappinfo?appid=wx713931c9accc58f1&path=pages%2Findex%2Findex.html%3Fcontext%3DWM%26mcid%3D41941&iswxtpa=1#wechat-redirect">
+                            <button id="copyButton" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors p-2">
+                                <i class="fa fa-copy"></i>
+                            </button>
+                        </div>
+                        <p id="copySuccess" class="hidden mt-1 text-xs text-green-500">
+                            <i class="fa fa-check-circle"></i> 链接已复制到剪贴板
+                        </p>
+                    </div>
+
+                    <div class="mt-6 flex flex-wrap gap-3 justify-center">
+                        <button id="downloadButton" class="bg-accent hover:bg-accent/90 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 flex items-center transform hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="fa fa-download mr-2"></i>
+                            下载二维码
+                        </button>
+                        <button id="resetButton" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 flex items-center transform hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="fa fa-undo mr-2"></i>
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 表单区域 -->
+            <div class="bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover" style="animation-delay: 0.2s;">
                 <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
                     <i class="fa fa-sliders mr-2 text-primary"></i>参数设置
                 </h2>
@@ -739,56 +789,6 @@
                         </button>
                     </div>
                 </form>
-            </div>
-
-            <!-- 二维码预览区域 -->
-            <div class="bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover" style="animation-delay: 0.2s;">
-                <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
-                    <i class="fa fa-qrcode mr-2 text-primary"></i>二维码预览
-                </h2>
-                
-                <!-- 成功提示区域 -->
-                <div id="successMessage" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm animate-fadeIn mb-6">
-                    <i class="fa fa-check-circle mr-2"></i>
-                    <span id="successText">操作成功！</span>
-                </div>
-                
-                <div class="flex flex-col items-center justify-center">
-                    <div id="qrcodeContainer" class="bg-white p-6 rounded-xl shadow-custom mb-6 flex items-center justify-center relative">
-                        <!-- 二维码图片将在这里生成 -->
-                        <div id="qrcode" class="border border-gray-100"></div>
-                        <!-- 加载指示器 -->
-                        <div id="loadingIndicator" class="absolute hidden">
-                            <div class="loader"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="w-full">
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">生成的链接</h3>
-                        <div class="relative">
-                            <input type="text" id="generatedUrl" readonly 
-                                   class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm overflow-x-auto"
-                                   value="https://open.weixin.qq.com/sns/getexpappinfo?appid=wx713931c9accc58f1&path=pages%2Findex%2Findex.html%3Fcontext%3DWM%26mcid%3D41941&iswxtpa=1#wechat-redirect">
-                            <button id="copyButton" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors p-2">
-                                <i class="fa fa-copy"></i>
-                            </button>
-                        </div>
-                        <p id="copySuccess" class="hidden mt-1 text-xs text-green-500">
-                            <i class="fa fa-check-circle"></i> 链接已复制到剪贴板
-                        </p>
-                    </div>
-
-                    <div class="mt-6 flex flex-wrap gap-3 justify-center">
-                        <button id="downloadButton" class="bg-accent hover:bg-accent/90 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 flex items-center transform hover:scale-[1.02] active:scale-[0.98]">
-                            <i class="fa fa-download mr-2"></i>
-                            下载二维码
-                        </button>
-                        <button id="resetButton" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 flex items-center transform hover:scale-[1.02] active:scale-[0.98]">
-                            <i class="fa fa-undo mr-2"></i>
-                            重置
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
         </div>
