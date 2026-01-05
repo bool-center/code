@@ -236,6 +236,10 @@
     </script>
     <!-- 引入jsQR库用于解码二维码 -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <!-- 引入Excel处理库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- 引入JSZip用于生成XMind文件 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- 配置文件 -->
     <script src="config.js"></script>
     <!-- Tailwind配置 -->
@@ -589,6 +593,12 @@
                         <span>解码工具</span>
                     </a>
                 </li>
+                <li>
+                    <a href="#excel-to-xmind" id="nav-excel-to-xmind" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 border-l-4 border-transparent transition-colors">
+                        <i class="fa fa-file-excel-o w-5 mr-2"></i>
+                        <span>Excel转XMind</span>
+                    </a>
+                </li>
             </ul>
         </nav>
     </aside>
@@ -624,6 +634,12 @@
                         <a href="#decode" id="mobile-nav-decode" class="flex items-center px-6 py-4 text-gray-600 border-l-4 border-transparent">
                             <i class="fa fa-qrcode w-5 mr-3"></i>
                             <span>解码工具</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#excel-to-xmind" id="mobile-nav-excel-to-xmind" class="flex items-center px-6 py-4 text-gray-600 border-l-4 border-transparent">
+                            <i class="fa fa-file-excel-o w-5 mr-3"></i>
+                            <span>Excel转XMind</span>
                         </a>
                     </li>
                 </ul>
@@ -838,6 +854,97 @@
                 </button>
             </div>
         </div>
+        
+        <!-- Excel转XMind工具模块 -->
+        <div id="excel-to-xmind-module" class="tool-module hidden bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover">
+            <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
+                <i class="fa fa-file-excel-o mr-2 text-primary"></i>Excel转XMind
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- 左侧上传区域 -->
+                <div class="bg-gray-50 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4 text-dark">上传设置</h3>
+                    
+                    <div class="mb-6">
+                        <label for="excel-file" class="block text-sm font-medium text-gray-700 mb-2">上传Excel文件</label>
+                        <div class="relative">
+                            <input type="file" id="excel-file" accept=".xlsx, .xls, .csv" 
+                                   class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
+                        </div>
+                        <p id="file-info" class="mt-2 text-sm text-gray-500">未选择文件</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="sheet-select" class="block text-sm font-medium text-gray-700 mb-1">工作表</label>
+                            <select id="sheet-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="root-select" class="block text-sm font-medium text-gray-700 mb-1">根节点列</label>
+                            <select id="root-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level1-select" class="block text-sm font-medium text-gray-700 mb-1">一级节点列</label>
+                            <select id="level1-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level2-select" class="block text-sm font-medium text-gray-700 mb-1">二级节点列</label>
+                            <select id="level2-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level3-select" class="block text-sm font-medium text-gray-700 mb-1">三级节点列</label>
+                            <select id="level3-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4">
+                        <button id="generate-btn" class="btn-primary bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center w-full" disabled>
+                            <i class="fa fa-magic mr-2"></i> 生成XMind
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 右侧预览区域 -->
+                <div class="bg-gray-50 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4 text-dark flex items-center justify-between">
+                        预览
+                        <div class="space-x-2">
+                            <button id="copy-btn" class="btn-primary bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center" disabled>
+                                <i class="fa fa-copy mr-1"></i> 复制
+                            </button>
+                            <button id="export-btn" class="btn-primary bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center" disabled>
+                                <i class="fa fa-download mr-1"></i> 导出
+                            </button>
+                        </div>
+                    </h3>
+                    
+                    <div class="h-[400px] relative overflow-hidden bg-white rounded-lg border border-gray-200">
+                        <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                            <i class="fa fa-file-excel-o text-6xl text-gray-400 mb-4"></i>
+                            <h4 class="text-lg font-medium text-gray-700 mb-2">请上传Excel文件</h4>
+                            <p class="text-sm text-gray-500">上传后将自动转换为XMind格式</p>
+                        </div>
+                        
+                        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6" style="display: none;">
+                            <div class="loader mr-2"></div>
+                            <p class="text-sm text-gray-600">正在生成XMind...</p>
+                        </div>
+                        
+                        <div id="xmind-preview" class="h-full overflow-auto p-6"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- 页脚 -->
@@ -853,18 +960,22 @@
     <!-- JavaScript -->
     <script>
         // 模块切换功能 - 全局变量
-        let generateModule, decodeModule, pageTitle;
-        let navGenerate, navDecode;
-        let mobileNavGenerate, mobileNavDecode, mobileNavToggle, mobileNav, mobileNavContent, closeMobileNav;
+        let generateModule, decodeModule, excelToXMindModule, pageTitle;
+        let navGenerate, navDecode, navExcelToXMind;
+        let mobileNavGenerate, mobileNavDecode, mobileNavExcelToXMind, mobileNavToggle, mobileNav, mobileNavContent, closeMobileNav;
         
         // 切换到生码工具
         function switchToGenerate() {
             generateModule.classList.remove('hidden');
             decodeModule.classList.add('hidden');
-            // 清除解码模块的内联样式，确保hidden类正常工作
+            excelToXMindModule.classList.add('hidden');
+            // 清除模块的内联样式，确保hidden类正常工作
             decodeModule.style.display = '';
             decodeModule.style.visibility = '';
             decodeModule.style.opacity = '';
+            excelToXMindModule.style.display = '';
+            excelToXMindModule.style.visibility = '';
+            excelToXMindModule.style.opacity = '';
             pageTitle.textContent = '微信二维码生码工具';
             
             // 更新导航状态
@@ -872,12 +983,16 @@
             navGenerate.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
             navDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
             navDecode.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
+            navExcelToXMind.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            navExcelToXMind.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
             
             // 更新移动端导航状态
             mobileNavGenerate.classList.add('text-primary', 'bg-primary/5', 'border-primary');
             mobileNavGenerate.classList.remove('text-gray-600', 'border-transparent');
             mobileNavDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
             mobileNavDecode.classList.add('text-gray-600', 'border-transparent');
+            mobileNavExcelToXMind.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            mobileNavExcelToXMind.classList.add('text-gray-600', 'border-transparent');
             
             // 关闭移动端导航
             closeMobileMenu();
@@ -885,28 +1000,53 @@
         
         // 切换到解码工具
         function switchToDecode() {
-            // 确保生成模块被隐藏，解码模块显示
             generateModule.classList.add('hidden');
             decodeModule.classList.remove('hidden');
+            excelToXMindModule.classList.add('hidden');
             pageTitle.textContent = '微信二维码解码工具';
-            
-            // 添加调试信息
-            console.log('切换到解码工具');
-            console.log('generateModule hidden class:', generateModule.classList.contains('hidden'));
-            console.log('decodeModule hidden class:', decodeModule.classList.contains('hidden'));
-            console.log('decodeModule innerHTML length:', decodeModule.innerHTML.length);
             
             // 更新导航状态
             navDecode.classList.add('text-primary', 'bg-primary/5', 'border-primary');
             navDecode.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
             navGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
             navGenerate.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
+            navExcelToXMind.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            navExcelToXMind.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
             
             // 更新移动端导航状态
             mobileNavDecode.classList.add('text-primary', 'bg-primary/5', 'border-primary');
             mobileNavDecode.classList.remove('text-gray-600', 'border-transparent');
             mobileNavGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
             mobileNavGenerate.classList.add('text-gray-600', 'border-transparent');
+            mobileNavExcelToXMind.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            mobileNavExcelToXMind.classList.add('text-gray-600', 'border-transparent');
+            
+            // 关闭移动端导航
+            closeMobileMenu();
+        }
+        
+        // 切换到Excel转XMind工具
+        function switchToExcelToXMind() {
+            generateModule.classList.add('hidden');
+            decodeModule.classList.add('hidden');
+            excelToXMindModule.classList.remove('hidden');
+            pageTitle.textContent = 'Excel转XMind工具';
+            
+            // 更新导航状态
+            navExcelToXMind.classList.add('text-primary', 'bg-primary/5', 'border-primary');
+            navExcelToXMind.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
+            navGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            navGenerate.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
+            navDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            navDecode.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
+            
+            // 更新移动端导航状态
+            mobileNavExcelToXMind.classList.add('text-primary', 'bg-primary/5', 'border-primary');
+            mobileNavExcelToXMind.classList.remove('text-gray-600', 'border-transparent');
+            mobileNavGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            mobileNavGenerate.classList.add('text-gray-600', 'border-transparent');
+            mobileNavDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
+            mobileNavDecode.classList.add('text-gray-600', 'border-transparent');
             
             // 关闭移动端导航
             closeMobileMenu();
@@ -929,6 +1069,8 @@
             const hash = window.location.hash;
             if (hash === '#decode') {
                 switchToDecode();
+            } else if (hash === '#excel-to-xmind') {
+                switchToExcelToXMind();
             } else {
                 switchToGenerate();
             }
@@ -938,15 +1080,18 @@
         function initModuleNavigation() {
             generateModule = document.getElementById('generate-module');
             decodeModule = document.getElementById('decode-module');
+            excelToXMindModule = document.getElementById('excel-to-xmind-module');
             pageTitle = document.getElementById('page-title');
             
             // 桌面端导航
             navGenerate = document.getElementById('nav-generate');
             navDecode = document.getElementById('nav-decode');
+            navExcelToXMind = document.getElementById('nav-excel-to-xmind');
             
             // 移动端导航
             mobileNavGenerate = document.getElementById('mobile-nav-generate');
             mobileNavDecode = document.getElementById('mobile-nav-decode');
+            mobileNavExcelToXMind = document.getElementById('mobile-nav-excel-to-xmind');
             mobileNavToggle = document.getElementById('mobile-nav-toggle');
             mobileNav = document.getElementById('mobile-nav');
             mobileNavContent = document.getElementById('mobile-nav-content');
@@ -955,8 +1100,10 @@
             // 绑定事件监听器
             navGenerate.addEventListener('click', (e) => { e.preventDefault(); switchToGenerate(); });
             navDecode.addEventListener('click', (e) => { e.preventDefault(); switchToDecode(); });
+            navExcelToXMind.addEventListener('click', (e) => { e.preventDefault(); switchToExcelToXMind(); });
             mobileNavGenerate.addEventListener('click', (e) => { e.preventDefault(); switchToGenerate(); });
             mobileNavDecode.addEventListener('click', (e) => { e.preventDefault(); switchToDecode(); });
+            mobileNavExcelToXMind.addEventListener('click', (e) => { e.preventDefault(); switchToExcelToXMind(); });
             mobileNavToggle.addEventListener('click', openMobileMenu);
             closeMobileNav.addEventListener('click', closeMobileMenu);
             mobileNav.addEventListener('click', (e) => { if (e.target === mobileNav) closeMobileMenu(); });
@@ -1711,6 +1858,497 @@
                 showToast('error', '生成二维码时发生错误，请重试');
             }
         }
+        
+        // Excel转XMind工具功能
+        function initExcelToXMindTool() {
+            // 全局变量
+            let workbook = null;
+            let xmindData = null;
+            
+            // DOM元素
+            const excelFileInput = document.getElementById('excel-file');
+            const fileInfo = document.getElementById('file-info');
+            const sheetSelect = document.getElementById('sheet-select');
+            const rootSelect = document.getElementById('root-select');
+            const level1Select = document.getElementById('level1-select');
+            const level2Select = document.getElementById('level2-select');
+            const level3Select = document.getElementById('level3-select');
+            const generateBtn = document.getElementById('generate-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const exportBtn = document.getElementById('export-btn');
+            const emptyState = document.getElementById('empty-state');
+            const loading = document.getElementById('loading');
+            const xmindPreview = document.getElementById('xmind-preview');
+            
+            // 事件监听器
+            if (excelFileInput) {
+                excelFileInput.addEventListener('change', handleFileUpload);
+            }
+            if (generateBtn) {
+                generateBtn.addEventListener('click', generateXMind);
+            }
+            if (copyBtn) {
+                copyBtn.addEventListener('click', copyXMindContent);
+            }
+            if (exportBtn) {
+                exportBtn.addEventListener('click', exportXMind);
+            }
+            
+            // 处理文件上传
+            function handleFileUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // 显示文件名
+                fileInfo.textContent = file.name;
+                
+                // 读取文件
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const fileExt = file.name.split('.').pop().toLowerCase();
+                    let excelData;
+                    
+                    try {
+                        if (fileExt === 'csv') {
+                            // 处理CSV文件
+                            excelData = e.target.result;
+                            workbook = XLSX.read(excelData, { 
+                                type: 'string',
+                                csvOptions: { header: 0 } // 0表示第一行作为表头
+                            });
+                        } else if (['xlsx', 'xls'].includes(fileExt)) {
+                            // 处理Excel文件（.xlsx和.xls）
+                            const arrayBuffer = e.target.result;
+                            workbook = XLSX.read(arrayBuffer, { 
+                                type: 'array',
+                                cellDates: true, // 自动解析日期
+                                cellNF: false,   // 不格式化数字
+                                cellText: false  // 保留原始值
+                            });
+                        } else {
+                            throw new Error('不支持的文件格式');
+                        }
+                        
+                        // 填充工作表选择
+                        populateSheetSelect();
+                        
+                        // 启用生成按钮
+                        generateBtn.disabled = false;
+                    } catch (error) {
+                        console.error('文件读取失败:', error);
+                        alert(`文件读取失败: ${error.message}`);
+                        fileInfo.textContent = '未选择文件';
+                        generateBtn.disabled = true;
+                    }
+                };
+                
+                if (file.name.split('.').pop().toLowerCase() === 'csv') {
+                    reader.readAsText(file);
+                } else {
+                    reader.readAsArrayBuffer(file);
+                }
+            }
+            
+            // 填充工作表选择
+            function populateSheetSelect() {
+                sheetSelect.innerHTML = '';
+                
+                // 添加工作表选项
+                workbook.SheetNames.forEach(sheetName => {
+                    const option = document.createElement('option');
+                    option.value = sheetName;
+                    option.textContent = sheetName;
+                    sheetSelect.appendChild(option);
+                });
+                
+                // 默认选择第一个工作表
+                if (workbook.SheetNames.length > 0) {
+                    populateColumnSelects(workbook.SheetNames[0]);
+                }
+                
+                // 监听工作表变化
+                sheetSelect.addEventListener('change', function() {
+                    populateColumnSelects(this.value);
+                });
+            }
+            
+            // 填充列选择
+            function populateColumnSelects(sheetName) {
+                const sheet = workbook.Sheets[sheetName];
+                const range = XLSX.utils.decode_range(sheet['!ref']);
+                
+                // 获取第一行作为列名
+                const headers = [];
+                for (let col = range.s.c; col <= range.e.c; col++) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: range.s.r, c: col });
+                    const cell = sheet[cellAddress];
+                    headers.push(cell ? cell.v : `列${col + 1}`);
+                }
+                
+                // 填充所有列选择
+                populateSelectOptions(rootSelect, headers);
+                populateSelectOptions(level1Select, headers);
+                populateSelectOptions(level2Select, headers);
+                populateSelectOptions(level3Select, headers);
+                
+                // 设置默认值：根据用户需求，根节点第三列、一级节点第四列、二级节点第五列、三级节点第六列
+                // 根节点默认第三列（索引2），如果没有则使用第一列
+                rootSelect.value = headers.length > 2 ? 2 : 0;
+                // 一级节点默认第四列（索引3），如果没有则使用第二列
+                level1Select.value = headers.length > 3 ? 3 : 1;
+                // 二级节点默认第五列（索引4），如果没有则使用第三列
+                level2Select.value = headers.length > 4 ? 4 : 2;
+                // 三级节点默认第六列（索引5），如果没有则使用第四列
+                level3Select.value = headers.length > 5 ? 5 : 3;
+            }
+            
+            // 填充选择框选项
+            function populateSelectOptions(selectElement, options) {
+                selectElement.innerHTML = '';
+                
+                options.forEach((option, index) => {
+                    const opt = document.createElement('option');
+                    opt.value = index;
+                    opt.textContent = option;
+                    selectElement.appendChild(opt);
+                });
+            }
+            
+            // 生成XMind
+            function generateXMind() {
+                loading.style.display = 'flex';
+                emptyState.style.display = 'none';
+                xmindPreview.style.display = 'none';
+                
+                setTimeout(() => {
+                    // 获取用户选择的列
+                    const sheetName = sheetSelect.value;
+                    const rootCol = parseInt(rootSelect.value);
+                    const level1Col = parseInt(level1Select.value);
+                    const level2Col = parseInt(level2Select.value);
+                    const level3Col = parseInt(level3Select.value);
+                    
+                    // 从Excel中提取数据 - 使用更可靠的方式获取所有单元格数据
+                    const sheet = workbook.Sheets[sheetName];
+                    const range = XLSX.utils.decode_range(sheet['!ref']);
+                    
+                    // 构建原始数据二维数组
+                    const rawData = [];
+                    for (let r = range.s.r; r <= range.e.r; r++) {
+                        const row = [];
+                        for (let c = range.s.c; c <= range.e.c; c++) {
+                            const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
+                            const cell = sheet[cellAddress];
+                            row.push(cell ? cell.v : '');
+                        }
+                        rawData.push(row);
+                    }
+                    
+                    console.log('提取的原始数据:', rawData);
+                    
+                    // 生成XMind数据结构
+                    const xmindStructure = generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col);
+                    
+                    console.log('生成的XMind结构:', xmindStructure);
+                    
+                    // 保存XMind数据
+                    xmindData = xmindStructure;
+                    
+                    // 显示预览
+                    showPreview(xmindStructure);
+                    
+                    // 启用导出和复制按钮
+                    exportBtn.disabled = false;
+                    copyBtn.disabled = false;
+                    
+                    loading.style.display = 'none';
+                    xmindPreview.style.display = 'block';
+                }, 1000);
+            }
+            
+            // 生成XMind结构
+            function generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col) {
+                // 检查数据是否为空
+                if (!rawData || rawData.length <= 1) {
+                    return {
+                        root: {
+                            title: 'XMind思维导图',
+                            children: []
+                        }
+                    };
+                }
+                
+                // 构建XMind结构
+                const xmind = {
+                    root: {
+                        title: 'XMind思维导图',
+                        children: []
+                    }
+                };
+                
+                // 按根节点分组
+                const rootGroups = {};
+                
+                // 跳过表头行，从第二行开始处理数据
+                for (let i = 1; i < rawData.length; i++) {
+                    const row = rawData[i];
+                    if (!row || row.length === 0) continue;
+                    
+                    // 获取各列的值，处理列索引超出范围的情况
+                    let rootValue, level1Value, level2Value, level3Value;
+                    
+                    // 根节点：确保使用正确的列
+                    rootValue = rootCol < row.length ? row[rootCol] : '';
+                    
+                    // 一级节点：确保使用正确的列
+                    level1Value = level1Col < row.length ? row[level1Col] : '';
+                    
+                    // 二级节点：确保使用正确的列
+                    level2Value = level2Col < row.length ? row[level2Col] : '';
+                    
+                    // 三级节点：确保使用正确的列
+                    level3Value = level3Col < row.length ? row[level3Col] : '';
+                    
+                    // 确保值不为undefined或null
+                    rootValue = rootValue || '未分类';
+                    level1Value = level1Value || '无';
+                    level2Value = level2Value || '无';
+                    level3Value = level3Value || '无';
+                    
+                    // 跳过所有值都相同的行
+                    if (rootValue === level1Value && rootValue === level2Value && rootValue === level3Value) {
+                        continue;
+                    }
+                    
+                    if (!rootGroups[rootValue]) {
+                        rootGroups[rootValue] = {
+                            title: rootValue,
+                            children: []
+                        };
+                    }
+                    
+                    // 查找或创建一级节点
+                    let level1Node = rootGroups[rootValue].children.find(child => child.title === level1Value);
+                    if (!level1Node) {
+                        level1Node = {
+                            title: level1Value,
+                            children: []
+                        };
+                        rootGroups[rootValue].children.push(level1Node);
+                    }
+                    
+                    // 查找或创建二级节点
+                    let level2Node = level1Node.children.find(child => child.title === level2Value);
+                    if (!level2Node) {
+                        level2Node = {
+                            title: level2Value,
+                            children: []
+                        };
+                        level1Node.children.push(level2Node);
+                    }
+                    
+                    // 添加三级节点
+                    level2Node.children.push({
+                        title: level3Value,
+                        children: []
+                    });
+                }
+                
+                // 将分组转换为XMind子节点
+                xmind.root.children = Object.values(rootGroups);
+                
+                return xmind;
+            }
+            
+            // 显示预览
+            function showPreview(xmindStructure) {
+                // 简单的树形结构预览
+                xmindPreview.innerHTML = '';
+                
+                const treeContainer = document.createElement('div');
+                treeContainer.style.padding = '10px';
+                treeContainer.style.fontFamily = 'Arial, sans-serif';
+                
+                // 递归生成树状结构
+                function generateTree(node, level = 0) {
+                    const nodeElement = document.createElement('div');
+                    nodeElement.style.marginLeft = `${level * 20}px`;
+                    nodeElement.style.marginBottom = '8px';
+                    
+                    const titleElement = document.createElement('div');
+                    titleElement.style.padding = '6px 10px';
+                    titleElement.style.backgroundColor = 
+                        level === 0 ? '#3498db' : 
+                        level === 1 ? '#2ecc71' : 
+                        level === 2 ? '#f39c12' : 
+                        '#9b59b6'; // 三级节点使用紫色
+                    titleElement.style.color = 'white';
+                    titleElement.style.borderRadius = '4px';
+                    titleElement.style.cursor = 'pointer';
+                    titleElement.style.display = 'inline-block';
+                    titleElement.style.marginBottom = '3px';
+                    titleElement.textContent = node.title;
+                    
+                    nodeElement.appendChild(titleElement);
+                    
+                    if (node.children && node.children.length > 0) {
+                        const childrenContainer = document.createElement('div');
+                        childrenContainer.style.marginLeft = '15px';
+                        
+                        node.children.forEach(child => {
+                            childrenContainer.appendChild(generateTree(child, level + 1));
+                        });
+                        
+                        nodeElement.appendChild(childrenContainer);
+                    }
+                    
+                    return nodeElement;
+                }
+                
+                treeContainer.appendChild(generateTree(xmindStructure.root));
+                xmindPreview.appendChild(treeContainer);
+            }
+            
+            // 复制XMind内容
+            function copyXMindContent() {
+                if (!xmindData) {
+                    console.error('没有XMind数据可复制');
+                    return;
+                }
+                
+                // 将XMind结构转换为Markdown格式的树形结构
+                function convertToMarkdown(node, level = 0) {
+                    const indent = '  '.repeat(level);
+                    let result = `${indent}- ${node.title}\n`;
+                    
+                    if (node.children && node.children.length > 0) {
+                        node.children.forEach(child => {
+                            result += convertToMarkdown(child, level + 1);
+                        });
+                    }
+                    
+                    return result;
+                }
+                
+                const markdownText = convertToMarkdown(xmindData.root);
+                
+                // 复制到剪贴板
+                navigator.clipboard.writeText(markdownText)
+                    .then(() => {
+                        // 显示复制成功提示
+                        showToast('success', '内容已复制到剪贴板！');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showToast('error', '复制失败，请重试！');
+                    });
+            }
+            
+            // 导出XMind
+            function exportXMind() {
+                if (!xmindData) {
+                    console.error('没有XMind数据可导出');
+                    return;
+                }
+                
+                console.log('开始导出XMind，数据结构:', xmindData);
+                
+                // 创建JSZip实例
+                const zip = new JSZip();
+                
+                // 生成content.xml
+                const contentXml = generateXMindXml(xmindData);
+                console.log('生成的XML:', contentXml);
+                zip.file('content.xml', contentXml);
+                
+                // 生成META-INF/manifest.xml
+                const manifestXml = `<?xml version="1.0" encoding="UTF-8"?>
+<manifest xmlns="urn:xmind:xmap:xmlns:manifest:1.0">
+  <file-entry full-path="/" media-type="application/xmind-workbook" />
+  <file-entry full-path="content.xml" media-type="text/xml" />
+  <file-entry full-path="styles.xml" media-type="text/xml" />
+</manifest>`;
+                zip.folder('META-INF').file('manifest.xml', manifestXml);
+                
+                // 生成styles.xml
+                const stylesXml = `<?xml version="1.0" encoding="UTF-8"?>
+<xmap-styles xmlns="urn:xmind:xmap:xmlns:style:2.0">
+  <sheet-styles id="sheet1">
+    <topic-styles>
+      <topic-style id="__central_topic__" shape-class="org.xmind.ui.shape.roundedRect"/>
+      <topic-style id="__main_topic__" shape-class="org.xmind.ui.shape.roundedRect"/>
+      <topic-style id="__sub_topic__" shape-class="org.xmind.ui.shape.roundedRect"/>
+    </topic-styles>
+  </sheet-styles>
+</xmap-styles>`;
+                zip.file('styles.xml', stylesXml);
+                
+                // 生成XMind文件并下载
+                zip.generateAsync({ type: 'blob' }).then(function(blob) {
+                    console.log('生成的XMind文件大小:', blob.size, 'bytes');
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'mindmap.xmind';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    console.log('XMind文件下载完成');
+                    showToast('success', 'XMind文件已成功导出！');
+                }).catch(function(error) {
+                    console.error('生成XMind文件失败:', error);
+                    showToast('error', '导出XMind文件失败，请重试！');
+                });
+            }
+            
+            // 生成XMind XML格式
+            function generateXMindXml(xmindData) {
+                // 标准的XMind XML格式，确保兼容性
+                let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<xmap-content xmlns="urn:xmind:xmap:xmlns:content:2.0">
+  <sheet id="sheet1" title="Sheet 1">
+    <topic id="root" structure-class="org.xmind.ui.map.unbalancedTree">
+      <title>${xmindData.root.title}</title>`;
+                
+                // 递归添加子节点
+                function addChildren(children) {
+                    if (!children || children.length === 0) {
+                        return '';
+                    }
+                    
+                    let childrenXml = `
+      <children type="attached">`;
+                    
+                    children.forEach(child => {
+                        childrenXml += `
+        <topic>
+          <title>${child.title}</title>`;
+                        
+                        if (child.children && child.children.length > 0) {
+                            childrenXml += addChildren(child.children);
+                        }
+                        
+                        childrenXml += `
+        </topic>`;
+                    });
+                    
+                    childrenXml += `
+      </children>`;
+                    return childrenXml;
+                }
+                
+                xml += addChildren(xmindData.root.children);
+                
+                xml += `
+    </topic>
+  </sheet>
+</xmap-content>`;
+                
+                return xml;
+            }
+        }
+        
+        // 调用初始化函数
+        initExcelToXMindTool();
     </script>
 </body>
 </html>
