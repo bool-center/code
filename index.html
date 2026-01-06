@@ -798,12 +798,7 @@
                         </div>
                     </div>
 
-                    <div class="pt-4">
-                        <button type="submit" class="btn-primary bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center w-full">
-                            <i class="fa fa-refresh mr-2"></i>
-                            生成二维码
-                        </button>
-                    </div>
+
                 </form>
             </div>
         </div>
@@ -1576,38 +1571,45 @@
                 }
             }
             
-            // 监听表单提交事件
-            document.getElementById('qrForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // 验证表单
-                if (validateForm()) {
-                    generateQRCode();
-                    
-                    // 显示成功消息
-                    const successMessage = document.getElementById('successMessage');
-                    const successText = document.getElementById('successText');
-                    successText.textContent = '二维码生成成功！';
-                    successMessage.classList.remove('hidden');
-                    
-                    // 3秒后隐藏成功消息
-                    setTimeout(() => {
-                        successMessage.classList.add('hidden');
-                    }, 3000);
-                    
-                    // 添加提交动画效果
-                    const submitButton = this.querySelector('button[type="submit"]');
-                    submitButton.classList.add('animate-pulse');
-                    setTimeout(() => {
-                        submitButton.classList.remove('animate-pulse');
-                    }, 1000);
+            // 为所有输入字段添加实时change/input事件监听
+            const inputFields = ['appid', 'mcid', 'tableno', 'bustype', 'qrsize'];
+            inputFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    // 根据字段类型选择合适的事件类型
+                    const eventType = field.type === 'range' ? 'input' : 'change';
+                    field.addEventListener(eventType, function() {
+                        // 更新显示的大小值（仅针对滑块）
+                        if (fieldId === 'qrsize') {
+                            const sizeValue = this.value;
+                            document.getElementById('qrsizeValue').textContent = sizeValue + 'px';
+                        }
+                        
+                        // 验证表单并实时生成二维码
+                        if (validateForm()) {
+                            generateQRCode();
+                            
+                            // 显示成功消息
+                            const successMessage = document.getElementById('successMessage');
+                            const successText = document.getElementById('successText');
+                            successText.textContent = '二维码生成成功！';
+                            successMessage.classList.remove('hidden');
+                            
+                            // 3秒后隐藏成功消息
+                            setTimeout(() => {
+                                successMessage.classList.add('hidden');
+                            }, 3000);
+                        }
+                    });
                 }
             });
             
-            // 监听滑块变化
-            document.getElementById('qrsize').addEventListener('input', function() {
-                document.getElementById('qrsizeValue').textContent = this.value + 'px';
-            });
+            // 初始加载时生成默认二维码
+            setTimeout(() => {
+                if (validateForm()) {
+                    generateQRCode();
+                }
+            }, 500);
             
             // 复制链接功能
             document.getElementById('copyButton').addEventListener('click', function() {
