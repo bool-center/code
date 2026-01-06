@@ -672,9 +672,9 @@
         <main class="flex-grow container mx-auto px-4 py-8">
         <!-- 生码工具模块 -->
         <div id="generate-module" class="tool-module">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <!-- 二维码预览区域 -->
-            <div class="bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover">
+            <div class="bg-white rounded-2xl shadow-custom p-8 animate-fadeIn card-hover">
                 <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
                     <i class="fa fa-qrcode mr-2 text-primary"></i>二维码预览
                 </h2>
@@ -686,7 +686,7 @@
                 </div>
                 
                 <div class="flex flex-col items-center justify-center">
-                    <div id="qrcodeContainer" class="bg-white p-6 rounded-xl shadow-custom mb-6 flex items-center justify-center relative">
+                    <div id="qrcodeContainer" class="bg-white p-8 rounded-xl shadow-custom mb-8 flex items-center justify-center relative min-h-[400px]">
                         <!-- 二维码图片将在这里生成 -->
                         <div id="qrcode" class="border border-gray-100"></div>
                         <!-- 加载指示器 -->
@@ -724,7 +724,7 @@
             </div>
 
             <!-- 表单区域 -->
-            <div class="bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover" style="animation-delay: 0.2s;">
+            <div class="bg-white rounded-2xl shadow-custom p-8 animate-fadeIn card-hover" style="animation-delay: 0.2s;">
                 <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
                     <i class="fa fa-sliders mr-2 text-primary"></i>参数设置
                 </h2>
