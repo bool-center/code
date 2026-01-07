@@ -2,9 +2,9 @@
 const config = {
     // AppID配置列表，格式：{name: '显示名称', value: '实际AppID'}
     appidList: [
-        { name: '御风点餐-测试', value: 'wxd26f69dc103769e5' },
-        { name: '吾享智能', value: 'wx713931c9accc58f1' },
         { name: '吾享体验前线', value: 'wxce26fe91efc05d02' },
+        { name: '吾享智能', value: 'wx713931c9accc58f1' },
+        { name: '御风点餐-测试', value: 'wxd26f69dc103769e5' },
         { name: '吾享聚合', value: 'wx0658f169cc4d4e6c' },
         { name: '吾享聚合服务+', value: 'wx5189653e14282f9b' },
         { name: '吾享点+', value: 'wxf5a38c4b5409d9bf' },
