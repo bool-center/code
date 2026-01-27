@@ -2277,10 +2277,12 @@
             function exportXMind() {
                 if (!xmindData) {
                     console.error('没有XMind数据可导出');
+                    showToast('error', '没有XMind数据可导出');
                     return;
                 }
                 
                 console.log('开始导出XMind，数据结构:', xmindData);
+                console.log('根节点子节点数量:', xmindData.root.children.length);
                 
                 // 创建JSZip实例
                 const zip = new JSZip();
@@ -2288,6 +2290,15 @@
                 // 生成content.xml
                 const contentXml = generateXMindXml(xmindData);
                 console.log('生成的XML:', contentXml);
+                console.log('XML长度:', contentXml.length);
+                
+                // 检查XML是否包含子节点
+                if (contentXml.includes('<children type="attached">')) {
+                    console.log('XML包含子节点');
+                } else {
+                    console.log('XML不包含子节点');
+                }
+                
                 zip.file('content.xml', contentXml);
                 
                 // 生成META-INF/manifest.xml
@@ -2315,6 +2326,10 @@
                 // 生成XMind文件并下载
                 zip.generateAsync({ type: 'blob' }).then(function(blob) {
                     console.log('生成的XMind文件大小:', blob.size, 'bytes');
+                    
+                    // 检查zip文件内容
+                    console.log('zip文件包含的文件:', Object.keys(zip.files));
+                    
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
@@ -2345,22 +2360,24 @@
                     }
                     
                     let childrenXml = `
-      <children type="attached">`;
+      <children>
+        <topics type="attached">`;
                     
                     children.forEach(child => {
                         childrenXml += `
-        <topic>
-          <title>${child.title}</title>`;
+          <topic id="topic-${Date.now()}-${Math.random().toString(36).substr(2, 9)}">
+            <title>${child.title}</title>`;
                         
                         if (child.children && child.children.length > 0) {
                             childrenXml += addChildren(child.children);
                         }
                         
                         childrenXml += `
-        </topic>`;
+          </topic>`;
                     });
                     
                     childrenXml += `
+        </topics>
       </children>`;
                     return childrenXml;
                 }
