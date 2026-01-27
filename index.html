@@ -1993,15 +1993,27 @@
                 populateSelectOptions(level2Select, headers);
                 populateSelectOptions(level3Select, headers);
                 
-                // 设置默认值：根据用户需求，根节点第三列、一级节点第四列、二级节点第五列、三级节点第六列
-                // 根节点默认第三列（索引2），如果没有则使用第一列
-                rootSelect.value = headers.length > 2 ? 2 : 0;
-                // 一级节点默认第四列（索引3），如果没有则使用第二列
-                level1Select.value = headers.length > 3 ? 3 : 1;
-                // 二级节点默认第五列（索引4），如果没有则使用第三列
-                level2Select.value = headers.length > 4 ? 4 : 2;
-                // 三级节点默认第六列（索引5），如果没有则使用第四列
-                level3Select.value = headers.length > 5 ? 5 : 3;
+                // 设置默认值：根据Excel文件的实际列数，提供更合理的默认值
+                // 根节点默认第一列（索引0）
+                rootSelect.value = 0;
+                // 一级节点默认第二列（索引1），如果没有则使用第一列
+                level1Select.value = headers.length > 1 ? 1 : 0;
+                // 二级节点默认第三列（索引2），如果没有则使用第二列，如果也没有则使用第一列
+                level2Select.value = headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0);
+                // 三级节点默认第四列（索引3），如果没有则使用第三列，如果也没有则使用第二列，如果还没有则使用第一列
+                level3Select.value = headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0));
+                
+                // 显示用户友好提示
+                console.log('Excel文件列信息:', {
+                    总列数: headers.length,
+                    默认根节点列: rootSelect.value,
+                    默认一级节点列: level1Select.value,
+                    默认二级节点列: level2Select.value,
+                    默认三级节点列: level3Select.value
+                });
+                
+                // 启用生成按钮
+                generateBtn.disabled = false;
             }
             
             // 填充选择框选项
@@ -2072,6 +2084,7 @@
             function generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col) {
                 // 检查数据是否为空
                 if (!rawData || rawData.length <= 1) {
+                    console.log('数据为空或只有表头行');
                     return {
                         root: {
                             title: 'XMind思维导图',
@@ -2117,16 +2130,24 @@
                     level2Value = level2Value || '无';
                     level3Value = level3Value || '无';
                     
-                    // 跳过所有值都相同的行
-                    if (rootValue === level1Value && rootValue === level2Value && rootValue === level3Value) {
+                    // 仅跳过所有值都为'无'的行，避免过度过滤
+                    if (rootValue === '无' && level1Value === '无' && level2Value === '无' && level3Value === '无') {
                         continue;
                     }
+                    
+                    console.log('处理行数据:', {
+                        rootValue,
+                        level1Value,
+                        level2Value,
+                        level3Value
+                    });
                     
                     if (!rootGroups[rootValue]) {
                         rootGroups[rootValue] = {
                             title: rootValue,
                             children: []
                         };
+                        console.log('创建根节点:', rootValue);
                     }
                     
                     // 查找或创建一级节点
@@ -2137,6 +2158,7 @@
                             children: []
                         };
                         rootGroups[rootValue].children.push(level1Node);
+                        console.log('创建一级节点:', level1Value, '属于根节点:', rootValue);
                     }
                     
                     // 查找或创建二级节点
@@ -2147,6 +2169,7 @@
                             children: []
                         };
                         level1Node.children.push(level2Node);
+                        console.log('创建二级节点:', level2Value, '属于一级节点:', level1Value);
                     }
                     
                     // 添加三级节点
@@ -2154,7 +2177,11 @@
                         title: level3Value,
                         children: []
                     });
+                    console.log('添加三级节点:', level3Value, '属于二级节点:', level2Value);
                 }
+                
+                console.log('生成的根节点分组:', rootGroups);
+                console.log('转换为子节点数组:', Object.values(rootGroups));
                 
                 // 将分组转换为XMind子节点
                 xmind.root.children = Object.values(rootGroups);
