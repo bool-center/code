@@ -1793,7 +1793,7 @@
                 
                 // 检查URL长度，QRCode库有字符限制
                 const urlLength = url.length;
-                const MAX_QRCODE_LENGTH = 1056; // QRCode库的最大字符限制
+                const MAX_QRCODE_LENGTH = 2000; // 调整为更大的限制，基于二维码版本40和低纠错级别的最大容量
                 
                 if (urlLength > MAX_QRCODE_LENGTH) {
                     // URL过长，显示友好错误
