@@ -278,8 +278,8 @@
                             
                             // 创建canvas元素
                             const canvas = document.createElement('canvas');
-                            canvas.width = options.width || 300;
-                            canvas.height = options.width || 300; // 保持正方形
+                            canvas.width = options.width || 400;
+                            canvas.height = options.width || 400; // 保持正方形
                             container.appendChild(canvas);
                             
                             // 使用简单的备用实现
@@ -950,9 +950,9 @@
                     <div class="form-group">
                         <label for="qrsize" class="block text-sm font-medium text-gray-700 mb-1">二维码大小</label>
                         <div class="flex items-center space-x-4">
-                            <input type="range" id="qrsize" name="qrsize" min="100" max="600" value="350" step="10"
+                            <input type="range" id="qrsize" name="qrsize" min="100" max="600" value="400" step="10"
                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary">
-                            <span id="qrsizeValue" class="text-sm font-medium text-gray-700">350px</span>
+                            <span id="qrsizeValue" class="text-sm font-medium text-gray-700">400px</span>
                         </div>
                     </div>
 
@@ -1860,8 +1860,8 @@
                     const defaults = config.defaultParams;
                     // mcid不再设置默认值，保持为空
                     document.getElementById('tableno').value = defaults.tableno || '001';
-                    document.getElementById('qrsize').value = defaults.qrsize || 350;
-                    document.getElementById('qrsizeValue').textContent = (defaults.qrsize || 350) + 'px';
+                    document.getElementById('qrsize').value = defaults.qrsize || 400;
+                    document.getElementById('qrsizeValue').textContent = (defaults.qrsize || 400) + 'px';
                 }
                 
                 // 移除所有错误状态
@@ -1906,7 +1906,7 @@
             const mcid = requiredElements.mcid.value.trim();
             const tableno = requiredElements.tableno.value.trim() || '001';
             const bustype = requiredElements.bustype.value || 'WM';
-            const qrsize = parseInt(requiredElements.qrsize.value) || 350;
+            const qrsize = parseInt(requiredElements.qrsize.value) || 400;
             
             try {
                 // 检查配置对象是否正确加载
