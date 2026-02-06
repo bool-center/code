@@ -219,30 +219,46 @@
                         let correctLevel;
                         const textLength = text.length;
                         
-                        if (textLength > 2331) {
-                            // 超长文本，使用最低纠错级别
-                            correctLevel = QRCode.CorrectLevel.L;
-                        } else if (textLength > 1663) {
-                            // 长文本，使用中纠错级别
-                            correctLevel = QRCode.CorrectLevel.M;
-                        } else if (textLength > 1273) {
-                            // 中等长度文本，使用较高纠错级别
-                            correctLevel = QRCode.CorrectLevel.Q;
+                        // 显示QRCode.CorrectLevel的值，用于调试
+                        console.log('QRCode.CorrectLevel:', QRCode.CorrectLevel);
+                        
+                        // 确保QRCode.CorrectLevel存在
+                        if (QRCode.CorrectLevel) {
+                            if (textLength > 2331) {
+                                // 超长文本，使用最低纠错级别
+                                correctLevel = QRCode.CorrectLevel.L;
+                            } else if (textLength > 1663) {
+                                // 长文本，使用中纠错级别
+                                correctLevel = QRCode.CorrectLevel.M;
+                            } else if (textLength > 1273) {
+                                // 中等长度文本，使用较高纠错级别
+                                correctLevel = QRCode.CorrectLevel.Q;
+                            } else {
+                                // 短文本，使用最高纠错级别
+                                correctLevel = QRCode.CorrectLevel.H;
+                            }
+                            
+                            console.log(`选择纠错级别: ${correctLevel === QRCode.CorrectLevel.L ? 'L' : correctLevel === QRCode.CorrectLevel.M ? 'M' : correctLevel === QRCode.CorrectLevel.Q ? 'Q' : 'H'} (文本长度: ${textLength})`);
+                            console.log(`纠错级别数值: ${correctLevel}`);
                         } else {
-                            // 短文本，使用最高纠错级别
-                            correctLevel = QRCode.CorrectLevel.H;
+                            // QRCode.CorrectLevel不存在，使用默认值
+                            correctLevel = 2; // 2代表Q纠错级别
+                            console.log(`QRCode.CorrectLevel不存在，使用默认纠错级别Q (数值: ${correctLevel})`);
                         }
                         
-                        console.log(`选择纠错级别: ${correctLevel === QRCode.CorrectLevel.L ? 'L' : correctLevel === QRCode.CorrectLevel.M ? 'M' : correctLevel === QRCode.CorrectLevel.Q ? 'Q' : 'H'} (文本长度: ${textLength})`);
-                        
-                        const qr = new QRCode(container, {
+                        // 创建QRCode选项对象
+                        const qrOptions = {
                             text: text,
                             width: options.width || 256,
                             height: options.height || 256,
                             colorDark: options.color.dark || '#000000',
                             colorLight: options.color.light || '#ffffff',
-                            correctLevel: QRCode.CorrectLevel ? correctLevel : undefined
-                        });
+                            correctLevel: correctLevel
+                        };
+                        
+                        console.log('QRCode选项:', qrOptions);
+                        
+                        const qr = new QRCode(container, qrOptions);
                         
                         // 添加一个小延迟确保二维码完全生成
                         setTimeout(() => {
