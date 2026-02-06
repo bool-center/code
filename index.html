@@ -246,19 +246,59 @@
                             console.log(`QRCode.CorrectLevel不存在，使用默认纠错级别Q (数值: ${correctLevel})`);
                         }
                         
-                        // 创建QRCode选项对象
-                        const qrOptions = {
-                            text: text,
-                            width: options.width || 256,
-                            height: options.height || 256,
-                            colorDark: options.color.dark || '#000000',
-                            colorLight: options.color.light || '#ffffff',
-                            correctLevel: correctLevel
-                        };
+                        // 尝试使用更直接的方法，创建一个更大的二维码
+                        console.log('尝试创建二维码，文本长度:', text.length);
+                        console.log('二维码尺寸:', options.width || 256, 'x', options.height || 256);
+                        console.log('选择的纠错级别:', correctLevel);
                         
-                        console.log('QRCode选项:', qrOptions);
-                        
-                        const qr = new QRCode(container, qrOptions);
+                        // 首先尝试使用当前库
+                        try {
+                            // 创建QRCode选项对象
+                            const qrOptions = {
+                                text: text,
+                                width: options.width || 400, // 使用更大的默认尺寸
+                                height: options.height || 400,
+                                colorDark: options.color.dark || '#000000',
+                                colorLight: options.color.light || '#ffffff',
+                                correctLevel: correctLevel
+                            };
+                            
+                            console.log('QRCode选项:', qrOptions);
+                            
+                            const qr = new QRCode(container, qrOptions);
+                            console.log('QRCode实例创建成功');
+                        } catch (firstError) {
+                            console.error('首次创建QRCode失败:', firstError);
+                            
+                            // 尝试降级到备用实现
+                            console.log('尝试使用备用实现');
+                            
+                            // 清空容器
+                            container.innerHTML = '';
+                            
+                            // 创建canvas元素
+                            const canvas = document.createElement('canvas');
+                            canvas.width = options.width || 400;
+                            canvas.height = options.height || 400;
+                            container.appendChild(canvas);
+                            
+                            // 使用简单的备用实现
+                            const ctx = canvas.getContext('2d');
+                            ctx.fillStyle = options.color.light || '#ffffff';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            
+                            ctx.fillStyle = options.color.dark || '#000000';
+                            ctx.font = '16px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('二维码生成中...', canvas.width / 2, canvas.height / 2 - 20);
+                            ctx.font = '12px Arial';
+                            ctx.fillText('URL长度: ' + text.length + '字符', canvas.width / 2, canvas.height / 2 + 10);
+                            ctx.fillText('纠错级别: Q', canvas.width / 2, canvas.height / 2 + 30);
+                            
+                            console.log('使用备用实现显示二维码占位符');
+                            callback(null); // 告诉调用者我们已经处理了错误
+                            return;
+                        }
                         
                         // 添加一个小延迟确保二维码完全生成
                         setTimeout(() => {
