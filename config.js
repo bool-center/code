@@ -18,6 +18,8 @@ const config = {
     bustypeList: [
         { name: '外卖', value: 'WM', pathTemplate: 'pages/index/index.html?context=WM&mcid={{mcid}}&tableno={{tableno}}' },
         { name: '自提', value: 'ZT', pathTemplate: 'pages/index/index.html?context=ZT&mcid={{mcid}}&tableno={{tableno}}' },
+        { name: '团餐外卖', value: 'TCWM', pathTemplate: 'pages/index/index.html?context=WM&cusbusiness=TC&mcid={{mcid}}&tableno={{tableno}}' },
+        { name: '团餐自提', value: 'TCZT', pathTemplate: 'pages/index/index.html?context=ZT&cusbusiness=TC&mcid={{mcid}}&tableno={{tableno}}' },
         { name: '点餐', value: 'DC', pathTemplate: 'pages/index/index.html?context=DC&mcid={{mcid}}&tableno={{tableno}}' },
         { name: '我的订单', value: 'OD', pathTemplate: 'pages/index/index.html?context=OD&page=myOrder&mcid={{mcid}}&tableno={{tableno}}' },
         { name: '首页', value: 'HOME', pathTemplate: 'pages/index/index.html?context=HOME&page=home&mcid={{mcid}}&tableno={{tableno}}' },
