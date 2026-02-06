@@ -168,7 +168,37 @@
                     canvas.width = options.width || 256;
                     canvas.height = options.height || 256;
                     
-                    QRCode.toCanvas(canvas, text, options, (error) => {
+                    // 根据文本长度选择合适的纠错级别
+                    // L: 低纠错级别，最大容量约2953字符
+                    // M: 中纠错级别，最大容量约2331字符
+                    // Q: 高纠错级别，最大容量约1663字符
+                    // H: 最高纠错级别，最大容量约1273字符
+                    let errorCorrectionLevel;
+                    const textLength = text.length;
+                    
+                    if (textLength > 2331) {
+                        // 超长文本，使用最低纠错级别
+                        errorCorrectionLevel = 'L';
+                    } else if (textLength > 1663) {
+                        // 长文本，使用中纠错级别
+                        errorCorrectionLevel = 'M';
+                    } else if (textLength > 1273) {
+                        // 中等长度文本，使用较高纠错级别
+                        errorCorrectionLevel = 'Q';
+                    } else {
+                        // 短文本，使用最高纠错级别
+                        errorCorrectionLevel = 'H';
+                    }
+                    
+                    console.log(`选择纠错级别 (toCanvas API): ${errorCorrectionLevel} (文本长度: ${textLength})`);
+                    
+                    // 创建带有纠错级别的选项对象
+                    const toCanvasOptions = {
+                        ...options,
+                        errorCorrectionLevel: errorCorrectionLevel
+                    };
+                    
+                    QRCode.toCanvas(canvas, text, toCanvasOptions, (error) => {
                         if (error) {
                             console.error('QRCode生成错误:', error);
                             callback(error);
