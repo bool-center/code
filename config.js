@@ -5,6 +5,7 @@ const config = {
         { name: '吾享体验前线', value: 'wxce26fe91efc05d02' },
         { name: '体验聚合(测试平台小程序)', value: 'wx0aef6e2c0955e99f' },
         { name: '御风点餐-测试', value: 'wxd26f69dc103769e5' },
+        { name: '御风点餐palt-测试聚合', value: 'wx1bf8365f76b1c06a' },
         { name: '吾享聚合', value: 'wx0658f169cc4d4e6c' },
         { name: '吾享聚合服务+', value: 'wx5189653e14282f9b' },
         { name: '吾享点+', value: 'wxf5a38c4b5409d9bf' },
