@@ -246,26 +246,16 @@
                         
                         // 确保QRCode.CorrectLevel存在
                         if (QRCode.CorrectLevel) {
-                            if (textLength > 2331) {
-                                // 超长文本，使用最低纠错级别
-                                correctLevel = QRCode.CorrectLevel.L;
-                            } else if (textLength > 1663) {
-                                // 长文本，使用中纠错级别
-                                correctLevel = QRCode.CorrectLevel.M;
-                            } else if (textLength > 1273) {
-                                // 中等长度文本，使用较高纠错级别
-                                correctLevel = QRCode.CorrectLevel.Q;
-                            } else {
-                                // 短文本，使用最高纠错级别
-                                correctLevel = QRCode.CorrectLevel.H;
-                            }
+                            // 对于所有文本，使用最低纠错级别L，以最大化容量
+                            // 这样可以容纳更多字符，避免长度溢出错误
+                            correctLevel = QRCode.CorrectLevel.L;
                             
-                            console.log(`选择纠错级别: ${correctLevel === QRCode.CorrectLevel.L ? 'L' : correctLevel === QRCode.CorrectLevel.M ? 'M' : correctLevel === QRCode.CorrectLevel.Q ? 'Q' : 'H'} (文本长度: ${textLength})`);
+                            console.log(`选择纠错级别: L (文本长度: ${textLength})`);
                             console.log(`纠错级别数值: ${correctLevel}`);
                         } else {
                             // QRCode.CorrectLevel不存在，使用默认值
-                            correctLevel = 2; // 2代表Q纠错级别
-                            console.log(`QRCode.CorrectLevel不存在，使用默认纠错级别Q (数值: ${correctLevel})`);
+                            correctLevel = 1; // 1代表L纠错级别
+                            console.log(`QRCode.CorrectLevel不存在，使用默认纠错级别L (数值: ${correctLevel})`);
                         }
                         
                         // 尝试使用更直接的方法，创建一个更大的二维码
