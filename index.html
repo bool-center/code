@@ -190,12 +190,34 @@
                         errorCorrectionLevel = 'H';
                     }
                     
-                    console.log(`选择纠错级别 (toCanvas API): ${errorCorrectionLevel} (文本长度: ${textLength})`);
+                    // 根据文本长度选择合适的二维码版本
+                    // QRCode版本1-40，版本越高能承载的字符越多
+                    let version;
+                    if (textLength > 2331) {
+                        // 超长文本，使用最高版本40
+                        version = 40;
+                    } else if (textLength > 1663) {
+                        // 长文本，使用版本30
+                        version = 30;
+                    } else if (textLength > 1273) {
+                        // 中等长度文本，使用版本20
+                        version = 20;
+                    } else if (textLength > 871) {
+                        // 较长文本，使用版本15
+                        version = 15;
+                    } else {
+                        // 短文本，使用默认版本
+                        version = 10;
+                    }
                     
-                    // 创建带有纠错级别的选项对象
+                    console.log(`选择纠错级别 (toCanvas API): ${errorCorrectionLevel} (文本长度: ${textLength})`);
+                    console.log(`选择二维码版本 (toCanvas API): ${version} (文本长度: ${textLength})`);
+                    
+                    // 创建带有纠错级别和版本的选项对象
                     const toCanvasOptions = {
                         ...options,
-                        errorCorrectionLevel: errorCorrectionLevel
+                        errorCorrectionLevel: errorCorrectionLevel,
+                        version: version // 添加版本参数
                     };
                     
                     QRCode.toCanvas(canvas, text, toCanvasOptions, (error) => {
@@ -253,6 +275,30 @@
                         
                         // 首先尝试使用当前库
                         try {
+                            // 根据文本长度选择合适的二维码版本
+                            // QRCode版本1-40，版本越高能承载的字符越多
+                            let version;
+                            const textLength = text.length;
+                            
+                            if (textLength > 2331) {
+                                // 超长文本，使用最高版本40
+                                version = 40;
+                            } else if (textLength > 1663) {
+                                // 长文本，使用版本30
+                                version = 30;
+                            } else if (textLength > 1273) {
+                                // 中等长度文本，使用版本20
+                                version = 20;
+                            } else if (textLength > 871) {
+                                // 较长文本，使用版本15
+                                version = 15;
+                            } else {
+                                // 短文本，使用默认版本
+                                version = 10;
+                            }
+                            
+                            console.log(`选择二维码版本: ${version} (文本长度: ${textLength})`);
+                            
                             // 创建QRCode选项对象
                             const qrOptions = {
                                 text: text,
@@ -260,13 +306,17 @@
                                 height: options.height || 400,
                                 colorDark: options.color.dark || '#000000',
                                 colorLight: options.color.light || '#ffffff',
-                                correctLevel: correctLevel
+                                correctLevel: correctLevel,
+                                version: version // 添加版本参数
                             };
                             
                             console.log('QRCode选项:', qrOptions);
                             
                             const qr = new QRCode(container, qrOptions);
                             console.log('QRCode实例创建成功');
+                            
+                            // 显示版本信息
+                            console.log(`二维码生成成功，使用版本: ${version}`);
                         } catch (firstError) {
                             console.warn('QRCode创建失败，使用备用实现:', firstError.message);
                             
