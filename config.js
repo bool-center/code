@@ -13,7 +13,8 @@ const config = {
         { name: '平台生产', value: 'wx8022fc66b8ba2821' },
         { name: '御风收银点餐', value: 'wx8c4ff9c3bace8038' },
         { name: '客享来体验', value: 'wx118a2087c4781fc5' },
-        { name: '吾享通', value: 'wx93c15f7a80819b6d' }
+        { name: '吾享通', value: 'wx93c15f7a80819b6d' },
+        { name: '御风收银管家', value: 'wx8c4ff9c3bace8038' }
     ],
     
     // Business Type配置列表，格式：{name: '显示名称', value: '实际值', pathTemplate: '路径模板'}
