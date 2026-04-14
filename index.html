@@ -2699,16 +2699,16 @@
                 treeContainer.style.position = 'relative';
                 treeContainer.style.display = 'flex';
                 treeContainer.style.flexDirection = 'row';
-                treeContainer.style.alignItems = 'flex-start';
+                treeContainer.style.alignItems = 'center';
+                treeContainer.style.minHeight = '300px';
                 
                 // 递归生成树状结构
                 function generateTree(node, level = 0) {
                     const nodeElement = document.createElement('div');
                     nodeElement.style.position = 'relative';
                     nodeElement.style.display = 'flex';
-                    nodeElement.style.flexDirection = 'column';
+                    nodeElement.style.flexDirection = 'row';
                     nodeElement.style.alignItems = 'center';
-                    nodeElement.style.marginRight = '30px';
                     
                     const titleElement = document.createElement('div');
                     titleElement.style.padding = '6px 12px';
@@ -2750,18 +2750,30 @@
                     nodeElement.appendChild(titleElement);
                     
                     if (node.children && node.children.length > 0) {
+                        // 添加连接线
+                        const connector = document.createElement('div');
+                        connector.style.width = '20px';
+                        connector.style.height = '2px';
+                        connector.style.backgroundColor = '#e5e7eb';
+                        connector.style.margin = '0 10px';
+                        nodeElement.appendChild(connector);
+                        
                         const childrenContainer = document.createElement('div');
                         childrenContainer.style.display = 'flex';
                         childrenContainer.style.flexDirection = 'row';
-                        childrenContainer.style.alignItems = 'flex-start';
-                        childrenContainer.style.marginTop = '15px';
-                        
-                        // 添加连接线效果
-                        if (level >= 0) {
-                            childrenContainer.style.position = 'relative';
-                        }
+                        childrenContainer.style.alignItems = 'center';
+                        childrenContainer.style.flexWrap = 'wrap';
                         
                         node.children.forEach((child, index) => {
+                            if (index > 0) {
+                                // 添加节点间的连接线
+                                const childConnector = document.createElement('div');
+                                childConnector.style.width = '2px';
+                                childConnector.style.height = '20px';
+                                childConnector.style.backgroundColor = '#e5e7eb';
+                                childConnector.style.margin = '0 10px';
+                                childrenContainer.appendChild(childConnector);
+                            }
                             const childElement = generateTree(child, level + 1);
                             childrenContainer.appendChild(childElement);
                         });
