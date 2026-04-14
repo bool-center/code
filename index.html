@@ -2698,18 +2698,17 @@
                 treeContainer.style.fontFamily = 'Arial, sans-serif';
                 treeContainer.style.position = 'relative';
                 treeContainer.style.display = 'flex';
-                treeContainer.style.flexDirection = 'column';
+                treeContainer.style.flexDirection = 'row';
+                treeContainer.style.alignItems = 'flex-start';
                 
                 // 递归生成树状结构
                 function generateTree(node, level = 0) {
                     const nodeElement = document.createElement('div');
                     nodeElement.style.position = 'relative';
-                    nodeElement.style.marginBottom = '10px';
-                    
-                    // 根节点特殊处理
-                    if (level === 0) {
-                        nodeElement.style.marginBottom = '20px';
-                    }
+                    nodeElement.style.display = 'flex';
+                    nodeElement.style.flexDirection = 'column';
+                    nodeElement.style.alignItems = 'center';
+                    nodeElement.style.marginRight = '30px';
                     
                     const titleElement = document.createElement('div');
                     titleElement.style.padding = '6px 12px';
@@ -2736,6 +2735,7 @@
                     titleElement.style.fontWeight = level === 0 ? 'bold' : 'normal';
                     titleElement.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
                     titleElement.textContent = node.title;
+                    titleElement.style.whiteSpace = 'nowrap';
                     
                     // 添加悬停效果
                     titleElement.addEventListener('mouseenter', function() {
@@ -2751,13 +2751,13 @@
                     
                     if (node.children && node.children.length > 0) {
                         const childrenContainer = document.createElement('div');
-                        childrenContainer.style.marginLeft = '20px';
-                        childrenContainer.style.position = 'relative';
+                        childrenContainer.style.display = 'flex';
+                        childrenContainer.style.flexDirection = 'row';
+                        childrenContainer.style.alignItems = 'flex-start';
+                        childrenContainer.style.marginTop = '15px';
                         
                         // 添加连接线效果
                         if (level >= 0) {
-                            childrenContainer.style.borderLeft = '2px solid #e5e7eb';
-                            childrenContainer.style.paddingLeft = '20px';
                             childrenContainer.style.position = 'relative';
                         }
                         
