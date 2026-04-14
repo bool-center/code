@@ -1068,13 +1068,15 @@
                         <p id="file-info" class="mt-2 text-sm text-gray-500">未选择文件</p>
                     </div>
                     
-                    <div class="space-y-4">
-                        <div>
-                            <label for="sheet-select" class="block text-sm font-medium text-gray-700 mb-1">工作表</label>
-                            <select id="sheet-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
+                    <!-- 工作表选择 -->
+                    <div class="mb-6">
+                        <label for="sheet-select" class="block text-sm font-medium text-gray-700 mb-1">工作表</label>
+                        <select id="sheet-select" 
+                                class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                    </div>
+                    
+                    <!-- 节点列选择 - 使用网格布局 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
                             <label for="root-select" class="block text-sm font-medium text-gray-700 mb-1">根节点列</label>
                             <select id="root-select" 
@@ -1108,6 +1110,60 @@
                         <div>
                             <label for="level5-select" class="block text-sm font-medium text-gray-700 mb-1">五级节点列</label>
                             <select id="level5-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level6-select" class="block text-sm font-medium text-gray-700 mb-1">六级节点列</label>
+                            <select id="level6-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level7-select" class="block text-sm font-medium text-gray-700 mb-1">七级节点列</label>
+                            <select id="level7-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level8-select" class="block text-sm font-medium text-gray-700 mb-1">八级节点列</label>
+                            <select id="level8-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level9-select" class="block text-sm font-medium text-gray-700 mb-1">九级节点列</label>
+                            <select id="level9-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level10-select" class="block text-sm font-medium text-gray-700 mb-1">十级节点列</label>
+                            <select id="level10-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level11-select" class="block text-sm font-medium text-gray-700 mb-1">十一级节点列</label>
+                            <select id="level11-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level12-select" class="block text-sm font-medium text-gray-700 mb-1">十二级节点列</label>
+                            <select id="level12-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level13-select" class="block text-sm font-medium text-gray-700 mb-1">十三级节点列</label>
+                            <select id="level13-select" 
+                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label for="level14-select" class="block text-sm font-medium text-gray-700 mb-1">十四级节点列</label>
+                            <select id="level14-select" 
                                     class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
                         </div>
                     </div>
@@ -2087,6 +2143,15 @@
             const level3Select = document.getElementById('level3-select');
             const level4Select = document.getElementById('level4-select');
             const level5Select = document.getElementById('level5-select');
+            const level6Select = document.getElementById('level6-select');
+            const level7Select = document.getElementById('level7-select');
+            const level8Select = document.getElementById('level8-select');
+            const level9Select = document.getElementById('level9-select');
+            const level10Select = document.getElementById('level10-select');
+            const level11Select = document.getElementById('level11-select');
+            const level12Select = document.getElementById('level12-select');
+            const level13Select = document.getElementById('level13-select');
+            const level14Select = document.getElementById('level14-select');
             const generateBtn = document.getElementById('generate-btn');
             const copyBtn = document.getElementById('copy-btn');
             const exportBtn = document.getElementById('export-btn');
@@ -2206,6 +2271,15 @@
                 populateSelectOptions(level3Select, headers);
                 populateSelectOptions(level4Select, headers);
                 populateSelectOptions(level5Select, headers);
+                populateSelectOptions(level6Select, headers);
+                populateSelectOptions(level7Select, headers);
+                populateSelectOptions(level8Select, headers);
+                populateSelectOptions(level9Select, headers);
+                populateSelectOptions(level10Select, headers);
+                populateSelectOptions(level11Select, headers);
+                populateSelectOptions(level12Select, headers);
+                populateSelectOptions(level13Select, headers);
+                populateSelectOptions(level14Select, headers);
                 
                 // 设置默认值：根据Excel文件的实际列数，提供更合理的默认值
                 // 根节点默认第一列（索引0）
@@ -2220,6 +2294,24 @@
                 level4Select.value = headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)));
                 // 五级节点默认第六列（索引5），如果没有则使用第五列，如果也没有则使用第四列，如果还没有则使用第三列，如果最后没有则使用第二列，如果还没有则使用第一列
                 level5Select.value = headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))));
+                // 六级节点默认第七列（索引6），如果没有则使用第六列，如果也没有则使用第五列，如果还没有则使用第四列，如果最后没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
+                level6Select.value = headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))));
+                // 七级节点默认第八列（索引7），如果没有则使用第七列，如果也没有则使用第六列，如果还没有则使用第五列，如果最后没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
+                level7Select.value = headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)))));
+                // 八级节点默认第九列（索引8），如果没有则使用第八列，如果也没有则使用第七列，如果还没有则使用第六列，如果最后没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
+                level8Select.value = headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))))));
+                // 九级节点默认第十列（索引9），如果没有则使用第九列，如果也没有则使用第八列，如果还没有则使用第七列，如果最后没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
+                level9Select.value = headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)))))));
+                // 十级节点默认第十一列（索引10），如果没有则使用第十列，如果也没有则使用第九列，如果还没有则使用第八列，如果最后没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
+                level10Select.value = headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)))))));
+                // 十一级节点默认第十二列（索引11），如果没有则使用第十一列，如果也没有则使用第十列，如果还没有则使用第九列，如果最后没有则使用第八列，如果还没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
+                level11Select.value = headers.length > 11 ? 11 : (headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))))))));
+                // 十二级节点默认第十三列（索引12），如果没有则使用第十二列，如果也没有则使用第十一列，如果还没有则使用第十列，如果最后没有则使用第九列，如果还没有则使用第八列，如果还没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
+                level12Select.value = headers.length > 12 ? 12 : (headers.length > 11 ? 11 : (headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)))))))));
+                // 十三级节点默认第十四列（索引13），如果没有则使用第十三列，如果也没有则使用第十二列，如果还没有则使用第十一列，如果最后没有则使用第十列，如果还没有则使用第九列，如果还没有则使用第八列，如果还没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
+                level13Select.value = headers.length > 13 ? 13 : (headers.length > 12 ? 12 : (headers.length > 11 ? 11 : (headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)))))))));
+                // 十四级节点默认第十五列（索引14），如果没有则使用第十四列，如果也没有则使用第十三列，如果还没有则使用第十二列，如果最后没有则使用第十一列，如果还没有则使用第十列，如果还没有则使用第九列，如果还没有则使用第八列，如果还没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
+                level14Select.value = headers.length > 14 ? 14 : (headers.length > 13 ? 13 : (headers.length > 12 ? 12 : (headers.length > 11 ? 11 : (headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))))))))));
                 
                 // 显示用户友好提示
                 console.log('Excel文件列信息:', {
@@ -2263,6 +2355,15 @@
                     const level3Col = parseInt(level3Select.value);
                     const level4Col = parseInt(level4Select.value);
                     const level5Col = parseInt(level5Select.value);
+                    const level6Col = parseInt(level6Select.value);
+                    const level7Col = parseInt(level7Select.value);
+                    const level8Col = parseInt(level8Select.value);
+                    const level9Col = parseInt(level9Select.value);
+                    const level10Col = parseInt(level10Select.value);
+                    const level11Col = parseInt(level11Select.value);
+                    const level12Col = parseInt(level12Select.value);
+                    const level13Col = parseInt(level13Select.value);
+                    const level14Col = parseInt(level14Select.value);
                     
                     // 从Excel中提取数据 - 使用更可靠的方式获取所有单元格数据
                     const sheet = workbook.Sheets[sheetName];
@@ -2283,7 +2384,7 @@
                     console.log('提取的原始数据:', rawData);
                     
                     // 生成XMind数据结构
-                    const xmindStructure = generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col, level4Col, level5Col);
+                    const xmindStructure = generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col, level4Col, level5Col, level6Col, level7Col, level8Col, level9Col, level10Col, level11Col, level12Col, level13Col, level14Col);
                     
                     console.log('生成的XMind结构:', xmindStructure);
                     
@@ -2303,7 +2404,7 @@
             }
             
             // 生成XMind结构
-            function generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col, level4Col, level5Col) {
+            function generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col, level4Col, level5Col, level6Col, level7Col, level8Col, level9Col, level10Col, level11Col, level12Col, level13Col, level14Col) {
                 // 检查数据是否为空
                 if (!rawData || rawData.length <= 1) {
                     console.log('数据为空或只有表头行');
@@ -2332,7 +2433,7 @@
                     if (!row || row.length === 0) continue;
                     
                     // 获取各列的值，处理列索引超出范围的情况
-                    let rootValue, level1Value, level2Value, level3Value, level4Value, level5Value;
+                    let rootValue, level1Value, level2Value, level3Value, level4Value, level5Value, level6Value, level7Value, level8Value, level9Value, level10Value, level11Value, level12Value, level13Value, level14Value;
                     
                     // 根节点：确保使用正确的列
                     rootValue = rootCol < row.length ? row[rootCol] : '';
@@ -2352,6 +2453,33 @@
                     // 五级节点：确保使用正确的列
                     level5Value = level5Col < row.length ? row[level5Col] : '';
                     
+                    // 六级节点：确保使用正确的列
+                    level6Value = level6Col < row.length ? row[level6Col] : '';
+                    
+                    // 七级节点：确保使用正确的列
+                    level7Value = level7Col < row.length ? row[level7Col] : '';
+                    
+                    // 八级节点：确保使用正确的列
+                    level8Value = level8Col < row.length ? row[level8Col] : '';
+                    
+                    // 九级节点：确保使用正确的列
+                    level9Value = level9Col < row.length ? row[level9Col] : '';
+                    
+                    // 十级节点：确保使用正确的列
+                    level10Value = level10Col < row.length ? row[level10Col] : '';
+                    
+                    // 十一级节点：确保使用正确的列
+                    level11Value = level11Col < row.length ? row[level11Col] : '';
+                    
+                    // 十二级节点：确保使用正确的列
+                    level12Value = level12Col < row.length ? row[level12Col] : '';
+                    
+                    // 十三级节点：确保使用正确的列
+                    level13Value = level13Col < row.length ? row[level13Col] : '';
+                    
+                    // 十四级节点：确保使用正确的列
+                    level14Value = level14Col < row.length ? row[level14Col] : '';
+                    
                     // 确保值不为undefined或null
                     rootValue = rootValue || '未分类';
                     level1Value = level1Value || '无';
@@ -2359,9 +2487,18 @@
                     level3Value = level3Value || '无';
                     level4Value = level4Value || '无';
                     level5Value = level5Value || '无';
+                    level6Value = level6Value || '无';
+                    level7Value = level7Value || '无';
+                    level8Value = level8Value || '无';
+                    level9Value = level9Value || '无';
+                    level10Value = level10Value || '无';
+                    level11Value = level11Value || '无';
+                    level12Value = level12Value || '无';
+                    level13Value = level13Value || '无';
+                    level14Value = level14Value || '无';
                     
                     // 仅跳过所有值都为'无'的行，避免过度过滤
-                    if (rootValue === '无' && level1Value === '无' && level2Value === '无' && level3Value === '无' && level4Value === '无' && level5Value === '无') {
+                    if (rootValue === '无' && level1Value === '无' && level2Value === '无' && level3Value === '无' && level4Value === '无' && level5Value === '无' && level6Value === '无' && level7Value === '无' && level8Value === '无' && level9Value === '无' && level10Value === '无' && level11Value === '无' && level12Value === '无' && level13Value === '无' && level14Value === '无') {
                         continue;
                     }
                     
@@ -2371,7 +2508,16 @@
                         level2Value,
                         level3Value,
                         level4Value,
-                        level5Value
+                        level5Value,
+                        level6Value,
+                        level7Value,
+                        level8Value,
+                        level9Value,
+                        level10Value,
+                        level11Value,
+                        level12Value,
+                        level13Value,
+                        level14Value
                     });
                     
                     if (!rootGroups[rootValue]) {
@@ -2426,12 +2572,111 @@
                         console.log('创建四级节点:', level4Value, '属于三级节点:', level3Value);
                     }
                     
-                    // 添加五级节点
-                    level4Node.children.push({
-                        title: level5Value,
+                    // 查找或创建五级节点
+                    let level5Node = level4Node.children.find(child => child.title === level5Value);
+                    if (!level5Node) {
+                        level5Node = {
+                            title: level5Value,
+                            children: []
+                        };
+                        level4Node.children.push(level5Node);
+                        console.log('创建五级节点:', level5Value, '属于四级节点:', level4Value);
+                    }
+                    
+                    // 查找或创建六级节点
+                    let level6Node = level5Node.children.find(child => child.title === level6Value);
+                    if (!level6Node) {
+                        level6Node = {
+                            title: level6Value,
+                            children: []
+                        };
+                        level5Node.children.push(level6Node);
+                        console.log('创建六级节点:', level6Value, '属于五级节点:', level5Value);
+                    }
+                    
+                    // 查找或创建七级节点
+                    let level7Node = level6Node.children.find(child => child.title === level7Value);
+                    if (!level7Node) {
+                        level7Node = {
+                            title: level7Value,
+                            children: []
+                        };
+                        level6Node.children.push(level7Node);
+                        console.log('创建七级节点:', level7Value, '属于六级节点:', level6Value);
+                    }
+                    
+                    // 查找或创建八级节点
+                    let level8Node = level7Node.children.find(child => child.title === level8Value);
+                    if (!level8Node) {
+                        level8Node = {
+                            title: level8Value,
+                            children: []
+                        };
+                        level7Node.children.push(level8Node);
+                        console.log('创建八级节点:', level8Value, '属于七级节点:', level7Value);
+                    }
+                    
+                    // 查找或创建九级节点
+                    let level9Node = level8Node.children.find(child => child.title === level9Value);
+                    if (!level9Node) {
+                        level9Node = {
+                            title: level9Value,
+                            children: []
+                        };
+                        level8Node.children.push(level9Node);
+                        console.log('创建九级节点:', level9Value, '属于八级节点:', level8Value);
+                    }
+                    
+                    // 查找或创建十级节点
+                    let level10Node = level9Node.children.find(child => child.title === level10Value);
+                    if (!level10Node) {
+                        level10Node = {
+                            title: level10Value,
+                            children: []
+                        };
+                        level9Node.children.push(level10Node);
+                        console.log('创建十级节点:', level10Value, '属于九级节点:', level9Value);
+                    }
+                    
+                    // 查找或创建十一级节点
+                    let level11Node = level10Node.children.find(child => child.title === level11Value);
+                    if (!level11Node) {
+                        level11Node = {
+                            title: level11Value,
+                            children: []
+                        };
+                        level10Node.children.push(level11Node);
+                        console.log('创建十一级节点:', level11Value, '属于十级节点:', level10Value);
+                    }
+                    
+                    // 查找或创建十二级节点
+                    let level12Node = level11Node.children.find(child => child.title === level12Value);
+                    if (!level12Node) {
+                        level12Node = {
+                            title: level12Value,
+                            children: []
+                        };
+                        level11Node.children.push(level12Node);
+                        console.log('创建十二级节点:', level12Value, '属于十一级节点:', level11Value);
+                    }
+                    
+                    // 查找或创建十三级节点
+                    let level13Node = level12Node.children.find(child => child.title === level13Value);
+                    if (!level13Node) {
+                        level13Node = {
+                            title: level13Value,
+                            children: []
+                        };
+                        level12Node.children.push(level13Node);
+                        console.log('创建十三级节点:', level13Value, '属于十二级节点:', level12Value);
+                    }
+                    
+                    // 添加十四级节点
+                    level13Node.children.push({
+                        title: level14Value,
                         children: []
                     });
-                    console.log('添加五级节点:', level5Value, '属于四级节点:', level4Value);
+                    console.log('添加十四级节点:', level14Value, '属于十三级节点:', level13Value);
                 }
                 
                 console.log('生成的根节点分组:', rootGroups);
