@@ -1161,11 +1161,7 @@
                                     class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
                         </div>
                         
-                        <div>
-                            <label for="level14-select" class="block text-sm font-medium text-gray-700 mb-1">十四级节点列</label>
-                            <select id="level14-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
+
                     </div>
                     
                     <div class="pt-4">
@@ -2151,7 +2147,7 @@
             const level11Select = document.getElementById('level11-select');
             const level12Select = document.getElementById('level12-select');
             const level13Select = document.getElementById('level13-select');
-            const level14Select = document.getElementById('level14-select');
+
             const generateBtn = document.getElementById('generate-btn');
             const copyBtn = document.getElementById('copy-btn');
             const exportBtn = document.getElementById('export-btn');
@@ -2279,7 +2275,7 @@
                 populateSelectOptions(level11Select, headers);
                 populateSelectOptions(level12Select, headers);
                 populateSelectOptions(level13Select, headers);
-                populateSelectOptions(level14Select, headers);
+
                 
                 // 设置默认值：根据Excel文件的实际列数，提供更合理的默认值
                 // 根节点默认第一列（索引0）
@@ -2311,7 +2307,7 @@
                 // 十三级节点默认第十四列（索引13），如果没有则使用第十三列，如果也没有则使用第十二列，如果还没有则使用第十一列，如果最后没有则使用第十列，如果还没有则使用第九列，如果还没有则使用第八列，如果还没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
                 level13Select.value = headers.length > 13 ? 13 : (headers.length > 12 ? 12 : (headers.length > 11 ? 11 : (headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))))))))))));
                 // 十四级节点默认第十五列（索引14），如果没有则使用第十四列，如果也没有则使用第十三列，如果还没有则使用第十二列，如果最后没有则使用第十一列，如果还没有则使用第十列，如果还没有则使用第九列，如果还没有则使用第八列，如果还没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
-                level14Select.value = headers.length > 14 ? 14 : (headers.length > 13 ? 13 : (headers.length > 12 ? 12 : (headers.length > 11 ? 11 : (headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)))))))))))));
+
                 
                 // 显示用户友好提示
                 console.log('Excel文件列信息:', {
@@ -2363,7 +2359,7 @@
                     const level11Col = parseInt(level11Select.value);
                     const level12Col = parseInt(level12Select.value);
                     const level13Col = parseInt(level13Select.value);
-                    const level14Col = parseInt(level14Select.value);
+
                     
                     // 从Excel中提取数据 - 使用更可靠的方式获取所有单元格数据
                     const sheet = workbook.Sheets[sheetName];
@@ -2384,7 +2380,7 @@
                     console.log('提取的原始数据:', rawData);
                     
                     // 生成XMind数据结构
-                    const xmindStructure = generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col, level4Col, level5Col, level6Col, level7Col, level8Col, level9Col, level10Col, level11Col, level12Col, level13Col, level14Col);
+                    const xmindStructure = generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col, level4Col, level5Col, level6Col, level7Col, level8Col, level9Col, level10Col, level11Col, level12Col, level13Col);
                     
                     console.log('生成的XMind结构:', xmindStructure);
                     
@@ -2404,7 +2400,7 @@
             }
             
             // 生成XMind结构
-            function generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col, level4Col, level5Col, level6Col, level7Col, level8Col, level9Col, level10Col, level11Col, level12Col, level13Col, level14Col) {
+            function generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col, level4Col, level5Col, level6Col, level7Col, level8Col, level9Col, level10Col, level11Col, level12Col, level13Col) {
                 // 检查数据是否为空
                 if (!rawData || rawData.length <= 1) {
                     console.log('数据为空或只有表头行');
@@ -2433,7 +2429,7 @@
                     if (!row || row.length === 0) continue;
                     
                     // 获取各列的值，处理列索引超出范围的情况
-                    let rootValue, level1Value, level2Value, level3Value, level4Value, level5Value, level6Value, level7Value, level8Value, level9Value, level10Value, level11Value, level12Value, level13Value, level14Value;
+                    let rootValue, level1Value, level2Value, level3Value, level4Value, level5Value, level6Value, level7Value, level8Value, level9Value, level10Value, level11Value, level12Value, level13Value;
                     
                     // 根节点：确保使用正确的列
                     rootValue = rootCol < row.length ? row[rootCol] : '';
@@ -2478,7 +2474,7 @@
                     level13Value = level13Col < row.length ? row[level13Col] : '';
                     
                     // 十四级节点：确保使用正确的列
-                    level14Value = level14Col < row.length ? row[level14Col] : '';
+
                     
                     // 确保值不为undefined或null
                     rootValue = rootValue || '未分类';
@@ -2495,10 +2491,10 @@
                     level11Value = level11Value || '无';
                     level12Value = level12Value || '无';
                     level13Value = level13Value || '无';
-                    level14Value = level14Value || '无';
+
                     
                     // 仅跳过所有值都为'无'的行，避免过度过滤
-                    if (rootValue === '无' && level1Value === '无' && level2Value === '无' && level3Value === '无' && level4Value === '无' && level5Value === '无' && level6Value === '无' && level7Value === '无' && level8Value === '无' && level9Value === '无' && level10Value === '无' && level11Value === '无' && level12Value === '无' && level13Value === '无' && level14Value === '无') {
+                    if (rootValue === '无' && level1Value === '无' && level2Value === '无' && level3Value === '无' && level4Value === '无' && level5Value === '无' && level6Value === '无' && level7Value === '无' && level8Value === '无' && level9Value === '无' && level10Value === '无' && level11Value === '无' && level12Value === '无' && level13Value === '无') {
                         continue;
                     }
                     
@@ -2517,7 +2513,7 @@
                         level11Value,
                         level12Value,
                         level13Value,
-                        level14Value
+
                     });
                     
                     if (!rootGroups[rootValue]) {
@@ -2671,12 +2667,7 @@
                         console.log('创建十三级节点:', level13Value, '属于十二级节点:', level12Value);
                     }
                     
-                    // 添加十四级节点
-                    level13Node.children.push({
-                        title: level14Value,
-                        children: []
-                    });
-                    console.log('添加十四级节点:', level14Value, '属于十三级节点:', level13Value);
+
                 }
                 
                 console.log('生成的根节点分组:', rootGroups);
@@ -2709,7 +2700,7 @@
                     nodeElement.style.display = 'flex';
                     nodeElement.style.flexDirection = 'row';
                     nodeElement.style.alignItems = 'center';
-                    nodeElement.style.marginBottom = '20px';
+                    nodeElement.style.marginBottom = '10px';
                     
                     const titleElement = document.createElement('div');
                     titleElement.style.padding = '6px 12px';
@@ -2753,10 +2744,10 @@
                     if (node.children && node.children.length > 0) {
                         // 添加连接线
                         const connector = document.createElement('div');
-                        connector.style.width = '20px';
+                        connector.style.width = '30px';
                         connector.style.height = '2px';
                         connector.style.backgroundColor = '#e5e7eb';
-                        connector.style.margin = '0 10px';
+                        connector.style.margin = '0 5px';
                         nodeElement.appendChild(connector);
                         
                         const childrenContainer = document.createElement('div');
