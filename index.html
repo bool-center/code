@@ -1605,15 +1605,24 @@
             // 隐藏之前的错误消息
             errorMessageElement.classList.add('hidden');
             
-            // 验证AppID (下拉选择)
+            // 验证AppID（支持下拉选择和输入框两种模式）
             const appidSelect = document.getElementById('appid');
-            const appid = appidSelect.value;
+            const appidInput = document.getElementById('appid-input');
+            const appid = getAppidValue();
             
             if (!appid) {
-                showError(appidSelect, '请选择AppID');
+                if (appidInput) {
+                    showError(appidInput, '请输入AppID');
+                } else if (appidSelect) {
+                    showError(appidSelect, '请选择AppID');
+                }
                 isValid = false;
             } else {
-                removeError(appidSelect);
+                if (appidInput) {
+                    removeError(appidInput);
+                } else if (appidSelect) {
+                    removeError(appidSelect);
+                }
             }
             
             // 验证MCID（非必填，但如果填写必须是数字）
@@ -1773,6 +1782,58 @@
                     defaultOption.selected = true;
                     appidSelect.appendChild(defaultOption);
                 }
+                
+                // 添加自定义AppID选项
+                const customOption = document.createElement('option');
+                customOption.value = 'custom';
+                customOption.textContent = '-- 自定义AppID --';
+                appidSelect.appendChild(customOption);
+                
+                // 添加切换事件监听
+                appidSelect.addEventListener('change', handleAppidChange);
+            }
+            
+            // 处理AppID选择变化
+            function handleAppidChange() {
+                const appidSelect = document.getElementById('appid');
+                
+                if (appidSelect.value === 'custom') {
+                    // 创建输入框
+                    const inputGroup = appidSelect.parentElement;
+                    
+                    // 创建输入框
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = 'appid-input';
+                    input.name = 'appid';
+                    input.className = 'form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white';
+                    input.placeholder = '请输入自定义AppID';
+                    input.required = true;
+                    
+                    // 替换select为input
+                    inputGroup.innerHTML = '';
+                    inputGroup.appendChild(input);
+                    
+                    // 添加输入事件监听
+                    input.addEventListener('input', function() {
+                        if (validateForm()) {
+                            generateQRCode();
+                        }
+                    });
+                }
+            }
+            
+            // 获取当前AppID值
+            function getAppidValue() {
+                const appidSelect = document.getElementById('appid');
+                const appidInput = document.getElementById('appid-input');
+                
+                if (appidInput) {
+                    return appidInput.value.trim();
+                } else if (appidSelect) {
+                    return appidSelect.value;
+                }
+                return '';
             }
             
             // 初始化业务类型下拉框
@@ -1973,7 +2034,6 @@
             // 检查必要的DOM元素是否存在
             const requiredElements = {
                 loadingIndicator: document.getElementById('loadingIndicator'),
-                appid: document.getElementById('appid'),
                 mcid: document.getElementById('mcid'),
                 tableno: document.getElementById('tableno'),
                 bustype: document.getElementById('bustype'),
@@ -1993,8 +2053,8 @@
             // 显示加载指示器
             requiredElements.loadingIndicator.classList.remove('hidden');
             
-            // 获取表单值
-            const appid = requiredElements.appid.value.trim() || 'wx713931c9accc58f1';
+            // 获取表单值（AppID支持下拉选择和输入框两种模式）
+            const appid = getAppidValue() || 'wx713931c9accc58f1';
             const mcid = requiredElements.mcid.value.trim();
             const tableno = requiredElements.tableno.value.trim() || '001';
             const bustype = requiredElements.bustype.value || 'WM';

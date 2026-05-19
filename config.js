@@ -14,7 +14,8 @@ const config = {
         { name: '御风科技收银(青橙生产聚合)', value: 'wx99fca1ce07a8274b' },
         { name: '客享来体验', value: 'wx118a2087c4781fc5' },
         { name: '吾享通', value: 'wx93c15f7a80819b6d' },
-        { name: '御风收银管家(青橙生产平台)', value: 'wx8c4ff9c3bace8038' }
+        { name: '御风收银管家(青橙生产平台)', value: 'wx8c4ff9c3bace8038' },
+        { name: '外卖吾享', value: 'wx431fef5c79711f2b' }
     ],
     
     // Business Type配置列表，格式：{name: '显示名称', value: '实际值', pathTemplate: '路径模板'}
