@@ -28,7 +28,7 @@ const config = {
         { name: '我的订单', value: 'OD', pathTemplate: 'pages/index/index.html?context=OD&page=myOrder&mcid={{mcid}}&tableno={{tableno}}' },
         { name: '首页', value: 'HOME', pathTemplate: 'pages/index/index.html?context=HOME&page=home&mcid={{mcid}}&tableno={{tableno}}' },
         { name: '卡主页', value: 'CD', pathTemplate: 'pages/index/index.html?context=CD&page=cardHome&mcid={{mcid}}&tableno={{tableno}}' },
-        { name: '预点', value: 'YD', pathTemplate: 'pages/index/index.html?context=YD&page=yudian2&mcid={{mcid}}&tableno={{tableno}}' }
+        { name: '预点', value: 'YD', pathTemplate: 'pages/index/index.html?context=DC&page=yudian2&mcid={{mcid}}&tableno={{tableno}}' }
     ],
     
     // 默认参数
