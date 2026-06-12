@@ -2285,13 +2285,13 @@
                 
                 // 使用不依赖querySelector的方法，直接遍历DOM节点
                 let rootTopic = null;
+                const allTopics = [];
                 
-                // 递归查找所有节点，找到合适的topic
-                function findTopic(node) {
+                // 先收集所有的topic
+                function collectAllTopics(node) {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                         const tagName = node.tagName.toLowerCase();
                         
-                        // 查看是否是topic元素（不管命名空间）
                         if (tagName.includes('topic')) {
                             // 查找title子节点
                             let title = '';
@@ -2304,26 +2304,44 @@
                                 }
                             }
                             
-                            if (title && !title.includes('Warning') && 
-                                !title.includes('警告') && 
-                                !title.includes('Attention') && 
-                                title.trim().length > 0) {
-                                console.log('找到有效的topic:', title);
-                                return node;
+                            if (title) {
+                                allTopics.push({
+                                    node: node,
+                                    title: title
+                                });
                             }
                         }
                         
                         // 递归检查子节点
                         for (let i = 0; i < node.childNodes.length; i++) {
-                            const found = findTopic(node.childNodes[i]);
-                            if (found) return found;
+                            collectAllTopics(node.childNodes[i]);
                         }
                     }
-                    return null;
                 }
                 
-                // 查找第一个有效的topic
-                rootTopic = findTopic(xmlDoc.documentElement);
+                // 收集所有topic
+                collectAllTopics(xmlDoc.documentElement);
+                console.log('总共找到topic数量:', allTopics.length);
+                
+                // 打印所有topic的标题
+                allTopics.forEach((t, i) => {
+                    console.log(`Topic ${i}:`, t.title);
+                });
+                
+                // 找第一个不是警告的topic
+                for (const topicInfo of allTopics) {
+                    const title = topicInfo.title;
+                    if (!title.includes('Warning') && 
+                        !title.includes('警告') && 
+                        !title.includes('Attention') && 
+                        !title.includes('can not be opened') &&
+                        !title.includes('permanently') &&
+                        title.trim().length > 0) {
+                        rootTopic = topicInfo.node;
+                        console.log('选中的topic:', title);
+                        break;
+                    }
+                }
                 
                 if (rootTopic) {
                     // 提取标题
