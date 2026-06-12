@@ -2738,35 +2738,36 @@
                     ? xmindData.root.title 
                     : (currentFileName || '文档');
                 
-                function generateDocContent(node, level = 0) {
-                    let html = '';
+                // 生成纯文本的层级结构
+                function generateTextContent(node, level = 0) {
+                    let text = '';
+                    
+                    // 根据层级添加前缀
                     if (level === 0) {
-                        // 根节点使用文档标题
-                        html += `<h1 style="color: #07C160; border-bottom: 2px solid #07C160; padding-bottom: 10px; text-align: center;">${node.title}</h1>\n`;
+                        text += `${'='.repeat(node.title.length + 8)}\n`;
+                        text += `=== ${node.title} ===\n`;
+                        text += `${'='.repeat(node.title.length + 8)}\n\n`;
                     } else if (level === 1) {
-                        html += `<h2 style="color: #333; margin-top: 20px; margin-bottom: 10px; font-weight: bold;">${node.title}</h2>\n`;
+                        text += `\n【${node.title}】\n`;
                     } else if (level === 2) {
-                        html += `<h3 style="color: #555; margin-top: 15px; margin-bottom: 8px; font-weight: bold;">${node.title}</h3>\n`;
-                    } else if (level === 3) {
-                        html += `<h4 style="color: #666; margin-top: 12px; margin-bottom: 6px; font-weight: bold;">${node.title}</h4>\n`;
+                        text += `\n  ${node.title}\n`;
                     } else {
-                        // 更深层级使用列表格式
-                        const indent = (level - 4) * 20;
-                        html += `<p style="margin-left: ${indent}px; margin-top: 4px; margin-bottom: 4px;">${' '.repeat(Math.max(0, level - 4))}• ${node.title}</p>\n`;
+                        const indent = '    '.repeat(level - 2);
+                        text += `${indent}• ${node.title}\n`;
                     }
                     
                     if (node.children && node.children.length > 0) {
                         node.children.forEach(child => {
-                            html += generateDocContent(child, level + 1);
+                            text += generateTextContent(child, level + 1);
                         });
                     }
-                    return html;
+                    return text;
                 }
                 
-                const docContent = generateDocContent(xmindData.root);
+                const textContent = generateTextContent(xmindData.root);
                 
-                const fullHtml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!DOCTYPE html>
+                // 创建一个简单的HTML格式的Word文档，确保中文显示正常
+                const fullHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -2774,21 +2775,17 @@
     <style>
         body { 
             font-family: "Microsoft YaHei", "SimHei", Arial, sans-serif; 
-            line-height: 1.8; 
+            line-height: 2; 
             padding: 40px; 
             max-width: 900px; 
             margin: 0 auto; 
-            font-size: 14px;
+            font-size: 16px;
+            white-space: pre-wrap;
         }
-        h1 { font-size: 26px; text-align: center; }
-        h2 { font-size: 20px; }
-        h3 { font-size: 18px; }
-        h4 { font-size: 16px; }
-        p { margin-left: 0; }
     </style>
 </head>
 <body>
-${docContent}
+${textContent}
 </body>
 </html>`;
                 
