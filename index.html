@@ -2206,10 +2206,33 @@
                         } else if (fileExt === 'xmind') {
                             // 处理XMind文件（ZIP格式）
                             const zip = await JSZip.loadAsync(e.target.result);
-                            // 查找content.xml文件
+                            
+                            // 打印ZIP中的所有文件
+                            console.log('ZIP中的文件:');
+                            zip.forEach((relativePath, zipEntry) => {
+                                console.log('  -', relativePath);
+                            });
+                            
+                            // 尝试查找content.xml
+                            let xmlContent = null;
                             const contentXml = zip.file('content.xml');
                             if (contentXml) {
-                                const xmlContent = await contentXml.async('string');
+                                xmlContent = await contentXml.async('string');
+                            } else {
+                                // 如果根目录没有，尝试在子目录中查找
+                                for (const [path, file] of Object.entries(zip.files)) {
+                                    if (path.includes('content.xml') && !file.dir) {
+                                        console.log('在路径中找到content.xml:', path);
+                                        xmlContent = await file.async('string');
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (xmlContent) {
+                                console.log('找到content.xml，开始解析...');
+                                // 保存前1000字符的XML用于调试
+                                console.log('XML开头:', xmlContent.substring(0, 1000));
                                 xmindData = parseXMindXml(xmlContent);
                             } else {
                                 throw new Error('无效的XMind文件');
@@ -2245,10 +2268,13 @@
                 }
             }
             
-            // 解析XMind XML
+            // 解析XMind XML - 使用不依赖命名空间的方法
             function parseXMindXml(xmlContent) {
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
+                
+                console.log('=== 开始解析XMind ===');
+                console.log('XML长度:', xmlContent.length);
                 
                 const result = {
                     root: {
@@ -2257,94 +2283,151 @@
                     }
                 };
                 
-                // XMind的XML可能有命名空间，需要更智能的解析
-                const allElements = xmlDoc.querySelectorAll('*');
+                // 使用不依赖querySelector的方法，直接遍历DOM节点
                 let rootTopic = null;
                 
-                // 查找第一个title不为警告信息的topic
-                for (const el of allElements) {
-                    if (el.tagName.toLowerCase() === 'topic') {
-                        const titleEl = el.querySelector('title');
-                        if (titleEl && !titleEl.textContent.includes('Warning') && 
-                            !titleEl.textContent.includes('警告') && 
-                            !titleEl.textContent.includes('Attention')) {
-                            rootTopic = el;
+                // 递归查找所有节点，找到合适的topic
+                function findTopic(node) {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        const tagName = node.tagName.toLowerCase();
+                        
+                        // 查看是否是topic元素（不管命名空间）
+                        if (tagName.includes('topic')) {
+                            // 查找title子节点
+                            let title = '';
+                            for (let i = 0; i < node.childNodes.length; i++) {
+                                const child = node.childNodes[i];
+                                if (child.nodeType === Node.ELEMENT_NODE && 
+                                    child.tagName.toLowerCase().includes('title')) {
+                                    title = child.textContent || '';
+                                    break;
+                                }
+                            }
+                            
+                            if (title && !title.includes('Warning') && 
+                                !title.includes('警告') && 
+                                !title.includes('Attention') && 
+                                title.trim().length > 0) {
+                                console.log('找到有效的topic:', title);
+                                return node;
+                            }
+                        }
+                        
+                        // 递归检查子节点
+                        for (let i = 0; i < node.childNodes.length; i++) {
+                            const found = findTopic(node.childNodes[i]);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                }
+                
+                // 查找第一个有效的topic
+                rootTopic = findTopic(xmlDoc.documentElement);
+                
+                if (rootTopic) {
+                    // 提取标题
+                    let rootTitle = '';
+                    for (let i = 0; i < rootTopic.childNodes.length; i++) {
+                        const child = rootTopic.childNodes[i];
+                        if (child.nodeType === Node.ELEMENT_NODE && 
+                            child.tagName.toLowerCase().includes('title')) {
+                            rootTitle = child.textContent || '中心主题';
                             break;
                         }
                     }
-                }
-                
-                if (rootTopic) {
-                    const rootTitle = rootTopic.querySelector('title')?.textContent || '中心主题';
-                    result.root.title = rootTitle;
                     
-                    // 查找该topic下的所有children
-                    const children = findChildrenTopics(rootTopic);
+                    result.root.title = rootTitle || '中心主题';
+                    console.log('最终根节点标题:', result.root.title);
+                    
+                    // 查找子节点
+                    const children = findChildrenTopicsByTraversal(rootTopic);
+                    console.log('找到子节点数量:', children.length);
                     children.forEach(child => {
-                        result.root.children.push(parseTopicElement(child));
+                        result.root.children.push(parseTopicElementByTraversal(child));
                     });
                 } else {
-                    // 如果找不到，尝试更通用的方法
-                    const allTopics = xmlDoc.querySelectorAll('topic');
-                    for (const topic of allTopics) {
-                        const titleEl = topic.querySelector('title');
-                        if (titleEl) {
-                            const titleText = titleEl.textContent;
-                            if (!titleText.includes('Warning') && 
-                                !titleText.includes('警告') && 
-                                !titleText.includes('Attention') && 
-                                titleText.trim().length > 0) {
-                                result.root.title = titleText;
-                                const children = findChildrenTopics(topic);
-                                children.forEach(child => {
-                                    result.root.children.push(parseTopicElement(child));
-                                });
-                                break;
+                    console.log('未找到有效的topic，尝试备用方案');
+                    // 如果找不到，至少显示文件名
+                    result.root.title = currentFileName || 'XMind文档';
+                }
+                
+                console.log('=== 解析完成 ===');
+                console.log('解析结果:', result);
+                return result;
+            }
+            
+            // 通过遍历查找子topics
+            function findChildrenTopicsByTraversal(parentNode) {
+                const children = [];
+                
+                function findTopics(node) {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        const tagName = node.tagName.toLowerCase();
+                        
+                        // 可能的children容器
+                        if (tagName.includes('children')) {
+                            // 查找其中的topics
+                            for (let i = 0; i < node.childNodes.length; i++) {
+                                const child = node.childNodes[i];
+                                if (child.nodeType === Node.ELEMENT_NODE) {
+                                    const childTag = child.tagName.toLowerCase();
+                                    // topics容器
+                                    if (childTag.includes('topics')) {
+                                        for (let j = 0; j < child.childNodes.length; j++) {
+                                            const topic = child.childNodes[j];
+                                            if (topic.nodeType === Node.ELEMENT_NODE && 
+                                                topic.tagName.toLowerCase().includes('topic')) {
+                                                children.push(topic);
+                                            }
+                                        }
+                                    }
+                                    // 直接是topic
+                                    else if (childTag.includes('topic')) {
+                                        children.push(child);
+                                    }
+                                }
                             }
+                        }
+                        
+                        // 继续递归
+                        for (let i = 0; i < node.childNodes.length; i++) {
+                            findTopics(node.childNodes[i]);
                         }
                     }
                 }
                 
-                return result;
-            }
-            
-            // 查找topic的子topics
-            function findChildrenTopics(parentElement) {
-                const children = [];
-                // 查找所有可能的子topics路径
-                const possibleChildSelectors = [
-                    'children > topics > topic',
-                    'topics > topic',
-                    'topic'
-                ];
-                
-                for (const selector of possibleChildSelectors) {
-                    const found = parentElement.querySelectorAll(selector);
-                    if (found.length > 0) {
-                        return Array.from(found);
-                    }
-                }
-                
+                findTopics(parentNode);
                 return children;
             }
             
-            // 递归解析topic元素
-            function parseTopicElement(topicElement) {
-                const titleEl = topicElement.querySelector('title');
-                const title = titleEl?.textContent || '未命名';
+            // 通过遍历解析topic元素
+            function parseTopicElementByTraversal(topicNode) {
+                // 提取标题
+                let title = '';
+                for (let i = 0; i < topicNode.childNodes.length; i++) {
+                    const child = topicNode.childNodes[i];
+                    if (child.nodeType === Node.ELEMENT_NODE && 
+                        child.tagName.toLowerCase().includes('title')) {
+                        title = child.textContent || '未命名';
+                        break;
+                    }
+                }
                 
                 const node = {
                     title: title,
                     children: []
                 };
                 
-                const children = findChildrenTopics(topicElement);
+                // 查找子节点
+                const children = findChildrenTopicsByTraversal(topicNode);
                 children.forEach(child => {
-                    node.children.push(parseTopicElement(child));
+                    node.children.push(parseTopicElementByTraversal(child));
                 });
                 
                 return node;
             }
+            
             
             // 生成转换
             function generateXMind() {
