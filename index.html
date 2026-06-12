@@ -2213,28 +2213,41 @@
                                 console.log('  -', relativePath);
                             });
                             
-                            // 尝试查找content.xml
-                            let xmlContent = null;
-                            const contentXml = zip.file('content.xml');
-                            if (contentXml) {
-                                xmlContent = await contentXml.async('string');
-                            } else {
-                                // 如果根目录没有，尝试在子目录中查找
-                                for (const [path, file] of Object.entries(zip.files)) {
-                                    if (path.includes('content.xml') && !file.dir) {
-                                        console.log('在路径中找到content.xml:', path);
-                                        xmlContent = await file.async('string');
-                                        break;
+                            // 先尝试查找content.json（新格式）
+                            let jsonContent = null;
+                            const contentJson = zip.file('content.json');
+                            if (contentJson) {
+                                jsonContent = await contentJson.async('string');
+                                console.log('找到content.json，开始解析...');
+                                console.log('JSON开头:', jsonContent.substring(0, 2000));
+                                xmindData = parseXMindJson(jsonContent);
+                            }
+                            
+                            // 如果没有JSON，尝试content.xml
+                            if (!xmindData) {
+                                let xmlContent = null;
+                                const contentXml = zip.file('content.xml');
+                                if (contentXml) {
+                                    xmlContent = await contentXml.async('string');
+                                } else {
+                                    // 如果根目录没有，尝试在子目录中查找
+                                    for (const [path, file] of Object.entries(zip.files)) {
+                                        if (path.includes('content.xml') && !file.dir) {
+                                            console.log('在路径中找到content.xml:', path);
+                                            xmlContent = await file.async('string');
+                                            break;
+                                        }
                                     }
+                                }
+                                
+                                if (xmlContent) {
+                                    console.log('找到content.xml，开始解析...');
+                                    console.log('XML开头:', xmlContent.substring(0, 1000));
+                                    xmindData = parseXMindXml(xmlContent);
                                 }
                             }
                             
-                            if (xmlContent) {
-                                console.log('找到content.xml，开始解析...');
-                                // 保存前1000字符的XML用于调试
-                                console.log('XML开头:', xmlContent.substring(0, 1000));
-                                xmindData = parseXMindXml(xmlContent);
-                            } else {
+                            if (!xmindData) {
                                 throw new Error('无效的XMind文件');
                             }
                         } else {
@@ -2266,6 +2279,106 @@
                 } else {
                     reader.readAsArrayBuffer(file);
                 }
+            }
+            
+            // 解析XMind JSON格式
+            function parseXMindJson(jsonContent) {
+                console.log('=== 解析XMind JSON ===');
+                const result = {
+                    root: {
+                        title: 'XMind文档',
+                        children: []
+                    }
+                };
+                
+                try {
+                    const data = JSON.parse(jsonContent);
+                    console.log('JSON数据:', data);
+                    
+                    // 尝试查找root topic
+                    // XMind JSON格式可能有不同的结构，让我们尝试几种可能
+                    
+                    // 第一种可能：rootTopic直接在根
+                    if (data.rootTopic) {
+                        result.root = parseJsonTopic(data.rootTopic);
+                    }
+                    // 第二种可能：sheets -> sheet -> rootTopic
+                    else if (data.sheets && data.sheets.length > 0) {
+                        const sheet = data.sheets[0];
+                        if (sheet.rootTopic) {
+                            result.root = parseJsonTopic(sheet.rootTopic);
+                        } else if (sheet.rootTopicId) {
+                            // 可能有单独的topics列表
+                            const topic = findTopicById(data, sheet.rootTopicId);
+                            if (topic) {
+                                result.root = parseJsonTopic(topic);
+                            }
+                        }
+                    }
+                    // 第三种可能：其他结构
+                    else {
+                        console.log('未知的JSON结构，尝试查找');
+                        // 尝试查找title字段
+                        if (data.title) {
+                            result.root.title = data.title;
+                        }
+                    }
+                    
+                    console.log('JSON解析结果:', result);
+                } catch (e) {
+                    console.error('解析JSON失败:', e);
+                }
+                
+                return result;
+            }
+            
+            // 解析单个JSON topic
+            function parseJsonTopic(topic) {
+                const result = {
+                    title: topic.title || '未命名',
+                    children: []
+                };
+                
+                // 查找子topics
+                if (topic.children) {
+                    // 可能有attached或detached类型
+                    for (const type in topic.children) {
+                        const topics = topic.children[type];
+                        if (topics && topics.length > 0) {
+                            for (const childTopic of topics) {
+                                result.children.push(parseJsonTopic(childTopic));
+                            }
+                        }
+                    }
+                }
+                
+                return result;
+            }
+            
+            // 通过ID查找topic
+            function findTopicById(data, id) {
+                if (!data || !id) return null;
+                
+                // 如果有topics字典
+                if (data.topics && data.topics[id]) {
+                    return data.topics[id];
+                }
+                
+                // 递归查找
+                function findInObj(obj) {
+                    if (!obj) return null;
+                    if (obj.id === id) return obj;
+                    
+                    for (const key in obj) {
+                        if (typeof obj[key] === 'object') {
+                            const found = findInObj(obj[key]);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                }
+                
+                return findInObj(data);
             }
             
             // 解析XMind XML - 使用不依赖命名空间的方法
