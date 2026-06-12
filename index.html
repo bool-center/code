@@ -1066,7 +1066,7 @@
                     <!-- 上传区域 -->
                     <label for="excel-file" id="drop-area" 
                          class="border-4 border-dashed border-blue-500 rounded-3xl p-12 mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 text-center cursor-pointer hover:border-blue-600 hover:bg-gradient-to-br from-blue-100 to-indigo-100 transition-all duration-300 block">
-                        <input type="file" id="excel-file" accept=".xlsx, .xls, .csv" class="hidden">
+                        <input type="file" id="excel-file" accept=".xlsx, .xls, .csv, .xmind" class="hidden">
                         <div class="text-6xl mb-4">📁</div>
                         <h3 class="text-xl font-semibold text-gray-700 mb-2">点击或拖拽文件到这里</h3>
                         <p class="text-gray-500">支持 Excel (.xlsx, .xls) 和 XMind (.xmind)</p>
@@ -2123,6 +2123,7 @@
             // 全局变量
             let workbook = null;
             let xmindData = null;
+            let currentFileType = null;
             
             // DOM元素
             const excelFileInput = document.getElementById('excel-file');
@@ -2182,11 +2183,12 @@
                 fileInfo.textContent = `已选择: ${file.name}`;
                 fileInfo.classList.remove('hidden');
                 
+                const fileExt = file.name.split('.').pop().toLowerCase();
+                currentFileType = fileExt;
+                
                 // 读取文件
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const fileExt = file.name.split('.').pop().toLowerCase();
-                    
+                reader.onload = async function(e) {
                     try {
                         if (fileExt === 'csv') {
                             workbook = XLSX.read(e.target.result, { 
@@ -2198,6 +2200,17 @@
                                 type: 'array',
                                 cellDates: true
                             });
+                        } else if (fileExt === 'xmind') {
+                            // 处理XMind文件（ZIP格式）
+                            const zip = await JSZip.loadAsync(e.target.result);
+                            // 查找content.xml文件
+                            const contentXml = zip.file('content.xml');
+                            if (contentXml) {
+                                const xmlContent = await contentXml.async('string');
+                                xmindData = parseXMindXml(xmlContent);
+                            } else {
+                                throw new Error('无效的XMind文件');
+                            }
                         } else {
                             throw new Error('不支持的文件格式');
                         }
@@ -2205,6 +2218,12 @@
                         // 启用生成按钮，改变样式
                         generateBtn.disabled = false;
                         generateBtn.className = 'w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-8 rounded-2xl text-xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02]';
+                        
+                        // 如果是XMind文件，直接显示预览
+                        if (fileExt === 'xmind') {
+                            showSimplePreview(xmindData);
+                            resultArea.classList.remove('hidden');
+                        }
                         
                         showToast('success', '文件上传成功！');
                     } catch (error) {
@@ -2216,11 +2235,57 @@
                     }
                 };
                 
-                if (file.name.split('.').pop().toLowerCase() === 'csv') {
+                if (fileExt === 'csv') {
                     reader.readAsText(file);
                 } else {
                     reader.readAsArrayBuffer(file);
                 }
+            }
+            
+            // 解析XMind XML
+            function parseXMindXml(xmlContent) {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
+                
+                const result = {
+                    root: {
+                        title: 'XMind文档',
+                        children: []
+                    }
+                };
+                
+                // 查找所有topic元素
+                const topics = xmlDoc.querySelectorAll('topic');
+                
+                if (topics.length > 0) {
+                    const rootTopic = topics[0];
+                    const rootTitle = rootTopic.querySelector('title')?.textContent || '中心主题';
+                    result.root.title = rootTitle;
+                    
+                    // 处理子节点
+                    const children = rootTopic.querySelectorAll(':scope > children > topics > topic');
+                    children.forEach(child => {
+                        result.root.children.push(parseTopicElement(child));
+                    });
+                }
+                
+                return result;
+            }
+            
+            // 递归解析topic元素
+            function parseTopicElement(topicElement) {
+                const title = topicElement.querySelector(':scope > title')?.textContent || '未命名';
+                const node = {
+                    title: title,
+                    children: []
+                };
+                
+                const children = topicElement.querySelectorAll(':scope > children > topics > topic');
+                children.forEach(child => {
+                    node.children.push(parseTopicElement(child));
+                });
+                
+                return node;
             }
             
             // 生成转换
@@ -2230,61 +2295,69 @@
                 
                 setTimeout(() => {
                     try {
-                        // 使用第一个工作表
-                        const sheetName = workbook.SheetNames[0];
-                        const sheet = workbook.Sheets[sheetName];
-                        const range = XLSX.utils.decode_range(sheet['!ref']);
-                        
-                        // 构建原始数据
-                        const rawData = [];
-                        for (let r = range.s.r; r <= range.e.r; r++) {
-                            const row = [];
-                            for (let c = range.s.c; c <= range.e.c; c++) {
-                                const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
-                                const cell = sheet[cellAddress];
-                                row.push(cell ? cell.v : '');
+                        if (currentFileType === 'xmind') {
+                            // 如果是XMind文件，直接显示已解析的内容
+                            showSimplePreview(xmindData);
+                            resultArea.classList.remove('hidden');
+                            loading.classList.add('hidden');
+                            showToast('success', '转换完成！');
+                        } else {
+                            // 处理Excel文件
+                            const sheetName = workbook.SheetNames[0];
+                            const sheet = workbook.Sheets[sheetName];
+                            const range = XLSX.utils.decode_range(sheet['!ref']);
+                            
+                            // 构建原始数据
+                            const rawData = [];
+                            for (let r = range.s.r; r <= range.e.r; r++) {
+                                const row = [];
+                                for (let c = range.s.c; c <= range.e.c; c++) {
+                                    const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
+                                    const cell = sheet[cellAddress];
+                                    row.push(cell ? cell.v : '');
+                                }
+                                rawData.push(row);
                             }
-                            rawData.push(row);
-                        }
-                        
-                        // 简化的树形结构生成
-                        xmindData = {
-                            root: {
-                                title: '数据转换',
-                                children: []
-                            }
-                        };
-                        
-                        // 处理数据，创建简单的树形结构
-                        if (rawData.length > 1) {
-                            const headers = rawData[0];
-                            for (let i = 1; i < rawData.length; i++) {
-                                const row = rawData[i];
-                                if (row.length > 0) {
-                                    const rootValue = row[0] || '未分类';
-                                    let rootNode = xmindData.root.children.find(c => c.title === rootValue);
-                                    if (!rootNode) {
-                                        rootNode = { title: rootValue, children: [] };
-                                        xmindData.root.children.push(rootNode);
-                                    }
-                                    if (row.length > 1) {
-                                        for (let j = 1; j < row.length; j++) {
-                                            if (row[j]) {
-                                                rootNode.children.push({ title: row[j], children: [] });
+                            
+                            // 简化的树形结构生成
+                            xmindData = {
+                                root: {
+                                    title: '数据转换',
+                                    children: []
+                                }
+                            };
+                            
+                            // 处理数据，创建简单的树形结构
+                            if (rawData.length > 1) {
+                                const headers = rawData[0];
+                                for (let i = 1; i < rawData.length; i++) {
+                                    const row = rawData[i];
+                                    if (row.length > 0) {
+                                        const rootValue = row[0] || '未分类';
+                                        let rootNode = xmindData.root.children.find(c => c.title === rootValue);
+                                        if (!rootNode) {
+                                            rootNode = { title: rootValue, children: [] };
+                                            xmindData.root.children.push(rootNode);
+                                        }
+                                        if (row.length > 1) {
+                                            for (let j = 1; j < row.length; j++) {
+                                                if (row[j]) {
+                                                    rootNode.children.push({ title: row[j], children: [] });
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
+                            
+                            // 显示预览
+                            showSimplePreview(xmindData);
+                            
+                            loading.classList.add('hidden');
+                            resultArea.classList.remove('hidden');
+                            
+                            showToast('success', '转换完成！');
                         }
-                        
-                        // 显示预览
-                        showSimplePreview(xmindData);
-                        
-                        loading.classList.add('hidden');
-                        resultArea.classList.remove('hidden');
-                        
-                        showToast('success', '转换完成！');
                     } catch (error) {
                         console.error('转换失败:', error);
                         loading.classList.add('hidden');
