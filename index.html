@@ -2738,33 +2738,40 @@
                     ? xmindData.root.title 
                     : (currentFileName || '文档');
                 
-                // 生成纯文本的层级结构
-                function generateTextContent(node, level = 0) {
+                // 生成知识点总结格式的内容
+                function generateKnowledgePointContent(node, level = 0, indices = []) {
                     let text = '';
                     
-                    // 根据层级添加前缀
                     if (level === 0) {
-                        text += `${'='.repeat(node.title.length + 8)}\n`;
-                        text += `=== ${node.title} ===\n`;
-                        text += `${'='.repeat(node.title.length + 8)}\n\n`;
-                    } else if (level === 1) {
-                        text += `\n【${node.title}】\n`;
-                    } else if (level === 2) {
-                        text += `\n  ${node.title}\n`;
+                        // 根节点 - 标题
+                        text += `${'='.repeat(node.title.length + 12)}\n`;
+                        text += `==== ${node.title} ====\n`;
+                        text += `${'='.repeat(node.title.length + 12)}\n\n`;
                     } else {
-                        const indent = '    '.repeat(level - 2);
-                        text += `${indent}• ${node.title}\n`;
+                        // 生成编号前缀：1. 1.1. 1.1.1.
+                        const prefix = indices.join('.') + '.';
+                        
+                        if (level === 1) {
+                            text += `\n${prefix} ${node.title}\n`;
+                            text += `${'-'.repeat(node.title.length + 4)}\n`;
+                        } else if (level === 2) {
+                            text += `\n  ${prefix} ${node.title}\n`;
+                        } else {
+                            const indent = '    '.repeat(level - 2);
+                            text += `${indent}${prefix} ${node.title}\n`;
+                        }
                     }
                     
                     if (node.children && node.children.length > 0) {
-                        node.children.forEach(child => {
-                            text += generateTextContent(child, level + 1);
+                        node.children.forEach((child, index) => {
+                            const newIndices = [...indices, index + 1];
+                            text += generateKnowledgePointContent(child, level + 1, newIndices);
                         });
                     }
                     return text;
                 }
                 
-                const textContent = generateTextContent(xmindData.root);
+                const textContent = generateKnowledgePointContent(xmindData.root);
                 
                 // 创建一个简单的HTML格式的Word文档，确保中文显示正常
                 const fullHtml = `<!DOCTYPE html>
