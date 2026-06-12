@@ -2124,6 +2124,7 @@
             let workbook = null;
             let xmindData = null;
             let currentFileType = null;
+            let currentFileName = null;
             
             // DOM元素
             const excelFileInput = document.getElementById('excel-file');
@@ -2185,6 +2186,8 @@
                 
                 const fileExt = file.name.split('.').pop().toLowerCase();
                 currentFileType = fileExt;
+                // 保存文件名（去掉扩展名）
+                currentFileName = file.name.replace(/\.[^/.]+$/, '');
                 
                 // 读取文件
                 const reader = new FileReader();
@@ -2254,33 +2257,88 @@
                     }
                 };
                 
-                // 查找所有topic元素
-                const topics = xmlDoc.querySelectorAll('topic');
+                // XMind的XML可能有命名空间，需要更智能的解析
+                const allElements = xmlDoc.querySelectorAll('*');
+                let rootTopic = null;
                 
-                if (topics.length > 0) {
-                    const rootTopic = topics[0];
+                // 查找第一个title不为警告信息的topic
+                for (const el of allElements) {
+                    if (el.tagName.toLowerCase() === 'topic') {
+                        const titleEl = el.querySelector('title');
+                        if (titleEl && !titleEl.textContent.includes('Warning') && 
+                            !titleEl.textContent.includes('警告') && 
+                            !titleEl.textContent.includes('Attention')) {
+                            rootTopic = el;
+                            break;
+                        }
+                    }
+                }
+                
+                if (rootTopic) {
                     const rootTitle = rootTopic.querySelector('title')?.textContent || '中心主题';
                     result.root.title = rootTitle;
                     
-                    // 处理子节点
-                    const children = rootTopic.querySelectorAll(':scope > children > topics > topic');
+                    // 查找该topic下的所有children
+                    const children = findChildrenTopics(rootTopic);
                     children.forEach(child => {
                         result.root.children.push(parseTopicElement(child));
                     });
+                } else {
+                    // 如果找不到，尝试更通用的方法
+                    const allTopics = xmlDoc.querySelectorAll('topic');
+                    for (const topic of allTopics) {
+                        const titleEl = topic.querySelector('title');
+                        if (titleEl) {
+                            const titleText = titleEl.textContent;
+                            if (!titleText.includes('Warning') && 
+                                !titleText.includes('警告') && 
+                                !titleText.includes('Attention') && 
+                                titleText.trim().length > 0) {
+                                result.root.title = titleText;
+                                const children = findChildrenTopics(topic);
+                                children.forEach(child => {
+                                    result.root.children.push(parseTopicElement(child));
+                                });
+                                break;
+                            }
+                        }
+                    }
                 }
                 
                 return result;
             }
             
+            // 查找topic的子topics
+            function findChildrenTopics(parentElement) {
+                const children = [];
+                // 查找所有可能的子topics路径
+                const possibleChildSelectors = [
+                    'children > topics > topic',
+                    'topics > topic',
+                    'topic'
+                ];
+                
+                for (const selector of possibleChildSelectors) {
+                    const found = parentElement.querySelectorAll(selector);
+                    if (found.length > 0) {
+                        return Array.from(found);
+                    }
+                }
+                
+                return children;
+            }
+            
             // 递归解析topic元素
             function parseTopicElement(topicElement) {
-                const title = topicElement.querySelector(':scope > title')?.textContent || '未命名';
+                const titleEl = topicElement.querySelector('title');
+                const title = titleEl?.textContent || '未命名';
+                
                 const node = {
                     title: title,
                     children: []
                 };
                 
-                const children = topicElement.querySelectorAll(':scope > children > topics > topic');
+                const children = findChildrenTopics(topicElement);
                 children.forEach(child => {
                     node.children.push(parseTopicElement(child));
                 });
@@ -2375,11 +2433,32 @@
                 
                 function renderTree(node, level = 0) {
                     const div = document.createElement('div');
-                    div.style.paddingLeft = `${level * 20}px`;
-                    div.style.margin = '4px 0';
+                    div.style.paddingLeft = `${level * 24}px`;
+                    div.style.margin = '6px 0';
+                    div.style.lineHeight = '1.6';
                     
-                    const icon = level === 0 ? '📌' : level === 1 ? '📁' : '📄';
-                    div.textContent = `${icon} ${node.title}`;
+                    if (level === 0) {
+                        div.style.fontSize = '18px';
+                        div.style.fontWeight = 'bold';
+                        div.style.color = '#07C160';
+                        div.style.borderBottom = '2px solid #07C160';
+                        div.style.paddingBottom = '8px';
+                        div.style.marginBottom = '12px';
+                        div.textContent = `📌 ${node.title}`;
+                    } else if (level === 1) {
+                        div.style.fontSize = '16px';
+                        div.style.fontWeight = 'bold';
+                        div.style.color = '#333';
+                        div.textContent = `📁 ${node.title}`;
+                    } else if (level === 2) {
+                        div.style.fontSize = '14px';
+                        div.style.color = '#555';
+                        div.textContent = `📄 ${node.title}`;
+                    } else {
+                        div.style.fontSize = '13px';
+                        div.style.color = '#666';
+                        div.textContent = `${'　'.repeat(level - 3)}• ${node.title}`;
+                    }
                     
                     if (node.children && node.children.length > 0) {
                         node.children.forEach(child => {
@@ -2432,16 +2511,26 @@
                     return;
                 }
                 
+                // 使用XMind内容的标题，如果没有则使用文件名
+                const docTitle = xmindData.root.title && xmindData.root.title !== 'XMind文档' 
+                    ? xmindData.root.title 
+                    : (currentFileName || '文档');
+                
                 function generateDocContent(node, level = 0) {
                     let html = '';
                     if (level === 0) {
-                        html += `<h1 style="color: #07C160; border-bottom: 2px solid #07C160; padding-bottom: 10px;">${node.title}</h1>\n`;
+                        // 根节点使用文档标题
+                        html += `<h1 style="color: #07C160; border-bottom: 2px solid #07C160; padding-bottom: 10px; text-align: center;">${node.title}</h1>\n`;
                     } else if (level === 1) {
-                        html += `<h2 style="color: #333; margin-top: 20px; margin-bottom: 10px;">${node.title}</h2>\n`;
+                        html += `<h2 style="color: #333; margin-top: 20px; margin-bottom: 10px; font-weight: bold;">${node.title}</h2>\n`;
                     } else if (level === 2) {
-                        html += `<h3 style="color: #555; margin-top: 15px; margin-bottom: 8px;">${node.title}</h3>\n`;
+                        html += `<h3 style="color: #555; margin-top: 15px; margin-bottom: 8px; font-weight: bold;">${node.title}</h3>\n`;
+                    } else if (level === 3) {
+                        html += `<h4 style="color: #666; margin-top: 12px; margin-bottom: 6px; font-weight: bold;">${node.title}</h4>\n`;
                     } else {
-                        html += `<p style="margin-left: ${(level - 3) * 20}px; margin-top: 5px; margin-bottom: 5px;">• ${node.title}</p>\n`;
+                        // 更深层级使用列表格式
+                        const indent = (level - 4) * 20;
+                        html += `<p style="margin-left: ${indent}px; margin-top: 4px; margin-bottom: 4px;">${' '.repeat(Math.max(0, level - 4))}• ${node.title}</p>\n`;
                     }
                     
                     if (node.children && node.children.length > 0) {
@@ -2459,13 +2548,21 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>${docTitle}</title>
     <style>
-        body { font-family: "Microsoft YaHei", Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
-        h1 { font-size: 24px; }
+        body { 
+            font-family: "Microsoft YaHei", "SimHei", Arial, sans-serif; 
+            line-height: 1.8; 
+            padding: 40px; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            font-size: 14px;
+        }
+        h1 { font-size: 26px; text-align: center; }
         h2 { font-size: 20px; }
         h3 { font-size: 18px; }
-        p { font-size: 14px; }
+        h4 { font-size: 16px; }
+        p { margin-left: 0; }
     </style>
 </head>
 <body>
@@ -2480,7 +2577,7 @@ ${docContent}
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'document.doc';
+                a.download = `${docTitle}.doc`;
                 a.click();
                 URL.revokeObjectURL(url);
                 
