@@ -2298,11 +2298,19 @@
                     // 尝试查找root topic
                     // XMind JSON格式可能有不同的结构，让我们尝试几种可能
                     
-                    // 第一种可能：rootTopic直接在根
-                    if (data.rootTopic) {
+                    // 第一种可能：整个JSON是数组，第一个元素是sheet
+                    if (Array.isArray(data) && data.length > 0) {
+                        const sheet = data[0];
+                        console.log('找到数组形式的sheet:', sheet);
+                        if (sheet.rootTopic) {
+                            result.root = parseJsonTopic(sheet.rootTopic);
+                        }
+                    }
+                    // 第二种可能：rootTopic直接在根
+                    else if (data.rootTopic) {
                         result.root = parseJsonTopic(data.rootTopic);
                     }
-                    // 第二种可能：sheets -> sheet -> rootTopic
+                    // 第三种可能：sheets -> sheet -> rootTopic
                     else if (data.sheets && data.sheets.length > 0) {
                         const sheet = data.sheets[0];
                         if (sheet.rootTopic) {
@@ -2315,7 +2323,7 @@
                             }
                         }
                     }
-                    // 第三种可能：其他结构
+                    // 第四种可能：其他结构
                     else {
                         console.log('未知的JSON结构，尝试查找');
                         // 尝试查找title字段
