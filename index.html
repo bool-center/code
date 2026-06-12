@@ -2870,14 +2870,14 @@
                 xmindPreview.appendChild(treeContainer);
             }
             
-            // 复制XMind内容
+            // 复制内容
             function copyXMindContent() {
                 if (!xmindData) {
-                    console.error('没有XMind数据可复制');
+                    console.error('没有数据可复制');
                     return;
                 }
                 
-                // 将XMind结构转换为Markdown格式的树形结构
+                // 将结构转换为Markdown格式的树形结构
                 function convertToMarkdown(node, level = 0) {
                     const indent = '  '.repeat(level);
                     let result = `${indent}- ${node.title}\n`;
@@ -2905,75 +2905,84 @@
                     });
             }
             
-            // 导出XMind
+            // 导出Doc
             function exportXMind() {
                 if (!xmindData) {
-                    console.error('没有XMind数据可导出');
-                    showToast('error', '没有XMind数据可导出');
+                    console.error('没有数据可导出');
+                    showToast('error', '没有数据可导出');
                     return;
                 }
                 
-                console.log('开始导出XMind，数据结构:', xmindData);
+                console.log('开始导出Doc，数据结构:', xmindData);
                 console.log('根节点子节点数量:', xmindData.root.children.length);
                 
-                // 创建JSZip实例
-                const zip = new JSZip();
-                
-                // 生成content.xml
-                const contentXml = generateXMindXml(xmindData);
-                console.log('生成的XML:', contentXml);
-                console.log('XML长度:', contentXml.length);
-                
-                // 检查XML是否包含子节点
-                if (contentXml.includes('<children type="attached">')) {
-                    console.log('XML包含子节点');
-                } else {
-                    console.log('XML不包含子节点');
+                // 生成HTML格式的Word文档
+                function generateDocContent(node, level = 0) {
+                    const indent = '  '.repeat(level);
+                    let html = '';
+                    
+                    // 根据层级设置标题
+                    if (level === 0) {
+                        html += `<h1 style="color: #07C160; border-bottom: 2px solid #07C160; padding-bottom: 10px;">${node.title}</h1>\n`;
+                    } else if (level === 1) {
+                        html += `<h2 style="color: #333; margin-top: 20px; margin-bottom: 10px;">${node.title}</h2>\n`;
+                    } else if (level === 2) {
+                        html += `<h3 style="color: #555; margin-top: 15px; margin-bottom: 8px;">${node.title}</h3>\n`;
+                    } else {
+                        html += `<p style="margin-left: ${(level - 3) * 20}px; margin-top: 5px; margin-bottom: 5px;">• ${node.title}</p>\n`;
+                    }
+                    
+                    if (node.children && node.children.length > 0) {
+                        node.children.forEach(child => {
+                            html += generateDocContent(child, level + 1);
+                        });
+                    }
+                    
+                    return html;
                 }
                 
-                zip.file('content.xml', contentXml);
+                const docContent = generateDocContent(xmindData.root);
                 
-                // 生成META-INF/manifest.xml
-                const manifestXml = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest xmlns="urn:xmind:xmap:xmlns:manifest:1.0">
-  <file-entry full-path="/" media-type="application/xmind-workbook" />
-  <file-entry full-path="content.xml" media-type="text/xml" />
-  <file-entry full-path="styles.xml" media-type="text/xml" />
-</manifest>`;
-                zip.folder('META-INF').file('manifest.xml', manifestXml);
+                // 完整的Word文档HTML结构
+                const fullHtml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        body { 
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 24px; }
+        h2 { font-size: 20px; }
+        h3 { font-size: 18px; }
+        p { font-size: 14px; }
+    </style>
+</head>
+<body>
+${docContent}
+</body>
+</html>`;
                 
-                // 生成styles.xml
-                const stylesXml = `<?xml version="1.0" encoding="UTF-8"?>
-<xmap-styles xmlns="urn:xmind:xmap:xmlns:style:2.0">
-  <sheet-styles id="sheet1">
-    <topic-styles>
-      <topic-style id="__central_topic__" shape-class="org.xmind.ui.shape.roundedRect"/>
-      <topic-style id="__main_topic__" shape-class="org.xmind.ui.shape.roundedRect"/>
-      <topic-style id="__sub_topic__" shape-class="org.xmind.ui.shape.roundedRect"/>
-    </topic-styles>
-  </sheet-styles>
-</xmap-styles>`;
-                zip.file('styles.xml', stylesXml);
-                
-                // 生成XMind文件并下载
-                zip.generateAsync({ type: 'blob' }).then(function(blob) {
-                    console.log('生成的XMind文件大小:', blob.size, 'bytes');
-                    
-                    // 检查zip文件内容
-                    console.log('zip文件包含的文件:', Object.keys(zip.files));
-                    
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'mindmap.doc';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    console.log('Doc文件下载完成');
-                    showToast('success', 'Doc文件已成功导出！');
-                }).catch(function(error) {
-                    console.error('生成Doc文件失败:', error);
-                    showToast('error', '导出Doc文件失败，请重试！');
+                // 创建Blob并下载
+                const blob = new Blob(['\ufeff', fullHtml], { 
+                    type: 'application/msword;charset=utf-8' 
                 });
+                
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'mindmap.doc';
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                console.log('Doc文件下载完成');
+                showToast('success', 'Doc文件已成功导出！');
             }
             
             // 生成XMind XML格式
