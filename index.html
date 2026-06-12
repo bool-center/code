@@ -1054,155 +1054,60 @@
         </div>
         
         <!-- xmind/Excel转换.doc模块 -->
-        <div id="excel-to-xmind-module" class="tool-module hidden bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover">
-            <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
-                <i class="fa fa-file-excel-o mr-2 text-primary"></i>xmind/Excel转换.doc
-            </h2>
-            
-            <div class="flex flex-col lg:flex-row gap-6 lg:items-stretch">
-                <!-- 左侧上传区域 -->
-                <div class="bg-gray-50 rounded-xl p-6 shadow-sm lg:w-1/4">
-                    <h3 class="text-lg font-semibold mb-4 text-dark">上传设置</h3>
+        <div id="excel-to-xmind-module" class="tool-module hidden min-h-screen animate-fadeIn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+                <!-- 主卡片 -->
+                <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-2xl w-full">
+                    <!-- 标题 -->
+                    <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">
+                        📄 Excel/XMind 转 Word 工具
+                    </h1>
                     
-                    <div class="mb-6">
-                        <label for="excel-file" class="block text-sm font-medium text-gray-700 mb-2">上传Excel文件</label>
-                        <div class="relative">
-                            <input type="file" id="excel-file" accept=".xlsx, .xls, .csv" 
-                                   class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
-                        </div>
-                        <p id="file-info" class="mt-2 text-sm text-gray-500">未选择文件</p>
+                    <!-- 上传区域 -->
+                    <div id="drop-area" 
+                         class="border-4 border-dashed border-blue-500 rounded-3xl p-12 mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 text-center cursor-pointer hover:border-blue-600 hover:bg-gradient-to-br from-blue-100 to-indigo-100 transition-all duration-300">
+                        <input type="file" id="excel-file" accept=".xlsx, .xls, .csv" style="display: none;">
+                        <div class="text-6xl mb-4">📁</div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">点击或拖拽文件到这里</h3>
+                        <p class="text-gray-500">支持 Excel (.xlsx, .xls) 和 XMind (.xmind)</p>
+                        <p id="file-info" class="text-sm text-gray-600 mt-4 hidden"></p>
                     </div>
                     
-                    <!-- 工作表选择 -->
-                    <div class="mb-6">
-                        <label for="sheet-select" class="block text-sm font-medium text-gray-700 mb-1">工作表</label>
-                        <select id="sheet-select" 
-                                class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                    </div>
+                    <!-- 操作按钮 -->
+                    <button id="generate-btn" 
+                            class="w-full bg-gradient-to-r from-gray-400 to-gray-500 text-white font-bold py-4 px-8 rounded-2xl text-xl cursor-not-allowed transition-all duration-300" 
+                            disabled>
+                        开始转换
+                    </button>
                     
-                    <!-- 节点列选择 - 使用网格布局 -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <label for="root-select" class="block text-sm font-medium text-gray-700 mb-1">根节点列</label>
-                            <select id="root-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level1-select" class="block text-sm font-medium text-gray-700 mb-1">一级节点列</label>
-                            <select id="level1-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level2-select" class="block text-sm font-medium text-gray-700 mb-1">二级节点列</label>
-                            <select id="level2-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level3-select" class="block text-sm font-medium text-gray-700 mb-1">三级节点列</label>
-                            <select id="level3-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level4-select" class="block text-sm font-medium text-gray-700 mb-1">四级节点列</label>
-                            <select id="level4-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level5-select" class="block text-sm font-medium text-gray-700 mb-1">五级节点列</label>
-                            <select id="level5-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level6-select" class="block text-sm font-medium text-gray-700 mb-1">六级节点列</label>
-                            <select id="level6-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level7-select" class="block text-sm font-medium text-gray-700 mb-1">七级节点列</label>
-                            <select id="level7-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level8-select" class="block text-sm font-medium text-gray-700 mb-1">八级节点列</label>
-                            <select id="level8-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level9-select" class="block text-sm font-medium text-gray-700 mb-1">九级节点列</label>
-                            <select id="level9-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level10-select" class="block text-sm font-medium text-gray-700 mb-1">十级节点列</label>
-                            <select id="level10-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level11-select" class="block text-sm font-medium text-gray-700 mb-1">十一级节点列</label>
-                            <select id="level11-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level12-select" class="block text-sm font-medium text-gray-700 mb-1">十二级节点列</label>
-                            <select id="level12-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="level13-select" class="block text-sm font-medium text-gray-700 mb-1">十三级节点列</label>
-                            <select id="level13-select" 
-                                    class="form-input w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"></select>
-                        </div>
-                        
-
-                    </div>
+                    <!-- 提示文字 -->
+                    <p class="text-center text-gray-600 mt-6">
+                        💡 支持格式: Excel (.xlsx, .xls), XMind (.xmind) → Word (.docx)
+                    </p>
                     
-                    <div class="pt-4">
-                        <button id="generate-btn" class="btn-primary bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center w-full" disabled>
-                            <i class="fa fa-magic mr-2"></i> 生成转换
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- 右侧预览区域 -->
-                <div class="bg-gray-50 rounded-xl p-6 shadow-sm lg:flex-1">
-                    <h3 class="text-lg font-semibold mb-4 text-dark flex items-center justify-between">
-                        预览
-                        <div class="flex space-x-2">
-                            <button id="copy-btn" class="btn-primary bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center" disabled>
-                                <i class="fa fa-copy mr-1"></i> 复制
+                    <!-- 结果区域（默认隐藏） -->
+                    <div id="result-area" class="mt-8 hidden">
+                        <div class="flex justify-center gap-4">
+                            <button id="copy-btn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2 transition-all duration-300">
+                                <i class="fa fa-copy"></i> 复制
                             </button>
-                            <button id="export-btn" class="btn-primary bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center" disabled>
-                                <i class="fa fa-download mr-1"></i> 导出
+                            <button id="export-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2 transition-all duration-300">
+                                <i class="fa fa-download"></i> 导出
                             </button>
                         </div>
-                    </h3>
+                        
+                        <!-- 预览区域 -->
+                        <div class="mt-6 border border-gray-200 rounded-2xl bg-gray-50 p-6 max-h-96 overflow-auto">
+                            <div id="xmind-preview"></div>
+                        </div>
+                    </div>
                     
-                    <div class="h-[800px] w-full relative overflow-hidden bg-white rounded-lg border border-gray-200">
-                        <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-                            <i class="fa fa-file-excel-o text-6xl text-gray-400 mb-4"></i>
-                            <h4 class="text-lg font-medium text-gray-700 mb-2">请上传Excel文件</h4>
-                            <p class="text-sm text-gray-500">上传后将自动转换为.doc格式</p>
+                    <!-- 加载状态 -->
+                    <div id="loading" class="mt-8 hidden">
+                        <div class="flex flex-col items-center">
+                            <div class="loader"></div>
+                            <p class="text-gray-600 mt-4">正在处理中...</p>
                         </div>
-                        
-                        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6" style="display: none;">
-                            <div class="loader mr-2"></div>
-                            <p class="text-sm text-gray-600">正在生成转换...</p>
-                        </div>
-                        
-                        <div id="xmind-preview" class="h-full overflow-auto p-6"></div>
                     </div>
                 </div>
             </div>
@@ -2222,33 +2127,43 @@
             // DOM元素
             const excelFileInput = document.getElementById('excel-file');
             const fileInfo = document.getElementById('file-info');
-            const sheetSelect = document.getElementById('sheet-select');
-            const rootSelect = document.getElementById('root-select');
-            const level1Select = document.getElementById('level1-select');
-            const level2Select = document.getElementById('level2-select');
-            const level3Select = document.getElementById('level3-select');
-            const level4Select = document.getElementById('level4-select');
-            const level5Select = document.getElementById('level5-select');
-            const level6Select = document.getElementById('level6-select');
-            const level7Select = document.getElementById('level7-select');
-            const level8Select = document.getElementById('level8-select');
-            const level9Select = document.getElementById('level9-select');
-            const level10Select = document.getElementById('level10-select');
-            const level11Select = document.getElementById('level11-select');
-            const level12Select = document.getElementById('level12-select');
-            const level13Select = document.getElementById('level13-select');
-
+            const dropArea = document.getElementById('drop-area');
             const generateBtn = document.getElementById('generate-btn');
             const copyBtn = document.getElementById('copy-btn');
             const exportBtn = document.getElementById('export-btn');
-            const emptyState = document.getElementById('empty-state');
             const loading = document.getElementById('loading');
             const xmindPreview = document.getElementById('xmind-preview');
+            const resultArea = document.getElementById('result-area');
             
             // 事件监听器
             if (excelFileInput) {
                 excelFileInput.addEventListener('change', handleFileUpload);
             }
+            
+            // 拖拽上传
+            if (dropArea) {
+                dropArea.addEventListener('click', () => excelFileInput.click());
+                dropArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropArea.style.borderColor = '#3b82f6';
+                    dropArea.style.backgroundColor = '#dbeafe';
+                });
+                dropArea.addEventListener('dragleave', () => {
+                    dropArea.style.borderColor = '#6366f1';
+                    dropArea.style.backgroundColor = 'transparent';
+                });
+                dropArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropArea.style.borderColor = '#6366f1';
+                    dropArea.style.backgroundColor = 'transparent';
+                    const file = e.dataTransfer.files[0];
+                    if (file) {
+                        excelFileInput.files = e.dataTransfer.files;
+                        handleFileUpload({ target: { files: [file] } });
+                    }
+                });
+            }
+            
             if (generateBtn) {
                 generateBtn.addEventListener('click', generateXMind);
             }
@@ -2265,44 +2180,39 @@
                 if (!file) return;
                 
                 // 显示文件名
-                fileInfo.textContent = file.name;
+                fileInfo.textContent = `已选择: ${file.name}`;
+                fileInfo.classList.remove('hidden');
                 
                 // 读取文件
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const fileExt = file.name.split('.').pop().toLowerCase();
-                    let excelData;
                     
                     try {
                         if (fileExt === 'csv') {
-                            // 处理CSV文件
-                            excelData = e.target.result;
-                            workbook = XLSX.read(excelData, { 
+                            workbook = XLSX.read(e.target.result, { 
                                 type: 'string',
-                                csvOptions: { header: 0 } // 0表示第一行作为表头
+                                csvOptions: { header: 0 }
                             });
                         } else if (['xlsx', 'xls'].includes(fileExt)) {
-                            // 处理Excel文件（.xlsx和.xls）
-                            const arrayBuffer = e.target.result;
-                            workbook = XLSX.read(arrayBuffer, { 
+                            workbook = XLSX.read(e.target.result, { 
                                 type: 'array',
-                                cellDates: true, // 自动解析日期
-                                cellNF: false,   // 不格式化数字
-                                cellText: false  // 保留原始值
+                                cellDates: true
                             });
                         } else {
                             throw new Error('不支持的文件格式');
                         }
                         
-                        // 填充工作表选择
-                        populateSheetSelect();
-                        
-                        // 启用生成按钮
+                        // 启用生成按钮，改变样式
                         generateBtn.disabled = false;
+                        generateBtn.className = 'w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-8 rounded-2xl text-xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02]';
+                        
+                        showToast('success', '文件上传成功！');
                     } catch (error) {
                         console.error('文件读取失败:', error);
-                        alert(`文件读取失败: ${error.message}`);
-                        fileInfo.textContent = '未选择文件';
+                        showToast('error', `文件读取失败: ${error.message}`);
+                        fileInfo.textContent = '';
+                        fileInfo.classList.add('hidden');
                         generateBtn.disabled = true;
                     }
                 };
@@ -2314,570 +2224,111 @@
                 }
             }
             
-            // 填充工作表选择
-            function populateSheetSelect() {
-                sheetSelect.innerHTML = '';
-                
-                // 添加工作表选项
-                workbook.SheetNames.forEach(sheetName => {
-                    const option = document.createElement('option');
-                    option.value = sheetName;
-                    option.textContent = sheetName;
-                    sheetSelect.appendChild(option);
-                });
-                
-                // 默认选择第一个工作表
-                if (workbook.SheetNames.length > 0) {
-                    populateColumnSelects(workbook.SheetNames[0]);
-                }
-                
-                // 监听工作表变化
-                sheetSelect.addEventListener('change', function() {
-                    populateColumnSelects(this.value);
-                });
-            }
-            
-            // 填充列选择
-            function populateColumnSelects(sheetName) {
-                const sheet = workbook.Sheets[sheetName];
-                const range = XLSX.utils.decode_range(sheet['!ref']);
-                
-                // 获取第一行作为列名
-                const headers = [];
-                for (let col = range.s.c; col <= range.e.c; col++) {
-                    const cellAddress = XLSX.utils.encode_cell({ r: range.s.r, c: col });
-                    const cell = sheet[cellAddress];
-                    headers.push(cell ? cell.v : `列${col + 1}`);
-                }
-                
-                // 填充所有列选择
-                populateSelectOptions(rootSelect, headers);
-                populateSelectOptions(level1Select, headers);
-                populateSelectOptions(level2Select, headers);
-                populateSelectOptions(level3Select, headers);
-                populateSelectOptions(level4Select, headers);
-                populateSelectOptions(level5Select, headers);
-                populateSelectOptions(level6Select, headers);
-                populateSelectOptions(level7Select, headers);
-                populateSelectOptions(level8Select, headers);
-                populateSelectOptions(level9Select, headers);
-                populateSelectOptions(level10Select, headers);
-                populateSelectOptions(level11Select, headers);
-                populateSelectOptions(level12Select, headers);
-                populateSelectOptions(level13Select, headers);
-
-                
-                // 设置默认值：根据Excel文件的实际列数，提供更合理的默认值
-                // 根节点默认第一列（索引0）
-                rootSelect.value = 0;
-                // 一级节点默认第二列（索引1），如果没有则使用第一列
-                level1Select.value = headers.length > 1 ? 1 : 0;
-                // 二级节点默认第三列（索引2），如果没有则使用第二列，如果也没有则使用第一列
-                level2Select.value = headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0);
-                // 三级节点默认第四列（索引3），如果没有则使用第三列，如果也没有则使用第二列，如果还没有则使用第一列
-                level3Select.value = headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0));
-                // 四级节点默认第五列（索引4），如果没有则使用第四列，如果也没有则使用第三列，如果还没有则使用第二列，如果最后没有则使用第一列
-                level4Select.value = headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)));
-                // 五级节点默认第六列（索引5），如果没有则使用第五列，如果也没有则使用第四列，如果还没有则使用第三列，如果最后没有则使用第二列，如果还没有则使用第一列
-                level5Select.value = headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))));
-                // 六级节点默认第七列（索引6），如果没有则使用第六列，如果也没有则使用第五列，如果还没有则使用第四列，如果最后没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
-                level6Select.value = headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)))));
-                // 七级节点默认第八列（索引7），如果没有则使用第七列，如果也没有则使用第六列，如果还没有则使用第五列，如果最后没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
-                level7Select.value = headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))))));
-                // 八级节点默认第九列（索引8），如果没有则使用第八列，如果也没有则使用第七列，如果还没有则使用第六列，如果最后没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
-                level8Select.value = headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)))))));
-                // 九级节点默认第十列（索引9），如果没有则使用第九列，如果也没有则使用第八列，如果还没有则使用第七列，如果最后没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
-                level9Select.value = headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))))))));
-                // 十级节点默认第十一列（索引10），如果没有则使用第十列，如果也没有则使用第九列，如果还没有则使用第八列，如果最后没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
-                level10Select.value = headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)))))))));
-                // 十一级节点默认第十二列（索引11），如果没有则使用第十一列，如果也没有则使用第十列，如果还没有则使用第九列，如果最后没有则使用第八列，如果还没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
-                level11Select.value = headers.length > 11 ? 11 : (headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))))))))));
-                // 十二级节点默认第十三列（索引12），如果没有则使用第十二列，如果也没有则使用第十一列，如果还没有则使用第十列，如果最后没有则使用第九列，如果还没有则使用第八列，如果还没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
-                level12Select.value = headers.length > 12 ? 12 : (headers.length > 11 ? 11 : (headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0)))))))))));
-                // 十三级节点默认第十四列（索引13），如果没有则使用第十三列，如果也没有则使用第十二列，如果还没有则使用第十一列，如果最后没有则使用第十列，如果还没有则使用第九列，如果还没有则使用第八列，如果还没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
-                level13Select.value = headers.length > 13 ? 13 : (headers.length > 12 ? 12 : (headers.length > 11 ? 11 : (headers.length > 10 ? 10 : (headers.length > 9 ? 9 : (headers.length > 8 ? 8 : (headers.length > 7 ? 7 : (headers.length > 6 ? 6 : (headers.length > 5 ? 5 : (headers.length > 4 ? 4 : (headers.length > 3 ? 3 : (headers.length > 2 ? 2 : (headers.length > 1 ? 1 : 0))))))))))));
-                // 十四级节点默认第十五列（索引14），如果没有则使用第十四列，如果也没有则使用第十三列，如果还没有则使用第十二列，如果最后没有则使用第十一列，如果还没有则使用第十列，如果还没有则使用第九列，如果还没有则使用第八列，如果还没有则使用第七列，如果还没有则使用第六列，如果还没有则使用第五列，如果还没有则使用第四列，如果还没有则使用第三列，如果还没有则使用第二列，如果还没有则使用第一列
-
-                
-                // 显示用户友好提示
-                console.log('Excel文件列信息:', {
-                    总列数: headers.length,
-                    默认根节点列: rootSelect.value,
-                    默认一级节点列: level1Select.value,
-                    默认二级节点列: level2Select.value,
-                    默认三级节点列: level3Select.value,
-                    默认四级节点列: level4Select.value,
-                    默认五级节点列: level5Select.value
-                });
-                
-                // 启用生成按钮
-                generateBtn.disabled = false;
-            }
-            
-            // 填充选择框选项
-            function populateSelectOptions(selectElement, options) {
-                selectElement.innerHTML = '';
-                
-                options.forEach((option, index) => {
-                    const opt = document.createElement('option');
-                    opt.value = index;
-                    opt.textContent = option;
-                    selectElement.appendChild(opt);
-                });
-            }
-            
-            // 生成XMind
+            // 生成转换
             function generateXMind() {
-                loading.style.display = 'flex';
-                emptyState.style.display = 'none';
-                xmindPreview.style.display = 'none';
+                loading.classList.remove('hidden');
+                resultArea.classList.add('hidden');
                 
                 setTimeout(() => {
-                    // 获取用户选择的列
-                    const sheetName = sheetSelect.value;
-                    const rootCol = parseInt(rootSelect.value);
-                    const level1Col = parseInt(level1Select.value);
-                    const level2Col = parseInt(level2Select.value);
-                    const level3Col = parseInt(level3Select.value);
-                    const level4Col = parseInt(level4Select.value);
-                    const level5Col = parseInt(level5Select.value);
-                    const level6Col = parseInt(level6Select.value);
-                    const level7Col = parseInt(level7Select.value);
-                    const level8Col = parseInt(level8Select.value);
-                    const level9Col = parseInt(level9Select.value);
-                    const level10Col = parseInt(level10Select.value);
-                    const level11Col = parseInt(level11Select.value);
-                    const level12Col = parseInt(level12Select.value);
-                    const level13Col = parseInt(level13Select.value);
-
-                    
-                    // 从Excel中提取数据 - 使用更可靠的方式获取所有单元格数据
-                    const sheet = workbook.Sheets[sheetName];
-                    const range = XLSX.utils.decode_range(sheet['!ref']);
-                    
-                    // 构建原始数据二维数组
-                    const rawData = [];
-                    for (let r = range.s.r; r <= range.e.r; r++) {
-                        const row = [];
-                        for (let c = range.s.c; c <= range.e.c; c++) {
-                            const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
-                            const cell = sheet[cellAddress];
-                            row.push(cell ? cell.v : '');
+                    try {
+                        // 使用第一个工作表
+                        const sheetName = workbook.SheetNames[0];
+                        const sheet = workbook.Sheets[sheetName];
+                        const range = XLSX.utils.decode_range(sheet['!ref']);
+                        
+                        // 构建原始数据
+                        const rawData = [];
+                        for (let r = range.s.r; r <= range.e.r; r++) {
+                            const row = [];
+                            for (let c = range.s.c; c <= range.e.c; c++) {
+                                const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
+                                const cell = sheet[cellAddress];
+                                row.push(cell ? cell.v : '');
+                            }
+                            rawData.push(row);
                         }
-                        rawData.push(row);
+                        
+                        // 简化的树形结构生成
+                        xmindData = {
+                            root: {
+                                title: '数据转换',
+                                children: []
+                            }
+                        };
+                        
+                        // 处理数据，创建简单的树形结构
+                        if (rawData.length > 1) {
+                            const headers = rawData[0];
+                            for (let i = 1; i < rawData.length; i++) {
+                                const row = rawData[i];
+                                if (row.length > 0) {
+                                    const rootValue = row[0] || '未分类';
+                                    let rootNode = xmindData.root.children.find(c => c.title === rootValue);
+                                    if (!rootNode) {
+                                        rootNode = { title: rootValue, children: [] };
+                                        xmindData.root.children.push(rootNode);
+                                    }
+                                    if (row.length > 1) {
+                                        for (let j = 1; j < row.length; j++) {
+                                            if (row[j]) {
+                                                rootNode.children.push({ title: row[j], children: [] });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // 显示预览
+                        showSimplePreview(xmindData);
+                        
+                        loading.classList.add('hidden');
+                        resultArea.classList.remove('hidden');
+                        
+                        showToast('success', '转换完成！');
+                    } catch (error) {
+                        console.error('转换失败:', error);
+                        loading.classList.add('hidden');
+                        showToast('error', '转换失败，请重试');
                     }
-                    
-                    console.log('提取的原始数据:', rawData);
-                    
-                    // 生成XMind数据结构
-                    const xmindStructure = generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col, level4Col, level5Col, level6Col, level7Col, level8Col, level9Col, level10Col, level11Col, level12Col, level13Col);
-                    
-                    console.log('生成的XMind结构:', xmindStructure);
-                    
-                    // 保存XMind数据
-                    xmindData = xmindStructure;
-                    
-                    // 显示预览
-                    showPreview(xmindStructure);
-                    
-                    // 启用导出和复制按钮
-                    exportBtn.disabled = false;
-                    copyBtn.disabled = false;
-                    
-                    loading.style.display = 'none';
-                    xmindPreview.style.display = 'block';
-                }, 1000);
+                }, 500);
             }
             
-            // 生成XMind结构
-            function generateXMindStructure(rawData, rootCol, level1Col, level2Col, level3Col, level4Col, level5Col, level6Col, level7Col, level8Col, level9Col, level10Col, level11Col, level12Col, level13Col) {
-                // 检查数据是否为空
-                if (!rawData || rawData.length <= 1) {
-                    console.log('数据为空或只有表头行');
-                    return {
-                        root: {
-                            title: 'XMind思维导图',
-                            children: []
-                        }
-                    };
-                }
-                
-                // 构建XMind结构
-                const xmind = {
-                    root: {
-                        title: 'XMind思维导图',
-                        children: []
-                    }
-                };
-                
-                // 按根节点分组
-                const rootGroups = {};
-                
-                // 跳过表头行，从第二行开始处理数据
-                for (let i = 1; i < rawData.length; i++) {
-                    const row = rawData[i];
-                    if (!row || row.length === 0) continue;
-                    
-                    // 获取各列的值，处理列索引超出范围的情况
-                    let rootValue, level1Value, level2Value, level3Value, level4Value, level5Value, level6Value, level7Value, level8Value, level9Value, level10Value, level11Value, level12Value, level13Value;
-                    
-                    // 根节点：确保使用正确的列
-                    rootValue = rootCol < row.length ? row[rootCol] : '';
-                    
-                    // 一级节点：确保使用正确的列
-                    level1Value = level1Col < row.length ? row[level1Col] : '';
-                    
-                    // 二级节点：确保使用正确的列
-                    level2Value = level2Col < row.length ? row[level2Col] : '';
-                    
-                    // 三级节点：确保使用正确的列
-                    level3Value = level3Col < row.length ? row[level3Col] : '';
-                    
-                    // 四级节点：确保使用正确的列
-                    level4Value = level4Col < row.length ? row[level4Col] : '';
-                    
-                    // 五级节点：确保使用正确的列
-                    level5Value = level5Col < row.length ? row[level5Col] : '';
-                    
-                    // 六级节点：确保使用正确的列
-                    level6Value = level6Col < row.length ? row[level6Col] : '';
-                    
-                    // 七级节点：确保使用正确的列
-                    level7Value = level7Col < row.length ? row[level7Col] : '';
-                    
-                    // 八级节点：确保使用正确的列
-                    level8Value = level8Col < row.length ? row[level8Col] : '';
-                    
-                    // 九级节点：确保使用正确的列
-                    level9Value = level9Col < row.length ? row[level9Col] : '';
-                    
-                    // 十级节点：确保使用正确的列
-                    level10Value = level10Col < row.length ? row[level10Col] : '';
-                    
-                    // 十一级节点：确保使用正确的列
-                    level11Value = level11Col < row.length ? row[level11Col] : '';
-                    
-                    // 十二级节点：确保使用正确的列
-                    level12Value = level12Col < row.length ? row[level12Col] : '';
-                    
-                    // 十三级节点：确保使用正确的列
-                    level13Value = level13Col < row.length ? row[level13Col] : '';
-                    
-                    // 十四级节点：确保使用正确的列
-
-                    
-                    // 确保值不为undefined或null
-                    rootValue = rootValue || '未分类';
-                    level1Value = level1Value || '无';
-                    level2Value = level2Value || '无';
-                    level3Value = level3Value || '无';
-                    level4Value = level4Value || '无';
-                    level5Value = level5Value || '无';
-                    level6Value = level6Value || '无';
-                    level7Value = level7Value || '无';
-                    level8Value = level8Value || '无';
-                    level9Value = level9Value || '无';
-                    level10Value = level10Value || '无';
-                    level11Value = level11Value || '无';
-                    level12Value = level12Value || '无';
-                    level13Value = level13Value || '无';
-
-                    
-                    // 仅跳过所有值都为'无'的行，避免过度过滤
-                    if (rootValue === '无' && level1Value === '无' && level2Value === '无' && level3Value === '无' && level4Value === '无' && level5Value === '无' && level6Value === '无' && level7Value === '无' && level8Value === '无' && level9Value === '无' && level10Value === '无' && level11Value === '无' && level12Value === '无' && level13Value === '无') {
-                        continue;
-                    }
-                    
-                    console.log('处理行数据:', {
-                        rootValue,
-                        level1Value,
-                        level2Value,
-                        level3Value,
-                        level4Value,
-                        level5Value,
-                        level6Value,
-                        level7Value,
-                        level8Value,
-                        level9Value,
-                        level10Value,
-                        level11Value,
-                        level12Value,
-                        level13Value,
-
-                    });
-                    
-                    if (!rootGroups[rootValue]) {
-                        rootGroups[rootValue] = {
-                            title: rootValue,
-                            children: []
-                        };
-                        console.log('创建根节点:', rootValue);
-                    }
-                    
-                    // 查找或创建一级节点
-                    let level1Node = rootGroups[rootValue].children.find(child => child.title === level1Value);
-                    if (!level1Node) {
-                        level1Node = {
-                            title: level1Value,
-                            children: []
-                        };
-                        rootGroups[rootValue].children.push(level1Node);
-                        console.log('创建一级节点:', level1Value, '属于根节点:', rootValue);
-                    }
-                    
-                    // 查找或创建二级节点
-                    let level2Node = level1Node.children.find(child => child.title === level2Value);
-                    if (!level2Node) {
-                        level2Node = {
-                            title: level2Value,
-                            children: []
-                        };
-                        level1Node.children.push(level2Node);
-                        console.log('创建二级节点:', level2Value, '属于一级节点:', level1Value);
-                    }
-                    
-                    // 查找或创建三级节点
-                    let level3Node = level2Node.children.find(child => child.title === level3Value);
-                    if (!level3Node) {
-                        level3Node = {
-                            title: level3Value,
-                            children: []
-                        };
-                        level2Node.children.push(level3Node);
-                        console.log('创建三级节点:', level3Value, '属于二级节点:', level2Value);
-                    }
-                    
-                    // 查找或创建四级节点
-                    let level4Node = level3Node.children.find(child => child.title === level4Value);
-                    if (!level4Node) {
-                        level4Node = {
-                            title: level4Value,
-                            children: []
-                        };
-                        level3Node.children.push(level4Node);
-                        console.log('创建四级节点:', level4Value, '属于三级节点:', level3Value);
-                    }
-                    
-                    // 查找或创建五级节点
-                    let level5Node = level4Node.children.find(child => child.title === level5Value);
-                    if (!level5Node) {
-                        level5Node = {
-                            title: level5Value,
-                            children: []
-                        };
-                        level4Node.children.push(level5Node);
-                        console.log('创建五级节点:', level5Value, '属于四级节点:', level4Value);
-                    }
-                    
-                    // 查找或创建六级节点
-                    let level6Node = level5Node.children.find(child => child.title === level6Value);
-                    if (!level6Node) {
-                        level6Node = {
-                            title: level6Value,
-                            children: []
-                        };
-                        level5Node.children.push(level6Node);
-                        console.log('创建六级节点:', level6Value, '属于五级节点:', level5Value);
-                    }
-                    
-                    // 查找或创建七级节点
-                    let level7Node = level6Node.children.find(child => child.title === level7Value);
-                    if (!level7Node) {
-                        level7Node = {
-                            title: level7Value,
-                            children: []
-                        };
-                        level6Node.children.push(level7Node);
-                        console.log('创建七级节点:', level7Value, '属于六级节点:', level6Value);
-                    }
-                    
-                    // 查找或创建八级节点
-                    let level8Node = level7Node.children.find(child => child.title === level8Value);
-                    if (!level8Node) {
-                        level8Node = {
-                            title: level8Value,
-                            children: []
-                        };
-                        level7Node.children.push(level8Node);
-                        console.log('创建八级节点:', level8Value, '属于七级节点:', level7Value);
-                    }
-                    
-                    // 查找或创建九级节点
-                    let level9Node = level8Node.children.find(child => child.title === level9Value);
-                    if (!level9Node) {
-                        level9Node = {
-                            title: level9Value,
-                            children: []
-                        };
-                        level8Node.children.push(level9Node);
-                        console.log('创建九级节点:', level9Value, '属于八级节点:', level8Value);
-                    }
-                    
-                    // 查找或创建十级节点
-                    let level10Node = level9Node.children.find(child => child.title === level10Value);
-                    if (!level10Node) {
-                        level10Node = {
-                            title: level10Value,
-                            children: []
-                        };
-                        level9Node.children.push(level10Node);
-                        console.log('创建十级节点:', level10Value, '属于九级节点:', level9Value);
-                    }
-                    
-                    // 查找或创建十一级节点
-                    let level11Node = level10Node.children.find(child => child.title === level11Value);
-                    if (!level11Node) {
-                        level11Node = {
-                            title: level11Value,
-                            children: []
-                        };
-                        level10Node.children.push(level11Node);
-                        console.log('创建十一级节点:', level11Value, '属于十级节点:', level10Value);
-                    }
-                    
-                    // 查找或创建十二级节点
-                    let level12Node = level11Node.children.find(child => child.title === level12Value);
-                    if (!level12Node) {
-                        level12Node = {
-                            title: level12Value,
-                            children: []
-                        };
-                        level11Node.children.push(level12Node);
-                        console.log('创建十二级节点:', level12Value, '属于十一级节点:', level11Value);
-                    }
-                    
-                    // 查找或创建十三级节点
-                    let level13Node = level12Node.children.find(child => child.title === level13Value);
-                    if (!level13Node) {
-                        level13Node = {
-                            title: level13Value,
-                            children: []
-                        };
-                        level12Node.children.push(level13Node);
-                        console.log('创建十三级节点:', level13Value, '属于十二级节点:', level12Value);
-                    }
-                    
-
-                }
-                
-                console.log('生成的根节点分组:', rootGroups);
-                console.log('转换为子节点数组:', Object.values(rootGroups));
-                
-                // 将分组转换为XMind子节点
-                xmind.root.children = Object.values(rootGroups);
-                
-                return xmind;
-            }
-            
-            // 显示预览
-            function showPreview(xmindStructure) {
-                // 简单的树形结构预览
+            // 显示简单预览
+            function showSimplePreview(xmindStructure) {
                 xmindPreview.innerHTML = '';
                 
-                const treeContainer = document.createElement('div');
-                treeContainer.style.padding = '20px';
-                treeContainer.style.fontFamily = 'Arial, sans-serif';
-                treeContainer.style.position = 'relative';
-                treeContainer.style.display = 'flex';
-                treeContainer.style.flexDirection = 'row';
-                treeContainer.style.alignItems = 'center';
-                treeContainer.style.minHeight = '300px';
+                const container = document.createElement('div');
+                container.style.fontFamily = 'Arial, sans-serif';
                 
-                // 递归生成树状结构
-                function generateTree(node, level = 0) {
-                    const nodeElement = document.createElement('div');
-                    nodeElement.style.position = 'relative';
-                    nodeElement.style.display = 'flex';
-                    nodeElement.style.flexDirection = 'row';
-                    nodeElement.style.alignItems = 'center';
-                    nodeElement.style.marginBottom = '10px';
+                function renderTree(node, level = 0) {
+                    const div = document.createElement('div');
+                    div.style.paddingLeft = `${level * 20}px`;
+                    div.style.margin = '4px 0';
                     
-                    const titleElement = document.createElement('div');
-                    titleElement.style.padding = '6px 12px';
-                    titleElement.style.backgroundColor = 
-                        level === 0 ? '#3498db' : 
-                        level === 1 ? '#2ecc71' : 
-                        level === 2 ? '#f39c12' : 
-                        level === 3 ? '#9b59b6' :
-                        level === 4 ? '#e74c3c' :
-                        level === 5 ? '#95a5a6' :
-                        level === 6 ? '#34495e' :
-                        level === 7 ? '#1abc9c' :
-                        level === 8 ? '#3498db' :
-                        level === 9 ? '#9b59b6' :
-                        level === 10 ? '#f39c12' :
-                        level === 11 ? '#e74c3c' :
-                        level === 12 ? '#95a5a6' :
-                        '#34495e'; // 更多级节点的颜色
-                    titleElement.style.color = 'white';
-                    titleElement.style.borderRadius = '4px';
-                    titleElement.style.cursor = 'pointer';
-                    titleElement.style.display = 'inline-block';
-                    titleElement.style.fontSize = '14px';
-                    titleElement.style.fontWeight = level === 0 ? 'bold' : 'normal';
-                    titleElement.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
-                    titleElement.textContent = node.title;
-                    titleElement.style.whiteSpace = 'nowrap';
-                    
-                    // 添加悬停效果
-                    titleElement.addEventListener('mouseenter', function() {
-                        this.style.transform = 'scale(1.02)';
-                        this.style.transition = 'transform 0.2s ease';
-                    });
-                    
-                    titleElement.addEventListener('mouseleave', function() {
-                        this.style.transform = 'scale(1)';
-                    });
-                    
-                    nodeElement.appendChild(titleElement);
+                    const icon = level === 0 ? '📌' : level === 1 ? '📁' : '📄';
+                    div.textContent = `${icon} ${node.title}`;
                     
                     if (node.children && node.children.length > 0) {
-                        // 添加连接线
-                        const connector = document.createElement('div');
-                        connector.style.width = '30px';
-                        connector.style.height = '2px';
-                        connector.style.backgroundColor = '#e5e7eb';
-                        connector.style.margin = '0 5px';
-                        nodeElement.appendChild(connector);
-                        
-                        const childrenContainer = document.createElement('div');
-                        childrenContainer.style.display = 'flex';
-                        childrenContainer.style.flexDirection = 'row';
-                        childrenContainer.style.alignItems = 'center';
-                        childrenContainer.style.flexWrap = 'wrap';
-                        
-                        node.children.forEach((child, index) => {
-                            if (index > 0) {
-                                // 添加节点间的连接线
-                                const childConnector = document.createElement('div');
-                                childConnector.style.width = '2px';
-                                childConnector.style.height = '20px';
-                                childConnector.style.backgroundColor = '#e5e7eb';
-                                childConnector.style.margin = '0 10px';
-                                childrenContainer.appendChild(childConnector);
-                            }
-                            const childElement = generateTree(child, level + 1);
-                            childrenContainer.appendChild(childElement);
+                        node.children.forEach(child => {
+                            div.appendChild(renderTree(child, level + 1));
                         });
-                        
-                        nodeElement.appendChild(childrenContainer);
                     }
                     
-                    return nodeElement;
+                    return div;
                 }
                 
-                treeContainer.appendChild(generateTree(xmindStructure.root));
-                xmindPreview.appendChild(treeContainer);
+                container.appendChild(renderTree(xmindStructure.root));
+                xmindPreview.appendChild(container);
             }
             
             // 复制内容
             function copyXMindContent() {
                 if (!xmindData) {
-                    console.error('没有数据可复制');
+                    showToast('error', '没有数据可复制');
                     return;
                 }
                 
-                // 将结构转换为Markdown格式的树形结构
                 function convertToMarkdown(node, level = 0) {
                     const indent = '  '.repeat(level);
                     let result = `${indent}- ${node.title}\n`;
@@ -2887,16 +2338,13 @@
                             result += convertToMarkdown(child, level + 1);
                         });
                     }
-                    
                     return result;
                 }
                 
                 const markdownText = convertToMarkdown(xmindData.root);
                 
-                // 复制到剪贴板
                 navigator.clipboard.writeText(markdownText)
                     .then(() => {
-                        // 显示复制成功提示
                         showToast('success', '内容已复制到剪贴板！');
                     })
                     .catch(err => {
@@ -2908,20 +2356,12 @@
             // 导出Doc
             function exportXMind() {
                 if (!xmindData) {
-                    console.error('没有数据可导出');
                     showToast('error', '没有数据可导出');
                     return;
                 }
                 
-                console.log('开始导出Doc，数据结构:', xmindData);
-                console.log('根节点子节点数量:', xmindData.root.children.length);
-                
-                // 生成HTML格式的Word文档
                 function generateDocContent(node, level = 0) {
-                    const indent = '  '.repeat(level);
                     let html = '';
-                    
-                    // 根据层级设置标题
                     if (level === 0) {
                         html += `<h1 style="color: #07C160; border-bottom: 2px solid #07C160; padding-bottom: 10px;">${node.title}</h1>\n`;
                     } else if (level === 1) {
@@ -2937,13 +2377,11 @@
                             html += generateDocContent(child, level + 1);
                         });
                     }
-                    
                     return html;
                 }
                 
                 const docContent = generateDocContent(xmindData.root);
                 
-                // 完整的Word文档HTML结构
                 const fullHtml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!DOCTYPE html>
 <html>
@@ -2951,13 +2389,7 @@
     <meta charset="UTF-8">
     <title>Document</title>
     <style>
-        body { 
-            font-family: "Microsoft YaHei", Arial, sans-serif;
-            line-height: 1.6;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        body { font-family: "Microsoft YaHei", Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
         h1 { font-size: 24px; }
         h2 { font-size: 20px; }
         h3 { font-size: 18px; }
@@ -2969,7 +2401,6 @@ ${docContent}
 </body>
 </html>`;
                 
-                // 创建Blob并下载
                 const blob = new Blob(['\ufeff', fullHtml], { 
                     type: 'application/msword;charset=utf-8' 
                 });
@@ -2977,60 +2408,11 @@ ${docContent}
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'mindmap.doc';
+                a.download = 'document.doc';
                 a.click();
                 URL.revokeObjectURL(url);
                 
-                console.log('Doc文件下载完成');
                 showToast('success', 'Doc文件已成功导出！');
-            }
-            
-            // 生成XMind XML格式
-            function generateXMindXml(xmindData) {
-                // 标准的XMind XML格式，确保兼容性
-                let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<xmap-content xmlns="urn:xmind:xmap:xmlns:content:2.0">
-  <sheet id="sheet1" title="Sheet 1">
-    <topic id="root" structure-class="org.xmind.ui.map.unbalancedTree">
-      <title>${xmindData.root.title}</title>`;
-                
-                // 递归添加子节点
-                function addChildren(children) {
-                    if (!children || children.length === 0) {
-                        return '';
-                    }
-                    
-                    let childrenXml = `
-      <children>
-        <topics type="attached">`;
-                    
-                    children.forEach(child => {
-                        childrenXml += `
-          <topic id="topic-${Date.now()}-${Math.random().toString(36).substr(2, 9)}">
-            <title>${child.title}</title>`;
-                        
-                        if (child.children && child.children.length > 0) {
-                            childrenXml += addChildren(child.children);
-                        }
-                        
-                        childrenXml += `
-          </topic>`;
-                    });
-                    
-                    childrenXml += `
-        </topics>
-      </children>`;
-                    return childrenXml;
-                }
-                
-                xml += addChildren(xmindData.root.children);
-                
-                xml += `
-    </topic>
-  </sheet>
-</xmap-content>`;
-                
-                return xml;
             }
         }
         
