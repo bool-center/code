@@ -436,7 +436,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <!-- 引入Excel处理库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- 引入JSZip用于生成XMind文件 -->
+    <!-- 引入JSZip用于生成Doc文件 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- 配置文件 -->
     <script src="config.js"></script>
@@ -794,7 +794,7 @@
                 <li>
                     <a href="#excel-to-xmind" id="nav-excel-to-xmind" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 border-l-4 border-transparent transition-colors">
                         <i class="fa fa-file-excel-o w-5 mr-2"></i>
-                        <span>Excel转XMind</span>
+                        <span>xmind/Excel转换.doc</span>
                     </a>
                 </li>
             </ul>
@@ -837,7 +837,7 @@
                     <li>
                         <a href="#excel-to-xmind" id="mobile-nav-excel-to-xmind" class="flex items-center px-6 py-4 text-gray-600 border-l-4 border-transparent">
                             <i class="fa fa-file-excel-o w-5 mr-3"></i>
-                            <span>Excel转XMind</span>
+                            <span>xmind/Excel转换.doc</span>
                         </a>
                     </li>
                 </ul>
@@ -1053,10 +1053,10 @@
             </div>
         </div>
         
-        <!-- Excel转XMind工具模块 -->
+        <!-- xmind/Excel转换.doc模块 -->
         <div id="excel-to-xmind-module" class="tool-module hidden bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover">
             <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
-                <i class="fa fa-file-excel-o mr-2 text-primary"></i>Excel转XMind
+                <i class="fa fa-file-excel-o mr-2 text-primary"></i>xmind/Excel转换.doc
             </h2>
             
             <div class="flex flex-col lg:flex-row gap-6 lg:items-stretch">
@@ -1171,7 +1171,7 @@
                     
                     <div class="pt-4">
                         <button id="generate-btn" class="btn-primary bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center w-full" disabled>
-                            <i class="fa fa-magic mr-2"></i> 生成XMind
+                            <i class="fa fa-magic mr-2"></i> 生成转换
                         </button>
                     </div>
                 </div>
@@ -1194,12 +1194,12 @@
                         <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
                             <i class="fa fa-file-excel-o text-6xl text-gray-400 mb-4"></i>
                             <h4 class="text-lg font-medium text-gray-700 mb-2">请上传Excel文件</h4>
-                            <p class="text-sm text-gray-500">上传后将自动转换为XMind格式</p>
+                            <p class="text-sm text-gray-500">上传后将自动转换为.doc格式</p>
                         </div>
                         
                         <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6" style="display: none;">
                             <div class="loader mr-2"></div>
-                            <p class="text-sm text-gray-600">正在生成XMind...</p>
+                            <p class="text-sm text-gray-600">正在生成转换...</p>
                         </div>
                         
                         <div id="xmind-preview" class="h-full overflow-auto p-6"></div>
@@ -1287,12 +1287,12 @@
             closeMobileMenu();
         }
         
-        // 切换到Excel转XMind工具
+        // 切换到xmind/Excel转换.doc工具
         function switchToExcelToXMind() {
             generateModule.classList.add('hidden');
             decodeModule.classList.add('hidden');
             excelToXMindModule.classList.remove('hidden');
-            pageTitle.textContent = 'Excel转XMind工具';
+            pageTitle.textContent = 'xmind/Excel转换.doc工具';
             
             // 更新导航状态
             navExcelToXMind.classList.add('text-primary', 'bg-primary/5', 'border-primary');
@@ -2213,7 +2213,7 @@
             }
         }
         
-        // Excel转XMind工具功能
+        // xmind/Excel转换.doc工具功能
         function initExcelToXMindTool() {
             // 全局变量
             let workbook = null;
@@ -2965,14 +2965,14 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'mindmap.xmind';
+                    a.download = 'mindmap.doc';
                     a.click();
                     URL.revokeObjectURL(url);
-                    console.log('XMind文件下载完成');
-                    showToast('success', 'XMind文件已成功导出！');
+                    console.log('Doc文件下载完成');
+                    showToast('success', 'Doc文件已成功导出！');
                 }).catch(function(error) {
-                    console.error('生成XMind文件失败:', error);
-                    showToast('error', '导出XMind文件失败，请重试！');
+                    console.error('生成Doc文件失败:', error);
+                    showToast('error', '导出Doc文件失败，请重试！');
                 });
             }
             
