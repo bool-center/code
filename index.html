@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0b1714">
-    <meta name="description" content="二维码生成、解码与文档转换，一站式效率工具工作台。">
+    <meta name="description" content="二维码生成、解码、文档转换与 JSON 格式化，一站式效率工具工作台。">
     <title>QR Studio · 效率工具工作台</title>
     <!-- 添加网站图标 -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2307C160' d='M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0zm8.485 19.492c-.293.293-.677.439-1.061.439-.383 0-.768-.146-1.061-.439l-5.485-5.485-5.485 5.485c-.293.293-.677.439-1.061.439s-.768-.146-1.061-.439c-.586-.586-.586-1.535 0-2.121l7.596-7.596c.586-.586 1.535-.586 2.121 0l7.596 7.596c.586.586.586 1.535 0 2.121z'/%3E%3C/svg%3E" type="image/svg+xml">
@@ -1815,6 +1815,307 @@
             font-size: 12px;
         }
 
+        /* JSON 格式化工具 */
+        #json-formatter-module {
+            width: 100%;
+            min-height: 0 !important;
+        }
+
+        .workspace-main.json-workspace-active {
+            width: 100%;
+            max-width: none;
+        }
+
+        .json-tool-card {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-height: calc(100dvh - 220px);
+            padding: 26px !important;
+        }
+
+        .json-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border: 1px solid #e4ebe6;
+            border-radius: 14px;
+            background: #f8fbf9;
+        }
+
+        .json-toolbar-group {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .json-tool-label {
+            color: #667a6e;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        #jsonIndent {
+            width: 102px;
+            height: 38px;
+            padding: -1 30px 0 11px;
+            color: #40564a;
+            font-size: 12px;
+            border: 1px solid #dce6df;
+            border-radius: 9px;
+            background: #fff;
+        }
+
+        .json-btn, .json-icon-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: #4c6255;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid #dce6df;
+            border-radius: 9px;
+            background: #fff;
+            transition: color 0.25s, border-color 0.25s, background 0.25s, transform 0.25s var(--ease-out), box-shadow 0.25s;
+        }
+
+        .json-btn {
+            min-height: 38px;
+            padding: 8px 14px;
+        }
+
+        .json-icon-button {
+            min-height: 30px;
+            padding: 5px 9px;
+            font-size: 10px;
+        }
+
+        .json-btn:hover, .json-icon-button:hover {
+            color: #087a4d;
+            border-color: #a8d8bd;
+            background: #f1faf5;
+            transform: translateY(-1px);
+        }
+
+        #jsonFormatButton {
+            color: #fff;
+            border-color: var(--emerald);
+            background: linear-gradient(135deg, #10b674, #078554);
+            box-shadow: 0 6px 16px rgba(7, 133, 84, 0.14);
+        }
+
+        #jsonFormatButton:hover {
+            color: #fff;
+            border-color: #078554;
+            background: linear-gradient(135deg, #0da76a, #06764b);
+            box-shadow: 0 8px 20px rgba(7, 133, 84, 0.2);
+        }
+
+        .json-btn:disabled, .json-icon-button:disabled {
+            color: #a3b0a8;
+            border-color: #e4eae6;
+            background: #f1f4f2;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .json-editor-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            flex: 1;
+            gap: 20px;
+        }
+
+        .json-editor-panel {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            min-height: 0;
+            overflow: hidden;
+            border: 1px solid #dfe8e2;
+            border-radius: 15px;
+            background: #fbfdfc;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .json-editor-panel:focus-within {
+            border-color: #93cfad;
+            box-shadow: 0 0 0 4px rgba(10, 166, 106, 0.06);
+        }
+
+        .json-editor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 52px;
+            padding: 10px 13px;
+            background: rgba(255, 255, 255, 0.82);
+        }
+
+        .json-editor-heading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #344b3e;
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .json-editor-heading i {
+            color: #7a9485;
+            font-size: 12px;
+        }
+
+        .json-editor-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .json-editor {
+            display: block;
+            width: 100%;
+            height: clamp(400px, calc(100dvh - 390px), 700px);
+            min-height: 400px;
+            flex: 1;
+            margin: 0;
+            padding: 20px;
+            resize: vertical;
+            color: #354b3e;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 13px;
+            line-height: 1.75;
+            tab-size: 2;
+            white-space: pre;
+            overflow: auto;
+            border: 0 !important;
+            border-top: 1px solid #e6ede8 !important;
+            border-radius: 0;
+            background: #fbfdfc;
+            box-shadow: none;
+        }
+
+        .json-editor:focus {
+            outline: none;
+            box-shadow: inset 0 0 0 2px rgba(10, 166, 106, 0.08);
+        }
+
+        .json-editor::placeholder {
+            color: #a0aea5;
+        }
+
+        #jsonOutput {
+            color: #24543c;
+            background: #f7faf8;
+        }
+
+        .json-editor-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            min-height: 34px;
+            padding: 7px 13px;
+            color: #8a9b90;
+            font-family: Inter, "PingFang SC", sans-serif;
+            font-size: 9px;
+            border-top: 1px solid #e6ede8;
+            background: rgba(255, 255, 255, 0.75);
+        }
+
+        .json-editor-footer span:last-child {
+            font-family: Inter, monospace;
+            letter-spacing: 0.08em;
+        }
+
+        #jsonStatus {
+            display: inline-flex;
+            align-items: center;
+            min-height: 21px;
+            padding: 3px 7px;
+            color: #7c8e83;
+            font-size: 9px;
+            font-weight: 500;
+            border-radius: 999px;
+            background: #edf1ee;
+        }
+
+        #jsonStatus.is-valid {
+            color: #087a4d;
+            background: #e2f5e9;
+        }
+
+        #jsonStatus.is-error {
+            color: #b24a4a;
+            background: #fbeaea;
+        }
+
+        .json-feedback {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            min-height: 42px;
+            margin-top: 16px;
+            padding: 11px 13px;
+            color: #72847a;
+            font-size: 11px;
+            line-height: 1.6;
+            border: 1px solid #e3ebe5;
+            border-radius: 11px;
+            background: #f8faf9;
+        }
+
+        .json-feedback i {
+            margin-top: 3px;
+        }
+
+        .json-feedback.is-success {
+            color: #19704b;
+            border-color: #cee7d8;
+            background: #f0f9f3;
+        }
+
+        .json-feedback.is-error {
+            color: #a14747;
+            border-color: #efd5d5;
+            background: #fdf5f5;
+        }
+
+        .json-privacy {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            color: #94a299;
+            font-size: 10px;
+        }
+
+        #jsonCopyButton.is-copied {
+            color: #087a4d;
+            border-color: #b9dfc8;
+            background: #e2f5e9;
+            transform: scale(1.04);
+        }
+
+        #jsonCopyButton.is-copied i {
+            animation: copyIconPop 0.45s var(--ease-out);
+        }
+
+        #jsonOutput.copy-success {
+            animation: copyFieldSuccess 1s var(--ease-out);
+        }
+
         .workspace-footer {
             display: flex;
             align-items: center;
@@ -2167,6 +2468,8 @@
         }
 
         @media (min-width: 1024px) and (max-height: 800px) {
+            .json-tool-card { padding: 20px !important; }
+            .json-editor { height: 360px; min-height: 360px; }
             .header-inner { min-height: 128px; }
             .header-mascot { height: 116px; }
             .fox-mascot { width: 164px; height: 126px; }
@@ -2189,6 +2492,12 @@
             .mascot-hint { display: none; }
             .decode-layout { grid-template-columns: 1fr; }
             .decode-actions { margin-top: 4px; }
+        }
+
+        @media (max-width: 900px) {
+            .json-tool-card { min-height: 0; }
+            .json-editor-grid { grid-template-columns: 1fr; }
+            .json-editor { height: 360px; min-height: 360px; }
         }
 
         @media (max-width: 900px) and (min-width: 768px) {
@@ -2218,6 +2527,12 @@
             #qrcode { max-width: calc(100vw - 100px); height: auto !important; aspect-ratio: 1; }
             #qr-drop-area, #excel-drop-area { min-height: 240px; padding: 28px 20px !important; }
             .conversion-heading h2 { font-size: 18px; }
+            .json-toolbar { align-items: stretch; flex-direction: column; }
+            .json-toolbar-group { width: 100%; }
+            .json-toolbar-group:last-child .json-btn { flex: 1; }
+            .json-editor-header { align-items: flex-start; }
+            .json-editor { height: 320px; min-height: 320px; padding: 16px; font-size: 12px; }
+            .json-privacy { align-items: flex-start; flex-direction: column; }
             .workspace-footer { align-items: flex-start; flex-direction: column; gap: 5px; }
             .toast { top: 16px; right: 16px; left: 16px; max-width: none; }
         }
@@ -2276,6 +2591,12 @@
                             <span class="nav-copy"><strong>文档转换</strong><small>Excel / XMind 转 Word</small></span>
                         </a>
                     </li>
+                    <li>
+                        <a href="#json-formatter" id="nav-json-formatter" class="nav-link text-gray-600 border-transparent">
+                            <i class="fa fa-code nav-icon" aria-hidden="true"></i>
+                            <span class="nav-copy"><strong>JSON 格式化</strong><small>校验、格式化与压缩 JSON</small></span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
             <div class="sidebar-foot">
@@ -2318,6 +2639,12 @@
                             <a href="#excel-to-xmind" id="mobile-nav-excel-to-xmind" class="nav-link text-gray-600 border-transparent">
                                 <i class="fa fa-files-o nav-icon" aria-hidden="true"></i>
                                 <span class="nav-copy"><strong>文档转换</strong><small>Excel / XMind 转 Word</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#json-formatter" id="mobile-nav-json-formatter" class="nav-link text-gray-600 border-transparent">
+                                <i class="fa fa-code nav-icon" aria-hidden="true"></i>
+                                <span class="nav-copy"><strong>JSON 格式化</strong><small>校验、格式化与压缩 JSON</small></span>
                             </a>
                         </li>
                     </ul>
@@ -2569,6 +2896,71 @@
             </div>
         </div>
 
+        <!-- JSON 格式化模块 -->
+        <div id="json-formatter-module" class="tool-module hidden">
+            <section class="glass-card json-tool-card" aria-labelledby="json-heading">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <i class="fa fa-code panel-icon" aria-hidden="true"></i>
+                        <div><h2 id="json-heading" class="panel-title">JSON 格式化</h2><div class="panel-subtitle">校验、美化与压缩 JSON 数据</div></div>
+                    </div>
+                    <span class="panel-badge">LOCAL JSON</span>
+                </div>
+
+                <div class="json-toolbar">
+                    <div class="json-toolbar-group">
+                        <label for="jsonIndent" class="json-tool-label">缩进方式</label>
+                        <select id="jsonIndent" aria-label="JSON 缩进方式">
+                            <option value="2" selected>2 个空格</option>
+                            <option value="4">4 个空格</option>
+                            <option value="tab">Tab 缩进</option>
+                        </select>
+                        <button id="jsonValidateButton" type="button" class="json-btn"><i class="fa fa-check-circle-o" aria-hidden="true"></i>语法校验</button>
+                    </div>
+                    <div class="json-toolbar-group">
+                        <button id="jsonMinifyButton" type="button" class="json-btn"><i class="fa fa-compress" aria-hidden="true"></i>压缩 JSON</button>
+                        <button id="jsonFormatButton" type="button" class="json-btn"><i class="fa fa-magic" aria-hidden="true"></i>格式化 JSON</button>
+                    </div>
+                </div>
+
+                <div class="json-editor-grid">
+                    <div class="json-editor-panel">
+                        <div class="json-editor-header">
+                            <div class="json-editor-heading"><i class="fa fa-sign-in" aria-hidden="true"></i>输入 JSON</div>
+                            <div class="json-editor-actions">
+                                <button id="jsonSampleButton" type="button" class="json-icon-button"><i class="fa fa-lightbulb-o" aria-hidden="true"></i>示例</button>
+                                <button id="jsonImportButton" type="button" class="json-icon-button"><i class="fa fa-folder-open-o" aria-hidden="true"></i>导入</button>
+                                <button id="jsonClearButton" type="button" class="json-icon-button"><i class="fa fa-trash-o" aria-hidden="true"></i>清空</button>
+                                <input type="file" id="jsonFileInput" accept=".json,.txt,application/json,text/plain" class="hidden">
+                            </div>
+                        </div>
+                        <textarea id="jsonInput" class="json-editor" placeholder="粘贴 JSON，例如：{&quot;name&quot;:&quot;QR Studio&quot;,&quot;enabled&quot;:true}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="输入需要格式化的 JSON"></textarea>
+                        <div class="json-editor-footer"><span id="jsonInputStats">0 字符 · 0 行</span><span>INPUT</span></div>
+                    </div>
+
+                    <div class="json-editor-panel">
+                        <div class="json-editor-header">
+                            <div class="json-editor-heading"><i class="fa fa-sign-out" aria-hidden="true"></i>格式化结果 <span id="jsonStatus">等待输入</span></div>
+                            <div class="json-editor-actions">
+                                <button id="jsonCopyButton" type="button" class="json-icon-button" aria-label="复制格式化结果" disabled><i class="fa fa-copy" aria-hidden="true"></i>复制</button>
+                                <button id="jsonDownloadButton" type="button" class="json-icon-button" disabled><i class="fa fa-download" aria-hidden="true"></i>下载</button>
+                            </div>
+                        </div>
+                        <textarea id="jsonOutput" class="json-editor" placeholder="格式化结果将在这里显示" readonly spellcheck="false" aria-label="JSON 格式化结果"></textarea>
+                        <div class="json-editor-footer"><span id="jsonOutputStats">0 字符 · 0 行</span><span>OUTPUT</span></div>
+                    </div>
+                </div>
+
+                <div id="jsonFeedback" class="json-feedback" role="status" aria-live="polite">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i><span id="jsonFeedbackText">输入 JSON 后可进行格式化、压缩或语法校验，全部处理均在本地完成。</span>
+                </div>
+                <div class="json-privacy">
+                    <span><i class="fa fa-lock mr-1" aria-hidden="true"></i>数据不会上传或持久保存</span>
+                    <span>Ctrl / Cmd + Enter 快速格式化 · Tab 插入缩进</span>
+                </div>
+            </section>
+        </div>
+
         <footer class="workspace-footer"><span>QR Studio v2.0 · 让日常工具更简单、更高效</span><span>LOCAL &amp; SECURE</span></footer>
     </main>
 
@@ -2586,13 +2978,13 @@
     <!-- JavaScript -->
     <script>
         // 模块切换功能 - 全局变量
-        let generateModule, decodeModule, excelToXMindModule, pageTitle, pageDescription;
-        let navGenerate, navDecode, navExcelToXMind;
-        let mobileNavGenerate, mobileNavDecode, mobileNavExcelToXMind, mobileNavToggle, mobileNav, mobileNavContent, closeMobileNav;
+        let generateModule, decodeModule, excelToXMindModule, jsonFormatterModule, pageTitle, pageDescription;
+        let navGenerate, navDecode, navExcelToXMind, navJsonFormatter;
+        let mobileNavGenerate, mobileNavDecode, mobileNavExcelToXMind, mobileNavJsonFormatter, mobileNavToggle, mobileNav, mobileNavContent, closeMobileNav;
         let mobileNavTimer;
 
         function activateModule(activeModule, activeNav, activeMobileNav, title, description, kicker) {
-            [generateModule, decodeModule, excelToXMindModule].forEach(module => {
+            [generateModule, decodeModule, excelToXMindModule, jsonFormatterModule].forEach(module => {
                 const isActive = module === activeModule;
                 module.classList.toggle('hidden', !isActive);
                 module.style.display = '';
@@ -2600,7 +2992,7 @@
                 module.style.opacity = '';
             });
 
-            [[navGenerate, mobileNavGenerate], [navDecode, mobileNavDecode], [navExcelToXMind, mobileNavExcelToXMind]].forEach(pair => {
+            [[navGenerate, mobileNavGenerate], [navDecode, mobileNavDecode], [navExcelToXMind, mobileNavExcelToXMind], [navJsonFormatter, mobileNavJsonFormatter]].forEach(pair => {
                 pair.forEach(navItem => {
                     const isActive = navItem === activeNav || navItem === activeMobileNav;
                     navItem.classList.toggle('text-primary', isActive);
@@ -2616,6 +3008,7 @@
                 });
             });
 
+            document.querySelector('.workspace-main').classList.toggle('json-workspace-active', activeModule === jsonFormatterModule);
             pageTitle.textContent = title;
             pageDescription.textContent = description;
             document.querySelector('.page-kicker').textContent = kicker;
@@ -2642,6 +3035,12 @@
         function switchToExcelToXMind() {
             activateModule(excelToXMindModule, navExcelToXMind, mobileNavExcelToXMind,
                 '文档转换工具', '将 Excel、CSV 或 XMind 内容整理为结构清晰的 Word 文档。', 'DOCUMENT CONVERTER');
+        }
+
+        // 切换到 JSON 格式化工具
+        function switchToJsonFormatter() {
+            activateModule(jsonFormatterModule, navJsonFormatter, mobileNavJsonFormatter,
+                'JSON 格式化工具', '在本地校验、格式化和压缩 JSON，让数据结构更清晰。', 'JSON WORKSPACE');
         }
 
         // 打开移动端菜单
@@ -2676,6 +3075,8 @@
                 switchToDecode();
             } else if (hash === '#excel-to-xmind') {
                 switchToExcelToXMind();
+            } else if (hash === '#json-formatter') {
+                switchToJsonFormatter();
             } else {
                 switchToGenerate();
             }
@@ -2686,6 +3087,7 @@
             generateModule = document.getElementById('generate-module');
             decodeModule = document.getElementById('decode-module');
             excelToXMindModule = document.getElementById('excel-to-xmind-module');
+            jsonFormatterModule = document.getElementById('json-formatter-module');
             pageTitle = document.getElementById('page-title');
             pageDescription = document.getElementById('page-description');
             
@@ -2693,11 +3095,13 @@
             navGenerate = document.getElementById('nav-generate');
             navDecode = document.getElementById('nav-decode');
             navExcelToXMind = document.getElementById('nav-excel-to-xmind');
+            navJsonFormatter = document.getElementById('nav-json-formatter');
             
             // 移动端导航
             mobileNavGenerate = document.getElementById('mobile-nav-generate');
             mobileNavDecode = document.getElementById('mobile-nav-decode');
             mobileNavExcelToXMind = document.getElementById('mobile-nav-excel-to-xmind');
+            mobileNavJsonFormatter = document.getElementById('mobile-nav-json-formatter');
             mobileNavToggle = document.getElementById('mobile-nav-toggle');
             mobileNav = document.getElementById('mobile-nav');
             mobileNavContent = document.getElementById('mobile-nav-content');
@@ -2707,9 +3111,11 @@
             navGenerate.addEventListener('click', (e) => { e.preventDefault(); switchToGenerate(); });
             navDecode.addEventListener('click', (e) => { e.preventDefault(); switchToDecode(); });
             navExcelToXMind.addEventListener('click', (e) => { e.preventDefault(); switchToExcelToXMind(); });
+            navJsonFormatter.addEventListener('click', (e) => { e.preventDefault(); switchToJsonFormatter(); });
             mobileNavGenerate.addEventListener('click', (e) => { e.preventDefault(); switchToGenerate(); });
             mobileNavDecode.addEventListener('click', (e) => { e.preventDefault(); switchToDecode(); });
             mobileNavExcelToXMind.addEventListener('click', (e) => { e.preventDefault(); switchToExcelToXMind(); });
+            mobileNavJsonFormatter.addEventListener('click', (e) => { e.preventDefault(); switchToJsonFormatter(); });
             mobileNavToggle.addEventListener('click', openMobileMenu);
             closeMobileNav.addEventListener('click', closeMobileMenu);
             mobileNav.addEventListener('click', (e) => { if (e.target === mobileNav) closeMobileMenu(); });
@@ -4346,6 +4752,259 @@ ${textContent}
             }
         }
         
+        // JSON 格式化工具
+        function initJsonFormatter() {
+            const input = document.getElementById('jsonInput');
+            const output = document.getElementById('jsonOutput');
+            const indentSelect = document.getElementById('jsonIndent');
+            const status = document.getElementById('jsonStatus');
+            const feedback = document.getElementById('jsonFeedback');
+            const feedbackText = document.getElementById('jsonFeedbackText');
+            const inputStats = document.getElementById('jsonInputStats');
+            const outputStats = document.getElementById('jsonOutputStats');
+            const copyButton = document.getElementById('jsonCopyButton');
+            const downloadButton = document.getElementById('jsonDownloadButton');
+            const fileInput = document.getElementById('jsonFileInput');
+            let validationTimer;
+
+            function formatBytes(bytes) {
+                if (bytes < 1024) return `${bytes} B`;
+                if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+                return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+            }
+
+            function updateStats(element, target) {
+                const text = element.value;
+                const lines = text ? text.split('\n').length : 0;
+                target.textContent = `${text.length} 字符 · ${lines} 行 · ${formatBytes(new Blob([text]).size)}`;
+            }
+
+            function setStatus(type, message) {
+                status.classList.remove('is-valid', 'is-error');
+                if (type) status.classList.add(`is-${type}`);
+                status.textContent = message;
+            }
+
+            function setFeedback(type, message) {
+                feedback.classList.remove('is-success', 'is-error');
+                const icon = feedback.querySelector('i');
+                if (type === 'success') {
+                    feedback.classList.add('is-success');
+                    icon.className = 'fa fa-check-circle';
+                } else if (type === 'error') {
+                    feedback.classList.add('is-error');
+                    icon.className = 'fa fa-exclamation-circle';
+                } else {
+                    icon.className = 'fa fa-info-circle';
+                }
+                feedbackText.textContent = message;
+            }
+
+            function setOutput(value) {
+                output.value = value;
+                updateStats(output, outputStats);
+                copyButton.disabled = !value;
+                downloadButton.disabled = !value;
+            }
+
+            function getErrorMessage(error, source) {
+                const message = error.message || 'JSON 语法错误';
+                const lineColumn = message.match(/line\s+(\d+)\s+column\s+(\d+)/i);
+                let line;
+                let column;
+                if (lineColumn) {
+                    line = Number(lineColumn[1]);
+                    column = Number(lineColumn[2]);
+                } else {
+                    const positionMatch = message.match(/position\s+(\d+)/i);
+                    if (positionMatch) {
+                        const position = Number(positionMatch[1]);
+                        const before = source.slice(0, position);
+                        line = before.split('\n').length;
+                        column = position - before.lastIndexOf('\n');
+                    }
+                }
+                return line ? `第 ${line} 行，第 ${column} 列 · ${message}` : message;
+            }
+
+            function parseInput() {
+                const source = input.value.trim();
+                if (!source) {
+                    setStatus('error', '内容为空');
+                    setFeedback('error', '请先输入需要处理的 JSON 内容。');
+                    input.focus();
+                    return { success: false };
+                }
+                try {
+                    return { success: true, value: JSON.parse(source) };
+                } catch (error) {
+                    setStatus('error', '语法错误');
+                    setFeedback('error', getErrorMessage(error, source));
+                    return { success: false };
+                }
+            }
+
+            function processJSON(mode) {
+                clearTimeout(validationTimer);
+                const result = parseInput();
+                if (!result.success) return;
+                const indent = indentSelect.value === 'tab' ? '\t' : Number(indentSelect.value);
+                const formatted = mode === 'minify'
+                    ? JSON.stringify(result.value)
+                    : JSON.stringify(result.value, null, indent);
+                setOutput(formatted);
+                setStatus('valid', mode === 'minify' ? '压缩完成' : '格式有效');
+                const message = mode === 'minify' ? 'JSON 压缩完成，已移除多余空白。' : 'JSON 格式化完成，语法正确。';
+                setFeedback('success', message);
+                celebrateFox(mode === 'minify' ? 'JSON 压缩完成' : 'JSON 格式化完成');
+                showToast('success', message);
+            }
+
+            function validateJSON() {
+                clearTimeout(validationTimer);
+                const result = parseInput();
+                if (!result.success) return;
+                setStatus('valid', '格式有效');
+                setFeedback('success', 'JSON 语法正确，可以进行格式化或压缩。');
+                celebrateFox('JSON 格式正确');
+                showToast('success', 'JSON 语法校验通过');
+            }
+
+            function validateLive() {
+                const source = input.value.trim();
+                if (!source) {
+                    setStatus('', '等待输入');
+                    setFeedback('info', '输入 JSON 后可进行格式化、压缩或语法校验，全部处理均在本地完成。');
+                    return;
+                }
+                try {
+                    JSON.parse(source);
+                    setStatus('valid', '格式有效');
+                    setFeedback('success', '实时校验通过，点击“格式化 JSON”生成结果。');
+                } catch (error) {
+                    setStatus('error', '语法错误');
+                    setFeedback('error', getErrorMessage(error, source));
+                }
+            }
+
+            function handleInputChange() {
+                clearTimeout(validationTimer);
+                updateStats(input, inputStats);
+                setOutput('');
+                setStatus('', input.value.trim() ? '待校验' : '等待输入');
+                setFeedback('info', input.value.trim() ? '内容已修改，正在等待实时校验…' : '输入 JSON 后可进行格式化、压缩或语法校验，全部处理均在本地完成。');
+                validationTimer = setTimeout(validateLive, 400);
+            }
+
+            function copyOutput() {
+                if (!output.value) return;
+                const showSuccess = () => {
+                    showCopyFeedback(copyButton, output);
+                    showToast('success', 'JSON 结果已复制到剪贴板');
+                };
+                const fallbackCopy = () => {
+                    output.select();
+                    output.setSelectionRange(0, output.value.length);
+                    try {
+                        if (document.execCommand('copy')) {
+                            showSuccess();
+                        } else {
+                            showToast('error', '复制失败，请手动复制');
+                        }
+                    } catch (error) {
+                        showToast('error', '复制失败，请手动复制');
+                    }
+                };
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(output.value).then(showSuccess).catch(fallbackCopy);
+                } else {
+                    fallbackCopy();
+                }
+            }
+
+            function downloadOutput() {
+                if (!output.value) return;
+                const blob = new Blob([output.value], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                link.href = url;
+                link.download = `formatted-${timestamp}.json`;
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(url), 0);
+                showToast('success', 'JSON 文件已下载');
+            }
+
+            document.getElementById('jsonFormatButton').addEventListener('click', () => processJSON('format'));
+            document.getElementById('jsonMinifyButton').addEventListener('click', () => processJSON('minify'));
+            document.getElementById('jsonValidateButton').addEventListener('click', validateJSON);
+            copyButton.addEventListener('click', copyOutput);
+            downloadButton.addEventListener('click', downloadOutput);
+            input.addEventListener('input', handleInputChange);
+            indentSelect.addEventListener('change', () => {
+                if (input.value.trim()) processJSON('format');
+            });
+
+            input.addEventListener('keydown', event => {
+                if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                    event.preventDefault();
+                    processJSON('format');
+                } else if (event.key === 'Tab') {
+                    event.preventDefault();
+                    const indent = indentSelect.value === 'tab' ? '\t' : ' '.repeat(Number(indentSelect.value));
+                    input.setRangeText(indent, input.selectionStart, input.selectionEnd, 'end');
+                    handleInputChange();
+                }
+            });
+
+            document.getElementById('jsonSampleButton').addEventListener('click', () => {
+                input.value = JSON.stringify({
+                    name: 'QR Studio',
+                    version: '2.0',
+                    local: true,
+                    features: ['二维码生成', '文档转换', 'JSON 格式化'],
+                    settings: { indent: 2, theme: 'emerald' }
+                });
+                handleInputChange();
+                processJSON('format');
+            });
+
+            document.getElementById('jsonClearButton').addEventListener('click', () => {
+                clearTimeout(validationTimer);
+                input.value = '';
+                fileInput.value = '';
+                setOutput('');
+                updateStats(input, inputStats);
+                setStatus('', '等待输入');
+                setFeedback('info', '内容已清空，可以输入新的 JSON。');
+                input.focus();
+            });
+
+            document.getElementById('jsonImportButton').addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('error', 'JSON 文件不能超过 5MB');
+                    fileInput.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => {
+                    input.value = reader.result;
+                    handleInputChange();
+                    processJSON('format');
+                    showToast('success', `已导入 ${file.name}`);
+                };
+                reader.onerror = () => showToast('error', '文件读取失败，请重试');
+                reader.readAsText(file);
+                fileInput.value = '';
+            });
+
+            updateStats(input, inputStats);
+            updateStats(output, outputStats);
+        }
+
         // 低多边形 3D 小狐狸
         let foxMascotController = null;
         let mascotMessageTimer;
@@ -4674,6 +5333,7 @@ ${textContent}
         initExcelToXMindTool();
         document.addEventListener('DOMContentLoaded', initUIInteractions);
         document.addEventListener('DOMContentLoaded', initFoxMascot);
+        document.addEventListener('DOMContentLoaded', initJsonFormatter);
     </script>
 </body>
 </html>
