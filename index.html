@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>微信二维码工具集</title>
+    <meta name="theme-color" content="#0b1714">
+    <meta name="description" content="二维码生成、解码与文档转换，一站式效率工具工作台。">
+    <title>QR Studio · 效率工具工作台</title>
     <!-- 添加网站图标 -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2307C160' d='M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0zm8.485 19.492c-.293.293-.677.439-1.061.439-.383 0-.768-.146-1.061-.439l-5.485-5.485-5.485 5.485c-.293.293-.677.439-1.061.439s-.768-.146-1.061-.439c-.586-.586-.586-1.535 0-2.121l7.596-7.596c.586-.586 1.535-.586 2.121 0l7.596 7.596c.586.586.586 1.535 0 2.121z'/%3E%3C/svg%3E" type="image/svg+xml">
     <!-- 引入Tailwind CSS -->
@@ -767,359 +769,1816 @@
             background-color: #3b82f6;
         }
     </style>
+    <style>
+        :root {
+            --ink: #14211c;
+            --muted: #6b7c73;
+            --line: #e2eae5;
+            --surface: rgba(255, 255, 255, 0.88);
+            --emerald: #0aa66a;
+            --emerald-dark: #078554;
+            --sidebar: #0b1714;
+            --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 78% 0%, rgba(16, 185, 129, 0.07), transparent 30%),
+                #f4f7f5;
+            font-family: Inter, "SF Pro Display", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        button, a, input, select, textarea {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button, a {
+            touch-action: manipulation;
+        }
+
+        button:focus-visible, a:focus-visible, input:focus-visible,
+        select:focus-visible, textarea:focus-visible {
+            outline: 3px solid rgba(10, 166, 106, 0.22);
+            outline-offset: 3px;
+        }
+
+        .app-sidebar {
+            width: 268px;
+            color: #d7e4dd;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(32, 201, 137, 0.13), transparent 30%),
+                linear-gradient(180deg, #0d1c18 0%, var(--sidebar) 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 16px 0 50px rgba(15, 35, 27, 0.06);
+        }
+
+        .app-sidebar-inner {
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 28px 18px 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 10px 28px;
+        }
+
+        .brand-mark {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 auto;
+            color: #fff;
+            font-size: 19px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 13px;
+            background: linear-gradient(145deg, #20c983, #078554);
+            box-shadow: 0 10px 25px rgba(4, 120, 72, 0.28), inset 0 1px rgba(255, 255, 255, 0.25);
+        }
+
+        .brand-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-name {
+            color: #f4fff9;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .version-badge {
+            display: inline-flex;
+            align-items: center;
+            height: 19px;
+            padding: 0 7px;
+            color: #7ce8b5;
+            font-family: Inter, monospace;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border: 1px solid rgba(80, 222, 157, 0.18);
+            border-radius: 999px;
+            background: rgba(38, 200, 133, 0.09);
+            transition: transform 0.35s var(--ease-out), background 0.35s;
+        }
+
+        .brand:hover .version-badge {
+            background: rgba(38, 200, 133, 0.16);
+            transform: translateY(-1px) rotate(-3deg);
+        }
+
+        .brand-subtitle, .nav-section-label {
+            color: #718c7f;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .nav-section-label {
+            padding: 0 12px;
+            margin: 8px 0 12px;
+        }
+
+        .sidebar-nav ul {
+            display: grid;
+            gap: 8px;
+        }
+
+        .nav-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 66px;
+            padding: 11px 12px !important;
+            color: #8fa79a !important;
+            text-decoration: none;
+            border: 1px solid transparent !important;
+            border-radius: 15px;
+            transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease, transform 0.25s var(--ease-out) !important;
+        }
+
+        .nav-link:hover {
+            color: #e6f6ed !important;
+            background: rgba(255, 255, 255, 0.055) !important;
+            transform: translateX(2px);
+        }
+
+        .nav-link.text-primary {
+            color: #eafff3 !important;
+            background: linear-gradient(100deg, rgba(25, 190, 123, 0.2), rgba(25, 190, 123, 0.08)) !important;
+            border-color: rgba(64, 217, 150, 0.17) !important;
+            box-shadow: inset 3px 0 #24c886, 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-icon {
+            display: grid;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            flex: 0 0 auto;
+            margin: 0 !important;
+            color: #87a094;
+            font-size: 15px;
+            border-radius: 11px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: inherit;
+        }
+
+        .nav-link.text-primary .nav-icon {
+            color: #70e6b0;
+            background: rgba(40, 205, 137, 0.13);
+        }
+
+        .nav-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        .nav-copy strong {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .nav-copy small {
+            overflow: hidden;
+            color: #627d6f;
+            font-size: 10px;
+            font-weight: 400;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .nav-link.text-primary .nav-copy small {
+            color: #8bb5a0;
+        }
+
+        .sidebar-foot {
+            margin-top: auto;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .privacy-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #c7dacf;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #35d793;
+            box-shadow: 0 0 0 5px rgba(53, 215, 147, 0.09);
+        }
+
+        .sidebar-foot p {
+            margin: 8px 0 0;
+            color: #668073;
+            font-size: 10px;
+            line-height: 1.7;
+        }
+
+        .workspace {
+            position: relative;
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .app-header {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            color: var(--ink) !important;
+            background: rgba(255, 255, 255, 0.64) !important;
+            border-bottom: 1px solid rgba(215, 228, 219, 0.8);
+            box-shadow: none !important;
+            backdrop-filter: blur(18px);
+        }
+
+        .app-header::before, .app-header::after {
+            position: absolute;
+            z-index: -1;
+            content: "";
+            border-radius: 999px;
+            filter: blur(2px);
+            pointer-events: none;
+        }
+
+        .app-header::before {
+            top: -130px;
+            right: 6%;
+            width: 340px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(30, 204, 137, 0.12), transparent 67%);
+            transform: translate(var(--header-x, 0), var(--header-y, 0));
+            transition: transform 0.8s var(--ease-out);
+        }
+
+        .app-header::after {
+            right: 28%;
+            bottom: -80px;
+            width: 180px;
+            height: 140px;
+            background: radial-gradient(circle, rgba(88, 128, 255, 0.07), transparent 70%);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 28px;
+            max-width: 1440px;
+            min-height: 142px;
+            margin: 0 auto;
+            padding: 8px 12px 6px;
+        }
+
+        .header-copy {
+            position: relative;
+            z-index: 2;
+            min-width: 0;
+        }
+
+        .header-mascot {
+            position: relative;
+            width: 230px;
+            height: 128px;
+            flex: 0 0 230px;
+            align-self: center;
+            margin-left: auto;
+        }
+
+        .fox-mascot {
+            position: absolute;
+            right: -2px;
+            bottom: -7px;
+            width: 178px;
+            height: 140px;
+            cursor: pointer;
+            border-radius: 48%;
+            outline-offset: -8px;
+            touch-action: manipulation;
+        }
+
+        .fox-mascot canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            filter: drop-shadow(0 10px 10px rgba(57, 76, 55, 0.12));
+        }
+
+        .fox-fallback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            display: grid;
+            place-items: center;
+            width: 72px;
+            height: 72px;
+            color: #fff;
+            font-size: 27px;
+            border: 5px solid rgba(255, 255, 255, 0.75);
+            border-radius: 46% 46% 52% 52%;
+            background: linear-gradient(145deg, #efa461, #ce7042);
+            box-shadow: 0 12px 25px rgba(171, 101, 57, 0.17);
+            opacity: 0.8;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.35s;
+        }
+
+        .fox-mascot.is-ready .fox-fallback {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .mascot-bubble {
+            position: absolute;
+            z-index: 3;
+            top: 12px;
+            left: 0;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            max-width: 138px;
+            padding: 8px 10px;
+            color: #4d6659;
+            font-size: 10px;
+            font-weight: 500;
+            line-height: 1.35;
+            border: 1px solid rgba(205, 221, 211, 0.85);
+            border-radius: 12px 12px 4px 12px;
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 7px 20px rgba(32, 67, 48, 0.06);
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+            transition: transform 0.3s var(--ease-out);
+        }
+
+        .mascot-bubble::after {
+            position: absolute;
+            right: -5px;
+            bottom: 8px;
+            width: 10px;
+            height: 10px;
+            content: "";
+            border-right: 1px solid rgba(205, 221, 211, 0.85);
+            border-bottom: 1px solid rgba(205, 221, 211, 0.85);
+            background: rgba(255, 255, 255, 0.9);
+            transform: rotate(-45deg);
+        }
+
+        .mascot-bubble .status-dot {
+            width: 6px;
+            height: 6px;
+            flex: 0 0 auto;
+            box-shadow: none;
+        }
+
+        .mascot-bubble.is-chatting {
+            transform: translateY(-3px) scale(1.03);
+        }
+
+        .mascot-hint {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            color: #87988e;
+            font-size: 9px;
+            letter-spacing: 0.04em;
+            pointer-events: none;
+        }
+
+        .page-kicker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            color: var(--emerald-dark);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.17em;
+        }
+
+        .page-kicker::before {
+            width: 18px;
+            height: 1px;
+            content: "";
+            background: var(--emerald);
+        }
+
+        #page-title {
+            margin: 0;
+            color: #13251d;
+            font-size: clamp(25px, 2.5vw, 32px);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.045em;
+            text-shadow: none;
+        }
+
+        #page-description {
+            max-width: 600px;
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 0 auto;
+            padding: 10px 14px;
+            color: #4d6659;
+            font-size: 11px;
+            font-weight: 500;
+            border: 1px solid rgba(205, 221, 211, 0.8);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.66);
+            box-shadow: 0 5px 20px rgba(32, 67, 48, 0.04);
+        }
+
+        .workspace-main {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 20px 12px 24px !important;
+        }
+
+        #generate-module > .grid {
+            gap: 26px !important;
+            align-items: stretch;
+        }
+
+        .glass-card {
+            position: relative;
+            isolation: isolate;
+            padding: 26px !important;
+            overflow: hidden;
+            border: 1px solid rgba(218, 229, 221, 0.9);
+            border-radius: 22px !important;
+            background: var(--surface) !important;
+            box-shadow: 0 12px 40px rgba(30, 60, 44, 0.055), 0 2px 8px rgba(30, 60, 44, 0.025) !important;
+            backdrop-filter: blur(18px);
+        }
+
+        .glass-card::after {
+            position: absolute;
+            z-index: 0;
+            inset: 0;
+            content: "";
+            opacity: 0;
+            background: radial-gradient(360px circle at var(--pointer-x, 50%) var(--pointer-y, 50%), rgba(7, 145, 87, 0.18), transparent 68%);
+            pointer-events: none;
+            transition: opacity 0.45s ease;
+        }
+
+        .glass-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .glass-card.spotlight-active::after {
+            opacity: 1;
+        }
+
+        button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ui-ripple {
+            position: absolute;
+            z-index: 5;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.14;
+            pointer-events: none;
+            transform: scale(0);
+            animation: uiRipple 0.65s var(--ease-out) forwards;
+        }
+
+        @keyframes uiRipple {
+            to { opacity: 0; transform: scale(2.4); }
+        }
+
+        .card-hover {
+            transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out), border-color 0.3s ease !important;
+        }
+
+        .card-hover:hover {
+            border-color: rgba(190, 215, 199, 0.95);
+            box-shadow: 0 20px 55px rgba(30, 60, 44, 0.075), 0 3px 10px rgba(30, 60, 44, 0.03) !important;
+            transform: translateY(-3px);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            min-height: 44px;
+            margin-bottom: 24px !important;
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 44px;
+        }
+
+        .panel-icon {
+            display: grid;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            margin: 0 !important;
+            color: var(--emerald-dark) !important;
+            border: 1px solid #d9eee2;
+            border-radius: 12px;
+            background: #edf9f2;
+        }
+
+        .panel-title {
+            color: #1b2d24;
+            font-size: 16px;
+            font-weight: 650;
+            letter-spacing: -0.01em;
+        }
+
+        .panel-subtitle {
+            margin-top: 4px;
+            color: #74877b;
+            font-size: 12px;
+            line-height: 1.4;
+            font-weight: 400;
+        }
+
+        .panel-badge {
+            flex: 0 0 auto;
+            padding: 5px 9px;
+            color: #75877c;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            border: 1px solid #e3eae5;
+            border-radius: 999px;
+            background: #f7faf8;
+        }
+
+        #qrcodeContainer {
+            width: 100%;
+            min-height: 0;
+            margin-bottom: 44px;
+            padding: 0;
+            overflow: visible;
+            border: 0;
+            border-radius: 18px;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        #qrcode {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            max-width: 100%;
+            height: auto !important;
+            aspect-ratio: 1;
+            overflow: hidden;
+            border: 0 !important;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 12px 35px rgba(24, 52, 37, 0.11), 0 0 0 7px #fff;
+            transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out), opacity 0.25s, filter 0.25s;
+        }
+
+        #qrcodeContainer:hover #qrcode {
+            box-shadow: 0 18px 42px rgba(24, 52, 37, 0.14), 0 0 0 7px #fff;
+            transform: translateY(-3px);
+        }
+
+        #qrcode canvas, #qrcode img, #qrcode table {
+            display: block;
+            max-width: 100%;
+            height: auto !important;
+        }
+
+        #loadingIndicator {
+            inset: 0;
+            z-index: 2;
+            align-items: center;
+            justify-content: center;
+            border-radius: inherit;
+            background: rgba(247, 250, 248, 0.76);
+            backdrop-filter: blur(5px);
+        }
+
+        #loadingIndicator:not(.hidden) {
+            display: flex;
+        }
+
+        .loader {
+            width: 28px;
+            height: 28px;
+            border: 2px solid rgba(10, 166, 106, 0.13);
+            border-top-color: var(--emerald);
+            animation-duration: 0.75s;
+        }
+
+        .url-label, .form-group > label, .field-label {
+            display: block;
+            margin-bottom: 8px !important;
+            color: #45594e !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+        }
+
+        #generatedUrl {
+            height: 46px;
+            padding: 0 46px 0 13px;
+            color: #61736a;
+            font-size: 11px;
+            border: 1px solid #e0e8e2;
+            border-radius: 11px;
+            background: #f7f9f8;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        #generatedUrl:hover {
+            border-color: #c8dace;
+            background: #fff;
+        }
+
+        #copyButton {
+            display: grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            color: var(--emerald-dark);
+            border-radius: 8px;
+            background: #e9f6ef;
+        }
+
+        #downloadButton, #generate-btn:not(:disabled), #decode-button {
+            color: #fff !important;
+            border: 1px solid rgba(5, 119, 73, 0.15);
+            background: linear-gradient(135deg, #13b878, #078b57) !important;
+            box-shadow: 0 8px 18px rgba(7, 139, 87, 0.17), inset 0 1px rgba(255, 255, 255, 0.2) !important;
+        }
+
+        #downloadButton:hover, #generate-btn:not(:disabled):hover, #decode-button:hover {
+            background: linear-gradient(135deg, #0fac70, #067a4c) !important;
+            box-shadow: 0 11px 24px rgba(7, 139, 87, 0.22) !important;
+            transform: translateY(-2px);
+        }
+
+        #downloadButton, #resetButton, #paramsResetButton,
+        #decode-button, #decode-reset-button, #copy-btn, #export-btn, #generate-btn {
+            min-height: 42px;
+            border-radius: 11px !important;
+            transition: transform 0.25s var(--ease-out), box-shadow 0.25s, background 0.25s, opacity 0.25s !important;
+        }
+
+        #resetButton, #paramsResetButton, #decode-reset-button {
+            color: #5d6f65 !important;
+            border: 1px solid #e0e7e2;
+            background: #f4f7f5 !important;
+            box-shadow: none !important;
+        }
+
+        #paramsResetButton {
+            min-height: 34px;
+            padding: 7px 11px;
+            font-size: 11px;
+        }
+
+        #resetButton:hover, #paramsResetButton:hover, #decode-reset-button:hover {
+            color: #263b30 !important;
+            border-color: #cddbd1;
+            background: #edf2ee !important;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0) scale(0.98) !important;
+        }
+
+        #qrForm {
+            display: grid;
+            gap: 21px;
+        }
+
+        .form-group > p {
+            margin-top: 6px;
+            color: #75877c;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .form-input {
+            height: 48px;
+            min-height: 48px !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            color: #34483d;
+            font-size: 14px !important;
+            font-weight: 400 !important;
+            border: 1px solid #dde6df !important;
+            border-radius: 11px !important;
+            background-color: #f9fbfa !important;
+            box-shadow: none !important;
+        }
+
+        .form-input:hover {
+            border-color: #bdd7c7 !important;
+            background-color: #fff !important;
+            transform: none !important;
+        }
+
+        .form-input:focus {
+            border-color: rgba(10, 166, 106, 0.65) !important;
+            background-color: #fff !important;
+            box-shadow: 0 0 0 4px rgba(10, 166, 106, 0.08) !important;
+            transform: none !important;
+        }
+
+        select.form-input option {
+            color: #34483d;
+            font-size: 14px !important;
+            line-height: 1.6;
+        }
+
+        .form-group .relative > span {
+            color: #91a298;
+            font-size: 13px;
+        }
+
+        .form-input.error {
+            border-color: #e78c8c !important;
+            box-shadow: 0 0 0 4px rgba(220, 80, 80, 0.07) !important;
+        }
+
+        #qrsize {
+            height: 5px;
+            border-radius: 999px;
+            background: linear-gradient(to right, var(--emerald) var(--range-progress, 60%), #e1e9e3 var(--range-progress, 60%));
+        }
+
+        #qrsize::-webkit-slider-thumb {
+            width: 18px;
+            height: 18px;
+            cursor: grab;
+            appearance: none;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 2px 8px rgba(5, 119, 73, 0.28);
+            transition: transform 0.2s;
+        }
+
+        #qrsize::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        #qrsize::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            cursor: grab;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 2px 8px rgba(5, 119, 73, 0.28);
+        }
+
+        #qrsizeValue {
+            min-width: 52px;
+            padding: 5px 8px;
+            color: #48705a;
+            font-size: 12px;
+            text-align: center;
+            border-radius: 7px;
+            background: #edf6f0;
+        }
+
+        #successMessage, #errorMessage {
+            border-radius: 11px;
+        }
+
+        .decode-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+            gap: 24px;
+        }
+
+        #qr-drop-area, #excel-drop-area {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
+            padding: 36px !important;
+            overflow: hidden;
+            border: 1.5px dashed #c9d9ce !important;
+            border-radius: 18px !important;
+            background: #f8fbf9 !important;
+            transition: border-color 0.3s, background 0.3s, transform 0.3s var(--ease-out), box-shadow 0.3s !important;
+        }
+
+        #qr-drop-area::before, #excel-drop-area::before {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            content: "";
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(20, 184, 120, 0.09), transparent 68%);
+            pointer-events: none;
+        }
+
+        #qr-drop-area:hover, #excel-drop-area:hover {
+            border-color: #57bd8d !important;
+            background: #f1faf5 !important;
+            box-shadow: inset 0 0 0 4px rgba(10, 166, 106, 0.025);
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            display: grid;
+            place-items: center;
+            width: 62px;
+            height: 62px;
+            margin-bottom: 18px;
+            color: var(--emerald-dark);
+            font-size: 22px;
+            border: 1px solid #d8ede0;
+            border-radius: 19px;
+            background: #eaf7ef;
+            box-shadow: 0 8px 20px rgba(15, 110, 68, 0.06);
+            transition: transform 0.35s var(--ease-out);
+        }
+
+        #qr-drop-area:hover .upload-icon, #excel-drop-area:hover .upload-icon {
+            transform: translateY(-4px) rotate(-3deg);
+        }
+
+        .upload-title {
+            position: relative;
+            margin: 0 0 8px;
+            color: #34483d;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .upload-hint {
+            position: relative;
+            margin: 0;
+            color: #91a198;
+            font-size: 11px;
+        }
+
+        .decode-side {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .decode-tip {
+            padding: 18px;
+            color: #71847a;
+            font-size: 11px;
+            line-height: 1.8;
+            border: 1px solid #e4ebe6;
+            border-radius: 14px;
+            background: #fafcfb;
+        }
+
+        .decode-tip strong {
+            display: block;
+            margin-bottom: 6px;
+            color: #41564a;
+            font-size: 12px;
+        }
+
+        #decode-result {
+            min-height: 132px;
+            padding: 14px 44px 14px 14px;
+            font-size: 11px;
+            border-color: #dfe8e1;
+            border-radius: 12px;
+            background: #f8faf9;
+        }
+
+        .decode-actions {
+            margin-top: auto;
+        }
+
+        #excel-to-xmind-module {
+            min-height: 0 !important;
+            background: transparent !important;
+        }
+
+        .conversion-shell {
+            max-width: 880px;
+            min-height: 0 !important;
+            margin: 0 auto;
+            padding: 0 !important;
+        }
+
+        .conversion-card {
+            padding: 30px !important;
+        }
+
+        .conversion-heading {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .conversion-heading h2 {
+            margin: 0;
+            color: #1c3025;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .conversion-heading p {
+            margin: 5px 0 0;
+            color: #899990;
+            font-size: 11px;
+        }
+
+        #excel-drop-area {
+            min-height: 270px;
+            margin-bottom: 18px;
+        }
+
+        .format-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 18px;
+        }
+
+        .format-chip {
+            padding: 5px 9px;
+            color: #72867a;
+            font-family: Inter, monospace;
+            font-size: 9px;
+            border: 1px solid #dfe9e2;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.75);
+        }
+
+        #file-info {
+            position: relative;
+            padding: 8px 12px;
+            color: #16734c;
+            border-radius: 8px;
+            background: #e9f7ef;
+        }
+
+        #generate-btn {
+            min-height: 48px;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+        }
+
+        #generate-btn:disabled {
+            color: #9aa9a0 !important;
+            border: 1px solid #e0e7e2;
+            background: #edf1ee !important;
+            box-shadow: none !important;
+        }
+
+        .conversion-note {
+            margin-top: 14px !important;
+            color: #93a198 !important;
+            font-size: 10px;
+        }
+
+        #result-area {
+            animation: moduleEnter 0.45s var(--ease-out) both;
+        }
+
+        #copy-btn, #export-btn {
+            min-height: 38px;
+            padding: 9px 16px;
+            font-size: 11px;
+        }
+
+        #copy-btn {
+            background: #0a9e64;
+        }
+
+        #export-btn {
+            background: #344f41;
+        }
+
+        #xmind-preview {
+            font-size: 12px;
+        }
+
+        .workspace-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 22px 2px 4px;
+            color: #9aa79f;
+            font-size: 10px;
+        }
+
+        .workspace-footer span:last-child {
+            font-family: Inter, monospace;
+            letter-spacing: 0.08em;
+        }
+
+        #mobile-nav {
+            opacity: 0;
+            background: rgba(5, 15, 11, 0.55);
+            backdrop-filter: blur(5px);
+            transition: opacity 0.28s ease;
+        }
+
+        #mobile-nav.is-open {
+            opacity: 1;
+        }
+
+        body.nav-open {
+            overflow: hidden;
+        }
+
+        #mobile-nav-content {
+            width: min(84vw, 320px) !important;
+            color: #d7e4dd;
+            background: linear-gradient(180deg, #0d1c18, #0b1714) !important;
+            box-shadow: 24px 0 60px rgba(0, 0, 0, 0.22) !important;
+            transition: transform 0.36s var(--ease-out) !important;
+        }
+
+        #mobile-nav-content .app-sidebar-inner {
+            position: relative;
+            height: 100%;
+        }
+
+        #mobile-nav-toggle, #close-mobile-nav {
+            display: grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 12px;
+        }
+
+        #mobile-nav-toggle {
+            color: #385245;
+            border: 1px solid #dce6df;
+            background: rgba(255, 255, 255, 0.75);
+            box-shadow: none;
+        }
+
+        #close-mobile-nav {
+            margin-left: auto;
+            color: #9eb4a7;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .toast {
+            top: 24px;
+            right: 24px;
+            display: flex;
+            align-items: center;
+            max-width: min(380px, calc(100vw - 32px));
+            padding: 13px 18px;
+            color: #f3f9f5;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 13px;
+            background: rgba(17, 32, 25, 0.94);
+            box-shadow: 0 16px 45px rgba(10, 27, 18, 0.2);
+            backdrop-filter: blur(16px);
+            pointer-events: none;
+            transform: translateY(-16px) scale(0.97);
+            transition: opacity 0.3s, transform 0.4s var(--ease-out);
+        }
+
+        .toast.show {
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+
+        .toast.success, .toast.error, .toast.info {
+            background: rgba(17, 32, 25, 0.94);
+        }
+
+        .toast.success i { color: #55dea0; }
+        .toast.error i { color: #ff9a9a; }
+        .toast.info i { color: #8ab8ff; }
+
+        .module-enter {
+            animation: moduleEnter 0.5s var(--ease-out) backwards !important;
+        }
+
+        @keyframes moduleEnter {
+            from { opacity: 0; transform: translateY(12px) scale(0.995); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .reveal-item {
+            animation: riseIn 0.65s var(--ease-out) backwards;
+        }
+
+        .reveal-item:nth-child(2) {
+            animation-delay: 0.08s;
+        }
+
+        ::selection {
+            color: #0b3b26;
+            background: #bcebd3;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border: 2px solid transparent;
+            border-radius: 999px;
+            background: #c5d4c9;
+            background-clip: padding-box;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9eb8a8;
+            background-clip: padding-box;
+        }
+
+        /* 操作反馈动效 */
+        #copyButton, #decode-copy-button {
+            transition: color 0.25s, background 0.25s, transform 0.25s var(--ease-out);
+        }
+
+        #copyButton.is-copied, #decode-copy-button.is-copied {
+            color: #087a4d;
+            background: #d9f4e6;
+            transform: translateY(-50%) scale(1.06);
+        }
+
+        #decode-copy-button.is-copied {
+            transform: scale(1.06);
+        }
+
+        #copyButton.is-copied i, #decode-copy-button.is-copied i {
+            animation: copyIconPop 0.45s var(--ease-out);
+        }
+
+        #generatedUrl.copy-success, #decode-result.copy-success {
+            animation: copyFieldSuccess 1s var(--ease-out);
+        }
+
+        @keyframes copyIconPop {
+            0% { opacity: 0; transform: scale(0.45) rotate(-12deg); }
+            65% { transform: scale(1.16) rotate(3deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0); }
+        }
+
+        @keyframes copyFieldSuccess {
+            0%, 100% { border-color: #e0e8e2; box-shadow: none; }
+            30%, 65% { border-color: #39ba80; box-shadow: 0 0 0 4px rgba(24, 176, 110, 0.11); }
+        }
+
+        #qrcode.is-refreshing {
+            opacity: 0.42;
+            filter: blur(1px);
+            transform: scale(0.985);
+        }
+
+        #qrcode.is-updated {
+            animation: qrUpdated 0.55s var(--ease-out);
+        }
+
+        #loadingIndicator {
+            background: rgba(255, 255, 255, 0.42);
+            backdrop-filter: blur(1px);
+        }
+
+        #loadingIndicator::before {
+            position: absolute;
+            inset: 0;
+            content: "";
+            background: linear-gradient(180deg, transparent 0%, rgba(27, 190, 123, 0.1) 48%, transparent 100%);
+            transform: translateY(-100%);
+            animation: qrLoadingSweep 1.35s ease-in-out infinite;
+        }
+
+        #loadingIndicator .loader {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.82);
+            box-shadow: 0 5px 18px rgba(12, 110, 67, 0.1);
+        }
+
+        @keyframes qrLoadingSweep {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @keyframes qrUpdated {
+            0% { opacity: 0.35; transform: scale(0.965); }
+            70% { opacity: 1; transform: scale(1.012); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* 尺寸滑块与跟随数值 */
+        .range-control {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding-top: 34px;
+        }
+
+        #qrsize {
+            margin: 0;
+        }
+
+        #qrsizeValue {
+            position: absolute;
+            top: 0;
+            left: clamp(28px, var(--range-progress, 60%), calc(100% - 28px));
+            min-width: 54px;
+            color: #176b48;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid #d5e9dc;
+            border-radius: 8px;
+            background: rgba(245, 252, 247, 0.96);
+            box-shadow: 0 5px 14px rgba(26, 86, 53, 0.07);
+            opacity: 0.82;
+            pointer-events: none;
+            transform: translateX(-50%) scale(0.94);
+            transition: opacity 0.2s, transform 0.25s var(--ease-out), box-shadow 0.25s;
+        }
+
+        #qrsizeValue::after {
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            width: 7px;
+            height: 7px;
+            content: "";
+            border-right: 1px solid #d5e9dc;
+            border-bottom: 1px solid #d5e9dc;
+            background: #f5fcf7;
+            transform: translateX(-50%) rotate(45deg);
+        }
+
+        #qrsize.is-dragging + #qrsizeValue, #qrsize:focus-visible + #qrsizeValue {
+            opacity: 1;
+            box-shadow: 0 7px 18px rgba(17, 128, 76, 0.12);
+            transform: translateX(-50%) translateY(-2px) scale(1.05);
+        }
+
+        #qrsize.is-dragging::-webkit-slider-thumb {
+            cursor: grabbing;
+            box-shadow: 0 0 0 7px rgba(10, 166, 106, 0.12), 0 3px 10px rgba(5, 119, 73, 0.25);
+            transform: scale(1.16);
+        }
+
+        #qrsize.is-dragging::-moz-range-thumb {
+            cursor: grabbing;
+            box-shadow: 0 0 0 7px rgba(10, 166, 106, 0.12), 0 3px 10px rgba(5, 119, 73, 0.25);
+            transform: scale(1.16);
+        }
+
+        /* 上传、成功状态与结果展开 */
+        #qr-drop-area::after, #excel-drop-area::after {
+            position: absolute;
+            inset: 8px;
+            content: "";
+            border: 1px dashed transparent;
+            border-radius: 13px;
+            pointer-events: none;
+            transition: border-color 0.25s;
+        }
+
+        #qr-drop-area.is-dragging, #excel-drop-area.is-dragging {
+            border-color: #20ac71 !important;
+            background: #edf9f2 !important;
+            animation: uploadAreaPulse 1.2s ease-in-out infinite;
+        }
+
+        #qr-drop-area.is-dragging::after, #excel-drop-area.is-dragging::after {
+            border-color: rgba(17, 166, 103, 0.34);
+            animation: uploadOutlinePulse 1.2s ease-in-out infinite;
+        }
+
+        #qr-drop-area.is-dragging .upload-icon, #excel-drop-area.is-dragging .upload-icon {
+            color: #087a4d;
+            animation: uploadIconFloat 0.75s ease-in-out infinite alternate;
+        }
+
+        #qr-drop-area.is-success, #excel-drop-area.is-success {
+            border-color: #57c38f !important;
+            background: #f0faf4 !important;
+        }
+
+        #qr-drop-area.is-success .upload-icon, #excel-drop-area.is-success .upload-icon {
+            color: #087a4d;
+            animation: uploadSuccessPop 0.5s var(--ease-out);
+        }
+
+        .ui-expand-in {
+            transform-origin: top center;
+            animation: uiExpandIn 0.45s var(--ease-out) both;
+        }
+
+        @keyframes uploadAreaPulse {
+            0%, 100% { box-shadow: inset 0 0 0 0 rgba(20, 177, 110, 0.02); }
+            50% { box-shadow: inset 0 0 0 5px rgba(20, 177, 110, 0.055); }
+        }
+
+        @keyframes uploadOutlinePulse {
+            0%, 100% { opacity: 0.45; transform: scale(1); }
+            50% { opacity: 1; transform: scale(0.985); }
+        }
+
+        @keyframes uploadIconFloat {
+            from { transform: translateY(0) scale(1); }
+            to { transform: translateY(-7px) scale(1.05); }
+        }
+
+        @keyframes uploadSuccessPop {
+            0% { transform: scale(0.75) rotate(-8deg); }
+            65% { transform: scale(1.12) rotate(3deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+
+        @keyframes uiExpandIn {
+            from { opacity: 0; transform: translateY(-7px) scale(0.985); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @media (min-width: 1024px) and (max-height: 800px) {
+            .header-inner { min-height: 128px; }
+            .header-mascot { height: 116px; }
+            .fox-mascot { width: 164px; height: 126px; }
+            #generate-module .glass-card { padding: 20px !important; }
+            #generate-module .panel-header { margin-bottom: 18px !important; }
+            #generate-module #qrcode { max-width: 300px; }
+            #qrcodeContainer { margin-bottom: 36px; }
+            #generate-module .form-input { height: 44px; min-height: 44px !important; }
+            #generate-module .form-group > p { display: none; }
+            #generate-module #qrForm { gap: 14px; }
+        }
+
+        @media (max-width: 1100px) {
+            .app-sidebar { width: 236px; }
+            .app-sidebar-inner { padding-right: 14px; padding-left: 14px; }
+            .header-inner, .workspace-main { padding-right: 10px !important; padding-left: 10px !important; }
+            .header-mascot { width: 170px; flex-basis: 170px; }
+            .fox-mascot { width: 158px; height: 130px; }
+            .mascot-bubble { top: 0; left: -12px; max-width: 116px; padding: 7px 8px; font-size: 9px; }
+            .mascot-hint { display: none; }
+            .decode-layout { grid-template-columns: 1fr; }
+            .decode-actions { margin-top: 4px; }
+        }
+
+        @media (max-width: 900px) and (min-width: 768px) {
+            .header-mascot { width: 142px; flex-basis: 142px; }
+            .fox-mascot { width: 146px; height: 122px; }
+            .mascot-bubble { display: none; }
+        }
+
+        @media (max-width: 767px) {
+            .workspace { height: 100dvh; }
+            .header-inner { min-height: 0; }
+            .header-mascot { display: none !important; }
+            .header-inner { align-items: flex-start; padding: 16px 20px 14px !important; }
+            .header-status { display: none; }
+            .header-copy { padding-right: 8px; }
+            .page-kicker { margin-bottom: 5px; font-size: 9px; }
+            #page-title { font-size: 23px; }
+            #page-description { margin-top: 5px; font-size: 12px; line-height: 1.55; }
+            .workspace-main { padding: 16px 16px 20px !important; }
+            #generate-module > .grid { gap: 16px !important; }
+            .glass-card, .conversion-card { padding: 20px !important; border-radius: 18px !important; }
+            .card-hover:hover { transform: none; }
+            .panel-header { margin-bottom: 20px !important; }
+            .panel-badge { display: none; }
+            #qrForm { gap: 20px; }
+            #qrcodeContainer { min-height: 0; margin-bottom: 32px; padding: 0; }
+            #qrcode { max-width: calc(100vw - 100px); height: auto !important; aspect-ratio: 1; }
+            #qr-drop-area, #excel-drop-area { min-height: 240px; padding: 28px 20px !important; }
+            .conversion-heading h2 { font-size: 18px; }
+            .workspace-footer { align-items: flex-start; flex-direction: column; gap: 5px; }
+            .toast { top: 16px; right: 16px; left: 16px; max-width: none; }
+        }
+
+        @media (min-width: 640px) and (max-width: 1023px) {
+            #generate-module > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (hover: none) {
+            .glass-card::after { display: none; }
+            #qrcodeContainer:hover #qrcode { transform: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html, .workspace { scroll-behavior: auto !important; }
+            .glass-card::after { display: none; }
+            .app-header::before { transform: none; }
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex">
     <!-- 左侧导航栏 -->
-    <aside class="w-auto bg-white shadow-lg flex-shrink-0 hidden md:block">
-        <div class="p-4 border-b border-gray-200">
-            <div class="flex items-center space-x-2">
-                <i class="fa fa-qrcode text-2xl text-primary"></i>
-                <h1 class="text-lg font-bold text-dark">工具集</h1>
-            </div>
-        </div>
-        <nav class="mt-4">
-            <ul>
-                <li>
-                    <a href="#generate" id="nav-generate" class="flex items-center px-4 py-3 text-primary bg-primary/5 border-l-4 border-primary hover:bg-primary/10 transition-colors">
-                        <i class="fa fa-plus-circle w-5 mr-2"></i>
-                        <span>生码工具</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#decode" id="nav-decode" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 border-l-4 border-transparent transition-colors">
-                        <i class="fa fa-qrcode w-5 mr-2"></i>
-                        <span>解码工具</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#excel-to-xmind" id="nav-excel-to-xmind" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 border-l-4 border-transparent transition-colors">
-                        <i class="fa fa-file-excel-o w-5 mr-2"></i>
-                        <span>xmind/Excel转换.doc</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </aside>
-    
-    <!-- 移动端导航按钮 -->
-    <div class="fixed bottom-6 right-6 md:hidden z-50">
-        <button id="mobile-nav-toggle" class="btn-primary bg-primary hover:bg-primary/90 text-white rounded-full w-14 h-14 shadow-lg flex items-center justify-center">
-            <i class="fa fa-bars text-xl"></i>
-        </button>
-    </div>
-    
-    <!-- 移动端侧边栏 -->
-    <div id="mobile-nav" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden">
-        <div class="bg-white h-full w-auto shadow-xl transform transition-transform duration-300 -translate-x-full" id="mobile-nav-content">
-            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <i class="fa fa-qrcode text-2xl text-primary"></i>
-                    <h1 class="text-lg font-bold text-dark">工具集</h1>
+    <aside class="app-sidebar flex-shrink-0 hidden md:block" aria-label="主导航">
+        <div class="app-sidebar-inner">
+            <div class="brand">
+                <div class="brand-mark"><i class="fa fa-qrcode" aria-hidden="true"></i></div>
+                <div>
+                    <div class="brand-title-row"><div class="brand-name">QR Studio</div><span class="version-badge">v2.0</span></div>
+                    <div class="brand-subtitle">Utility workspace</div>
                 </div>
-                <button id="close-mobile-nav" class="text-gray-500 hover:text-gray-700">
-                    <i class="fa fa-times text-xl"></i>
-                </button>
             </div>
-            <nav class="mt-4">
+            <div class="nav-section-label">工作区</div>
+            <nav class="sidebar-nav">
                 <ul>
                     <li>
-                        <a href="#generate" id="mobile-nav-generate" class="flex items-center px-6 py-4 text-primary bg-primary/5 border-l-4 border-primary">
-                            <i class="fa fa-plus-circle w-5 mr-3"></i>
-                            <span>生码工具</span>
+                        <a href="#generate" id="nav-generate" class="nav-link text-primary bg-primary/5 border-primary" aria-current="page">
+                            <i class="fa fa-plus-circle nav-icon" aria-hidden="true"></i>
+                            <span class="nav-copy"><strong>生码工具</strong><small>创建微信小程序二维码</small></span>
                         </a>
                     </li>
                     <li>
-                        <a href="#decode" id="mobile-nav-decode" class="flex items-center px-6 py-4 text-gray-600 border-l-4 border-transparent">
-                            <i class="fa fa-qrcode w-5 mr-3"></i>
-                            <span>解码工具</span>
+                        <a href="#decode" id="nav-decode" class="nav-link text-gray-600 border-transparent">
+                            <i class="fa fa-qrcode nav-icon" aria-hidden="true"></i>
+                            <span class="nav-copy"><strong>解码工具</strong><small>识别图片中的二维码</small></span>
                         </a>
                     </li>
                     <li>
-                        <a href="#excel-to-xmind" id="mobile-nav-excel-to-xmind" class="flex items-center px-6 py-4 text-gray-600 border-l-4 border-transparent">
-                            <i class="fa fa-file-excel-o w-5 mr-3"></i>
-                            <span>xmind/Excel转换.doc</span>
+                        <a href="#excel-to-xmind" id="nav-excel-to-xmind" class="nav-link text-gray-600 border-transparent">
+                            <i class="fa fa-files-o nav-icon" aria-hidden="true"></i>
+                            <span class="nav-copy"><strong>文档转换</strong><small>Excel / XMind 转 Word</small></span>
                         </a>
                     </li>
                 </ul>
             </nav>
+            <div class="sidebar-foot">
+                <div class="privacy-title"><span class="status-dot"></span>本地处理，安全无忧</div>
+                <p>文件与数据仅在当前浏览器中处理，不会上传至服务器。</p>
+            </div>
         </div>
-    </div>
-    
-    <!-- 主内容区域 -->
-    <div class="flex-1 overflow-y-auto">
-    <!-- 页面头部 -->
-    <header class="bg-gradient-wechat text-white shadow-md">
-        <div class="container mx-auto px-4 py-6">
-            <div class="flex items-center justify-between">
-                <h1 id="page-title" class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-shadow">微信二维码生码工具</h1>
-                <div class="hidden md:flex items-center space-x-4">
-                    <button class="text-white hover:text-gray-200 transition-all-300">
-                        <i class="fa fa-github text-xl"></i>
-                    </button>
-                    <button class="text-white hover:text-gray-200 transition-all-300">
-                        <i class="fa fa-info-circle text-xl"></i>
+    </aside>
+
+    <!-- 移动端侧边栏 -->
+    <div id="mobile-nav" class="fixed inset-0 z-40 hidden md:hidden" aria-hidden="true">
+        <div class="h-full transform -translate-x-full" id="mobile-nav-content">
+            <div class="app-sidebar-inner">
+                <div class="brand">
+                    <div class="brand-mark"><i class="fa fa-qrcode" aria-hidden="true"></i></div>
+                    <div>
+                        <div class="brand-title-row"><div class="brand-name">QR Studio</div><span class="version-badge">v2.0</span></div>
+                        <div class="brand-subtitle">Utility workspace</div>
+                    </div>
+                    <button id="close-mobile-nav" type="button" aria-label="关闭导航">
+                        <i class="fa fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
+                <div class="nav-section-label">工作区</div>
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li>
+                            <a href="#generate" id="mobile-nav-generate" class="nav-link text-primary bg-primary/5 border-primary">
+                                <i class="fa fa-plus-circle nav-icon" aria-hidden="true"></i>
+                                <span class="nav-copy"><strong>生码工具</strong><small>创建微信小程序二维码</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#decode" id="mobile-nav-decode" class="nav-link text-gray-600 border-transparent">
+                                <i class="fa fa-qrcode nav-icon" aria-hidden="true"></i>
+                                <span class="nav-copy"><strong>解码工具</strong><small>识别图片中的二维码</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#excel-to-xmind" id="mobile-nav-excel-to-xmind" class="nav-link text-gray-600 border-transparent">
+                                <i class="fa fa-files-o nav-icon" aria-hidden="true"></i>
+                                <span class="nav-copy"><strong>文档转换</strong><small>Excel / XMind 转 Word</small></span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="sidebar-foot">
+                    <div class="privacy-title"><span class="status-dot"></span>本地处理，安全无忧</div>
+                    <p>文件与数据仅在当前浏览器中处理。</p>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="workspace flex-1">
+    <!-- 页面头部 -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="header-copy">
+                <div class="page-kicker">WECHAT TOOLKIT</div>
+                <h1 id="page-title">微信二维码生码工具</h1>
+                <p id="page-description">配置业务参数，实时生成清晰、可下载的小程序二维码。</p>
+            </div>
+            <div class="header-mascot hidden md:block">
+                <div id="mascotBubble" class="mascot-bubble" aria-live="polite">
+                    <span class="status-dot"></span><span id="mascotMessage">所有工具已就绪</span>
+                </div>
+                <div id="foxMascot" class="fox-mascot" role="button" tabindex="0" aria-label="与 3D 小狐狸互动，点击让它跳一下">
+                    <div class="fox-fallback" aria-hidden="true"><i class="fa fa-paw"></i></div>
+                </div>
+                <span class="mascot-hint">点点小狐狸</span>
+            </div>
+            <button id="mobile-nav-toggle" type="button" class="md:hidden" aria-label="打开导航" aria-controls="mobile-nav" aria-expanded="false">
+                <i class="fa fa-bars" aria-hidden="true"></i>
+            </button>
         </div>
     </header>
 
     <!-- 内容区域和页脚的容器 -->
     <div class="flex-grow flex flex-col">
         <!-- 主要内容 -->
-        <main class="flex-grow container mx-auto px-4 py-8">
+        <main class="workspace-main flex-grow">
         <!-- 生码工具模块 -->
         <div id="generate-module" class="tool-module">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2">
             <!-- 二维码预览区域 -->
-            <div class="bg-white rounded-2xl shadow-custom p-8 animate-fadeIn card-hover">
-                <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
-                    <i class="fa fa-qrcode mr-2 text-primary"></i>二维码预览
-                </h2>
-                
-                <!-- 成功提示区域 -->
-                <div id="successMessage" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm animate-fadeIn mb-2">
-                    <i class="fa fa-check-circle mr-2"></i>
-                    <span id="successText">操作成功！</span>
+            <section class="glass-card reveal-item card-hover" aria-labelledby="preview-heading">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <i class="fa fa-qrcode panel-icon" aria-hidden="true"></i>
+                        <div><h2 id="preview-heading" class="panel-title">二维码预览</h2><div class="panel-subtitle">参数变更后自动刷新</div></div>
+                    </div>
+                    <span class="panel-badge">LIVE PREVIEW</span>
                 </div>
-                
+
+                <div id="successMessage" class="hidden p-4 bg-green-50 border border-green-200 text-green-600 text-sm animate-fadeIn mb-4" role="status">
+                    <i class="fa fa-check-circle mr-2"></i><span id="successText">操作成功！</span>
+                </div>
+
                 <div class="flex flex-col items-center justify-center">
-                    <div id="qrcodeContainer" class="bg-white p-6 rounded-xl shadow-custom mb-4 flex items-center justify-center relative min-h-[300px]">
-                        <!-- 二维码图片将在这里生成 -->
-                        <div id="qrcode" class="border border-gray-100"></div>
-                        <!-- 加载指示器 -->
-                        <div id="loadingIndicator" class="absolute hidden">
+                    <div id="qrcodeContainer" class="flex items-center justify-center relative">
+                        <div id="qrcode"></div>
+                        <div id="loadingIndicator" class="absolute hidden" aria-label="正在生成二维码">
                             <div class="loader"></div>
                         </div>
                     </div>
-                    
+
                     <div class="w-full">
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">生成的链接</h3>
+                        <label for="generatedUrl" class="url-label">生成的链接</label>
                         <div class="relative">
-                            <input type="text" id="generatedUrl" readonly 
-                                   class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm overflow-x-auto"
+                            <input type="text" id="generatedUrl" readonly
+                                   class="w-full overflow-x-auto"
                                    value="https://open.weixin.qq.com/sns/getexpappinfo?appid=wx713931c9accc58f1&path=pages%2Findex%2Findex.html%3Fcontext%3DWM%26mcid%3D41941&iswxtpa=1#wechat-redirect">
-                            <button id="copyButton" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors p-2">
-                                <i class="fa fa-copy"></i>
+                            <button id="copyButton" type="button" class="absolute right-2 top-1/2 transform -translate-y-1/2" aria-label="复制生成的链接" title="复制链接">
+                                <i class="fa fa-copy" aria-hidden="true"></i>
                             </button>
                         </div>
-                        <p id="copySuccess" class="hidden mt-1 text-xs text-green-500">
-                            <i class="fa fa-check-circle"></i> 链接已复制到剪贴板
-                        </p>
+                        <p id="copySuccess" class="hidden mt-1 text-xs text-green-500"><i class="fa fa-check-circle"></i> 链接已复制到剪贴板</p>
                     </div>
 
                     <div class="mt-6 flex flex-wrap gap-3 justify-center">
-                        <button id="downloadButton" class="bg-accent hover:bg-accent/90 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 flex items-center transform hover:scale-[1.02] active:scale-[0.98]">
-                            <i class="fa fa-download mr-2"></i>
-                            下载二维码
+                        <button id="downloadButton" type="button" class="font-medium py-2 px-5 flex items-center">
+                            <i class="fa fa-download mr-2" aria-hidden="true"></i>下载二维码
                         </button>
-                        <button id="resetButton" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 flex items-center transform hover:scale-[1.02] active:scale-[0.98]">
-                            <i class="fa fa-undo mr-2"></i>
-                            重置
+                        <button id="resetButton" type="button" class="font-medium py-2 px-5 flex items-center">
+                            <i class="fa fa-undo mr-2" aria-hidden="true"></i>重置参数
                         </button>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- 表单区域 -->
-            <div class="bg-white rounded-2xl shadow-custom p-8 animate-fadeIn card-hover" style="animation-delay: 0.2s;">
-                <h2 class="text-xl font-bold mb-6 text-dark flex items-center justify-between animate-slideIn">
-                        <div class="flex items-center">
-                            <i class="fa fa-sliders mr-2 text-primary"></i>参数设置
-                        </div>
-                        <button id="paramsResetButton" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg shadow transition-all duration-300 flex items-center transform hover:scale-[1.02] active:scale-[0.98]">
-                            <i class="fa fa-undo mr-2"></i>
-                            重置
-                        </button>
-                    </h2>
-                <form id="qrForm" class="space-y-5">
-                    <!-- 错误提示区域 -->
-                    <div id="errorMessage" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm animate-fadeIn">
-                        <i class="fa fa-exclamation-circle mr-2"></i>
-                        <span id="errorText">错误信息将显示在这里</span>
+            <section class="glass-card reveal-item card-hover" aria-labelledby="params-heading">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <i class="fa fa-sliders panel-icon" aria-hidden="true"></i>
+                        <div><h2 id="params-heading" class="panel-title">参数设置</h2><div class="panel-subtitle">填写小程序与业务信息</div></div>
+                    </div>
+                    <button id="paramsResetButton" type="button" class="font-medium flex items-center">
+                        <i class="fa fa-undo mr-2" aria-hidden="true"></i>重置
+                    </button>
+                </div>
+                <form id="qrForm">
+                    <div id="errorMessage" class="hidden p-4 bg-red-50 border border-red-200 text-red-600 text-sm animate-fadeIn" role="alert">
+                        <i class="fa fa-exclamation-circle mr-2"></i><span id="errorText">错误信息将显示在这里</span>
                     </div>
                     <div class="form-group">
-                        <label for="appid" class="block text-sm font-medium text-gray-700 mb-1">AppID <span class="text-red-500">*</span></label>
+                        <label for="appid">AppID <span class="text-red-500">*</span></label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                <i class="fa fa-key"></i>
-                            </span>
-                            <select id="appid" name="appid" 
-                                   class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white" 
-                                   style="max-height: 180px; overflow-y: auto; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #07C160 #f1f1f1;" required>
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3"><i class="fa fa-key" aria-hidden="true"></i></span>
+                            <select id="appid" name="appid" class="form-input w-full pl-10 pr-4" style="max-height: 180px; overflow-y: auto; scrollbar-width: thin;" required>
                                 <!-- AppID选项将通过JavaScript动态生成 -->
                             </select>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">请从下拉列表中选择AppID</p>
+                        <p>选择预设应用，或在列表底部使用自定义 AppID</p>
                     </div>
 
                     <div class="form-group">
-                        <label for="mcid" class="block text-sm font-medium text-gray-700 mb-1">MCID</label>
+                        <label for="mcid">MCID</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                <i class="fa fa-code"></i>
-                            </span>
-                            <input type="text" id="mcid" name="mcid" placeholder="请输入MCID" 
-                                   class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3"><i class="fa fa-code" aria-hidden="true"></i></span>
+                            <input type="text" id="mcid" name="mcid" placeholder="请输入MCID" inputmode="numeric" class="form-input w-full pl-10 pr-4">
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">例如: 41941</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="tableno" class="block text-sm font-medium text-gray-700 mb-1">桌位号</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                <i class="fa fa-cutlery"></i>
-                            </span>
-                            <input type="text" id="tableno" name="tableno" placeholder="请输入桌位号" value="001"
-                                   class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20">
-                        </div>
-                        <p class="mt-1 text-xs text-gray-500">非必填，默认值为001</p>
+                        <p>商户编号，仅支持数字，例如 41941</p>
                     </div>
 
                     <div class="form-group">
-                        <label for="bustype" class="block text-sm font-medium text-gray-700 mb-1">业务类型</label>
+                        <label for="tableno">桌位号</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                <i class="fa fa-briefcase"></i>
-                            </span>
-                            <select id="bustype" name="bustype" 
-                                    class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white" 
-                                    style="max-height: 180px; overflow-y: auto; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #07C160 #f1f1f1;">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3"><i class="fa fa-cutlery" aria-hidden="true"></i></span>
+                            <input type="text" id="tableno" name="tableno" placeholder="请输入桌位号" value="001" class="form-input w-full pl-10 pr-4">
+                        </div>
+                        <p>非必填，留空时默认使用 001</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bustype">业务类型</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3"><i class="fa fa-briefcase" aria-hidden="true"></i></span>
+                            <select id="bustype" name="bustype" class="form-input w-full pl-10 pr-4" style="max-height: 180px; overflow-y: auto; scrollbar-width: thin;">
                                 <!-- 选项将通过JavaScript动态生成 -->
                             </select>
                         </div>
                     </div>
 
-                    <!-- 路径不再需要手动输入，由配置文件中的pathTemplate自动生成 -->
-
                     <div class="form-group">
-                        <label for="qrsize" class="block text-sm font-medium text-gray-700 mb-1">二维码大小</label>
-                        <div class="flex items-center space-x-4">
-                            <input type="range" id="qrsize" name="qrsize" min="100" max="600" value="400" step="10"
-                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary">
-                            <span id="qrsizeValue" class="text-sm font-medium text-gray-700">400px</span>
+                        <label for="qrsize">二维码大小</label>
+                        <div class="range-control">
+                            <input type="range" id="qrsize" name="qrsize" min="100" max="600" value="400" step="10" class="w-full appearance-none cursor-pointer" aria-valuetext="400像素">
+                            <span id="qrsizeValue">400px</span>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+        </div>
+
+        <!-- 解码工具模块 -->
+        <section id="decode-module" class="tool-module glass-card card-hover hidden" aria-labelledby="decode-heading">
+            <div class="panel-header">
+                <div class="panel-heading">
+                    <i class="fa fa-qrcode panel-icon" aria-hidden="true"></i>
+                    <div><h2 id="decode-heading" class="panel-title">二维码解码</h2><div class="panel-subtitle">上传图片，快速提取二维码内容</div></div>
+                </div>
+                <span class="panel-badge">IMAGE DECODER</span>
+            </div>
+
+            <div class="decode-layout">
+                <div>
+                    <label class="field-label" for="qr-image-input">上传二维码图片</label>
+                    <div id="qr-drop-area" class="text-center cursor-pointer" role="button" tabindex="0" aria-label="点击或拖拽上传二维码图片">
+                        <input type="file" id="qr-image-input" accept="image/*" style="display: none;">
+                        <div class="upload-icon"><i class="fa fa-cloud-upload" aria-hidden="true"></i></div>
+                        <p class="upload-title">点击或拖拽图片到此处</p>
+                        <p class="upload-hint">支持 JPG、PNG、GIF，文件不超过 5MB</p>
+                    </div>
+                </div>
+
+                <div class="decode-side">
+                    <div class="decode-tip"><strong><i class="fa fa-lightbulb-o mr-2" aria-hidden="true"></i>获得更好的识别效果</strong>请上传清晰、完整且未被裁切的二维码图片，识别过程仅在本地浏览器中完成。</div>
+
+                    <div id="image-preview-container" class="hidden">
+                        <label class="field-label">图片预览</label>
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 flex justify-center min-h-[160px]">
+                            <img id="image-preview" src="" alt="待解码的二维码图片" class="max-w-full max-h-[220px] object-contain hidden">
                         </div>
                     </div>
 
-
-                </form>
-            </div>
-        </div>
-        </div>
-        
-        <!-- 解码工具模块 -->
-        <div id="decode-module" class="tool-module hidden bg-white rounded-2xl shadow-custom p-6 animate-fadeIn card-hover">
-            <h2 class="text-xl font-bold mb-6 text-dark flex items-center animate-slideIn">
-                <i class="fa fa-qrcode mr-2 text-primary"></i>二维码解码
-            </h2>
-            
-            <!-- 图片上传区域 -->
-            <div class="mb-8">
-                <label class="block text-sm font-semibold text-gray-700 mb-3">上传二维码图片</label>
-                <div id="drop-area" class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all duration-300 hover:border-primary hover:shadow-md">
-                    <input type="file" id="qr-image-input" accept="image/*" style="display: none;">
-                    <i class="fa fa-upload text-6xl text-gray-400 mb-4"></i>
-                    <p class="text-gray-600 mb-2 text-base">点击或拖拽图片到此处上传</p>
-                    <p class="text-xs text-gray-500">支持 JPG, PNG, GIF 等图片格式</p>
-                </div>
-            </div>
-            
-            <!-- 预览区域 -->
-            <div id="image-preview-container" class="mb-6 hidden">
-                <label class="block text-sm font-medium text-gray-700 mb-2">图片预览</label>
-                <div class="bg-white rounded-xl border border-gray-200 p-6 flex justify-center min-h-[200px]">
-                    <img id="image-preview" src="" alt="二维码预览" class="max-w-full max-h-[256px] object-contain hidden">
-                </div>
-            </div>
-            
-            <!-- 解码结果区域 -->
-            <div id="decode-result-container" class="mb-6 hidden">
-                <label class="block text-sm font-medium text-gray-700 mb-2">解码结果</label>
-                <div class="relative">
-                    <textarea id="decode-result" readonly class="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 font-mono text-sm min-h-[120px] resize-vertical focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
-                    <button id="decode-copy-button" class="absolute right-3 bottom-3 bg-primary/10 text-primary rounded-md p-2 hover:bg-primary/20 transition-colors">
-                        <i class="fa fa-copy"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="flex flex-wrap gap-3">
-                <button id="decode-button" class="btn-primary bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center flex-1 opacity-50 cursor-not-allowed">
-                    <i class="fa fa-search mr-2"></i> 解码二维码
-                </button>
-                <button id="decode-reset-button" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg shadow transition-all duration-300 transform hover:scale-[1.02] hover:shadow-hover flex items-center justify-center flex-1 opacity-50 cursor-not-allowed">
-                    <i class="fa fa-undo mr-2"></i> 重置
-                </button>
-            </div>
-        </div>
-        
-        <!-- xmind/Excel转换.doc模块 -->
-        <div id="excel-to-xmind-module" class="tool-module hidden min-h-screen animate-fadeIn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-            <div class="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
-                <!-- 主卡片 -->
-                <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-2xl w-full">
-                    <!-- 标题 -->
-                    <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">
-                        📄 Excel/XMind 转 Word 工具
-                    </h1>
-                    
-                    <!-- 上传区域 -->
-                    <label for="excel-file" id="drop-area" 
-                         class="border-4 border-dashed border-blue-500 rounded-3xl p-12 mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 text-center cursor-pointer hover:border-blue-600 hover:bg-gradient-to-br from-blue-100 to-indigo-100 transition-all duration-300 block">
-                        <input type="file" id="excel-file" accept=".xlsx, .xls, .csv, .xmind" class="hidden">
-                        <div class="text-6xl mb-4">📁</div>
-                        <h3 class="text-xl font-semibold text-gray-700 mb-2">点击或拖拽文件到这里</h3>
-                        <p class="text-gray-500">支持 Excel (.xlsx, .xls) 和 XMind (.xmind)</p>
-                        <p id="file-info" class="text-sm text-gray-600 mt-4 hidden"></p>
-                    </label>
-                    
-                    <!-- 操作按钮 -->
-                    <button id="generate-btn" 
-                            class="w-full bg-gradient-to-r from-gray-400 to-gray-500 text-white font-bold py-4 px-8 rounded-2xl text-xl cursor-not-allowed transition-all duration-300" 
-                            disabled>
-                        开始转换
-                    </button>
-                    
-                    <!-- 提示文字 -->
-                    <p class="text-center text-gray-600 mt-6">
-                        💡 支持格式: Excel (.xlsx, .xls), XMind (.xmind) → Word (.docx)
-                    </p>
-                    
-                    <!-- 结果区域（默认隐藏） -->
-                    <div id="result-area" class="mt-8 hidden">
-                        <div class="flex justify-center gap-4">
-                            <button id="copy-btn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2 transition-all duration-300">
-                                <i class="fa fa-copy"></i> 复制
-                            </button>
-                            <button id="export-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2 transition-all duration-300">
-                                <i class="fa fa-download"></i> 导出
+                    <div id="decode-result-container" class="hidden">
+                        <label for="decode-result" class="field-label">解码结果</label>
+                        <div class="relative">
+                            <textarea id="decode-result" readonly class="w-full font-mono resize-vertical focus:outline-none"></textarea>
+                            <button id="decode-copy-button" type="button" class="absolute right-3 bottom-3 bg-primary/10 text-primary rounded-md p-2" aria-label="复制解码结果" title="复制结果">
+                                <i class="fa fa-copy" aria-hidden="true"></i>
                             </button>
                         </div>
-                        
-                        <!-- 预览区域 -->
-                        <div class="mt-6 border border-gray-200 rounded-2xl bg-gray-50 p-6 max-h-96 overflow-auto">
+                    </div>
+
+                    <div class="decode-actions flex flex-wrap gap-3">
+                        <button id="decode-button" type="button" class="btn-primary font-semibold py-3 px-5 flex items-center justify-center flex-1 opacity-50 cursor-not-allowed">
+                            <i class="fa fa-search mr-2" aria-hidden="true"></i>开始解码
+                        </button>
+                        <button id="decode-reset-button" type="button" class="font-medium py-3 px-5 flex items-center justify-center opacity-50 cursor-not-allowed">
+                            <i class="fa fa-undo mr-2" aria-hidden="true"></i>重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 文档转换模块 -->
+        <div id="excel-to-xmind-module" class="tool-module hidden">
+            <div class="conversion-shell">
+                <section class="glass-card conversion-card" aria-labelledby="conversion-heading">
+                    <div class="conversion-heading">
+                        <i class="fa fa-files-o panel-icon" aria-hidden="true"></i>
+                        <div><h2 id="conversion-heading">Excel / XMind 转 Word</h2><p>将结构化内容整理为清晰、可编辑的文档</p></div>
+                    </div>
+
+                    <label for="excel-file" id="excel-drop-area" class="text-center cursor-pointer">
+                        <input type="file" id="excel-file" accept=".xlsx, .xls, .csv, .xmind" class="hidden">
+                        <div class="upload-icon"><i class="fa fa-folder-open-o" aria-hidden="true"></i></div>
+                        <h3 class="upload-title">点击或拖拽文件到这里</h3>
+                        <p class="upload-hint">选择需要转换的 Excel、CSV 或 XMind 文件</p>
+                        <div class="format-list" aria-label="支持的文件格式">
+                            <span class="format-chip">.XLSX</span><span class="format-chip">.XLS</span><span class="format-chip">.CSV</span><span class="format-chip">.XMIND</span>
+                        </div>
+                        <p id="file-info" class="text-sm mt-4 hidden"></p>
+                    </label>
+
+                    <button id="generate-btn" type="button" class="w-full py-3 px-8 cursor-not-allowed" disabled>
+                        <i class="fa fa-exchange mr-2" aria-hidden="true"></i>开始转换
+                    </button>
+                    <p class="conversion-note text-center"><i class="fa fa-lock mr-1" aria-hidden="true"></i>文件仅在本地处理，导出格式为 Word 文档</p>
+
+                    <div id="result-area" class="mt-7 hidden">
+                        <div class="flex justify-center gap-3">
+                            <button id="copy-btn" type="button" class="text-white font-semibold flex items-center gap-2"><i class="fa fa-copy"></i>复制内容</button>
+                            <button id="export-btn" type="button" class="text-white font-semibold flex items-center gap-2"><i class="fa fa-download"></i>导出文档</button>
+                        </div>
+                        <div class="mt-5 border border-gray-200 rounded-2xl bg-gray-50 p-6 max-h-96 overflow-auto">
                             <div id="xmind-preview"></div>
                         </div>
                     </div>
-                    
-                    <!-- 加载状态 -->
-                    <div id="loading" class="mt-8 hidden">
-                        <div class="flex flex-col items-center">
-                            <div class="loader"></div>
-                            <p class="text-gray-600 mt-4">正在处理中...</p>
-                        </div>
+
+                    <div id="loading" class="mt-7 hidden" role="status">
+                        <div class="flex flex-col items-center"><div class="loader"></div><p class="text-gray-600 mt-4 text-sm">正在整理文档结构...</p></div>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
+
+        <footer class="workspace-footer"><span>QR Studio v2.0 · 让日常工具更简单、更高效</span><span>LOCAL &amp; SECURE</span></footer>
     </main>
 
     <!-- 页脚 -->
 
     </div>
+    </div>
 
     <!-- Toast 通知元素 -->
-    <div id="toast" class="toast">
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
         <i class="fa fa-info-circle mr-2"></i>
         <span id="toastMessage">消息内容</span>
     </div>
@@ -1127,108 +2586,87 @@
     <!-- JavaScript -->
     <script>
         // 模块切换功能 - 全局变量
-        let generateModule, decodeModule, excelToXMindModule, pageTitle;
+        let generateModule, decodeModule, excelToXMindModule, pageTitle, pageDescription;
         let navGenerate, navDecode, navExcelToXMind;
         let mobileNavGenerate, mobileNavDecode, mobileNavExcelToXMind, mobileNavToggle, mobileNav, mobileNavContent, closeMobileNav;
-        
+        let mobileNavTimer;
+
+        function activateModule(activeModule, activeNav, activeMobileNav, title, description, kicker) {
+            [generateModule, decodeModule, excelToXMindModule].forEach(module => {
+                const isActive = module === activeModule;
+                module.classList.toggle('hidden', !isActive);
+                module.style.display = '';
+                module.style.visibility = '';
+                module.style.opacity = '';
+            });
+
+            [[navGenerate, mobileNavGenerate], [navDecode, mobileNavDecode], [navExcelToXMind, mobileNavExcelToXMind]].forEach(pair => {
+                pair.forEach(navItem => {
+                    const isActive = navItem === activeNav || navItem === activeMobileNav;
+                    navItem.classList.toggle('text-primary', isActive);
+                    navItem.classList.toggle('bg-primary/5', isActive);
+                    navItem.classList.toggle('border-primary', isActive);
+                    navItem.classList.toggle('text-gray-600', !isActive);
+                    navItem.classList.toggle('border-transparent', !isActive);
+                    if (isActive) {
+                        navItem.setAttribute('aria-current', 'page');
+                    } else {
+                        navItem.removeAttribute('aria-current');
+                    }
+                });
+            });
+
+            pageTitle.textContent = title;
+            pageDescription.textContent = description;
+            document.querySelector('.page-kicker').textContent = kicker;
+            document.title = `${title} · QR Studio`;
+            activeModule.classList.remove('module-enter');
+            void activeModule.offsetWidth;
+            activeModule.classList.add('module-enter');
+            closeMobileMenu();
+        }
+
         // 切换到生码工具
         function switchToGenerate() {
-            generateModule.classList.remove('hidden');
-            decodeModule.classList.add('hidden');
-            excelToXMindModule.classList.add('hidden');
-            // 清除模块的内联样式，确保hidden类正常工作
-            decodeModule.style.display = '';
-            decodeModule.style.visibility = '';
-            decodeModule.style.opacity = '';
-            excelToXMindModule.style.display = '';
-            excelToXMindModule.style.visibility = '';
-            excelToXMindModule.style.opacity = '';
-            pageTitle.textContent = '微信二维码生码工具';
-            
-            // 更新导航状态
-            navGenerate.classList.add('text-primary', 'bg-primary/5', 'border-primary');
-            navGenerate.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-            navDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            navDecode.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-            navExcelToXMind.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            navExcelToXMind.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-            
-            // 更新移动端导航状态
-            mobileNavGenerate.classList.add('text-primary', 'bg-primary/5', 'border-primary');
-            mobileNavGenerate.classList.remove('text-gray-600', 'border-transparent');
-            mobileNavDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            mobileNavDecode.classList.add('text-gray-600', 'border-transparent');
-            mobileNavExcelToXMind.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            mobileNavExcelToXMind.classList.add('text-gray-600', 'border-transparent');
-            
-            // 关闭移动端导航
-            closeMobileMenu();
+            activateModule(generateModule, navGenerate, mobileNavGenerate,
+                '微信二维码生码工具', '配置业务参数，实时生成清晰、可下载的小程序二维码。', 'WECHAT TOOLKIT');
         }
-        
+
         // 切换到解码工具
         function switchToDecode() {
-            generateModule.classList.add('hidden');
-            decodeModule.classList.remove('hidden');
-            excelToXMindModule.classList.add('hidden');
-            pageTitle.textContent = '微信二维码解码工具';
-            
-            // 更新导航状态
-            navDecode.classList.add('text-primary', 'bg-primary/5', 'border-primary');
-            navDecode.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-            navGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            navGenerate.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-            navExcelToXMind.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            navExcelToXMind.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-            
-            // 更新移动端导航状态
-            mobileNavDecode.classList.add('text-primary', 'bg-primary/5', 'border-primary');
-            mobileNavDecode.classList.remove('text-gray-600', 'border-transparent');
-            mobileNavGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            mobileNavGenerate.classList.add('text-gray-600', 'border-transparent');
-            mobileNavExcelToXMind.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            mobileNavExcelToXMind.classList.add('text-gray-600', 'border-transparent');
-            
-            // 关闭移动端导航
-            closeMobileMenu();
+            activateModule(decodeModule, navDecode, mobileNavDecode,
+                '二维码解码工具', '上传二维码图片，在本地快速识别并复制其中的内容。', 'IMAGE DECODER');
         }
-        
-        // 切换到xmind/Excel转换.doc工具
+
+        // 切换到文档转换工具
         function switchToExcelToXMind() {
-            generateModule.classList.add('hidden');
-            decodeModule.classList.add('hidden');
-            excelToXMindModule.classList.remove('hidden');
-            pageTitle.textContent = 'xmind/Excel转换.doc工具';
-            
-            // 更新导航状态
-            navExcelToXMind.classList.add('text-primary', 'bg-primary/5', 'border-primary');
-            navExcelToXMind.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-            navGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            navGenerate.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-            navDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            navDecode.classList.add('text-gray-600', 'hover:bg-gray-50', 'border-transparent');
-            
-            // 更新移动端导航状态
-            mobileNavExcelToXMind.classList.add('text-primary', 'bg-primary/5', 'border-primary');
-            mobileNavExcelToXMind.classList.remove('text-gray-600', 'border-transparent');
-            mobileNavGenerate.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            mobileNavGenerate.classList.add('text-gray-600', 'border-transparent');
-            mobileNavDecode.classList.remove('text-primary', 'bg-primary/5', 'border-primary');
-            mobileNavDecode.classList.add('text-gray-600', 'border-transparent');
-            
-            // 关闭移动端导航
-            closeMobileMenu();
+            activateModule(excelToXMindModule, navExcelToXMind, mobileNavExcelToXMind,
+                '文档转换工具', '将 Excel、CSV 或 XMind 内容整理为结构清晰的 Word 文档。', 'DOCUMENT CONVERTER');
         }
-        
+
         // 打开移动端菜单
         function openMobileMenu() {
+            clearTimeout(mobileNavTimer);
             mobileNav.classList.remove('hidden');
-            mobileNavContent.classList.remove('-translate-x-full');
+            mobileNav.setAttribute('aria-hidden', 'false');
+            mobileNavToggle.setAttribute('aria-expanded', 'true');
+            document.body.classList.add('nav-open');
+            requestAnimationFrame(() => {
+                mobileNav.classList.add('is-open');
+                mobileNavContent.classList.remove('-translate-x-full');
+            });
         }
-        
+
         // 关闭移动端菜单
         function closeMobileMenu() {
-            mobileNav.classList.add('hidden');
+            if (!mobileNav || mobileNav.classList.contains('hidden')) return;
+            mobileNav.classList.remove('is-open');
             mobileNavContent.classList.add('-translate-x-full');
+            mobileNav.setAttribute('aria-hidden', 'true');
+            mobileNavToggle.setAttribute('aria-expanded', 'false');
+            document.body.classList.remove('nav-open');
+            clearTimeout(mobileNavTimer);
+            mobileNavTimer = setTimeout(() => mobileNav.classList.add('hidden'), 360);
         }
         
         // 处理URL hash
@@ -1249,6 +2687,7 @@
             decodeModule = document.getElementById('decode-module');
             excelToXMindModule = document.getElementById('excel-to-xmind-module');
             pageTitle = document.getElementById('page-title');
+            pageDescription = document.getElementById('page-description');
             
             // 桌面端导航
             navGenerate = document.getElementById('nav-generate');
@@ -1274,6 +2713,9 @@
             mobileNavToggle.addEventListener('click', openMobileMenu);
             closeMobileNav.addEventListener('click', closeMobileMenu);
             mobileNav.addEventListener('click', (e) => { if (e.target === mobileNav) closeMobileMenu(); });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeMobileMenu();
+            });
             
             // 监听hash变化
             window.addEventListener('hashchange', handleHashChange);
@@ -1285,7 +2727,7 @@
         // 初始化解码工具功能
         function initDecodeTool() {
             // 获取DOM元素
-            const dropArea = document.getElementById('drop-area');
+            const dropArea = document.getElementById('qr-drop-area');
             const imageInput = document.getElementById('qr-image-input');
             const imagePreview = document.getElementById('image-preview');
             const imagePreviewContainer = document.getElementById('image-preview-container');
@@ -1320,7 +2762,8 @@
                 reader.onload = function(e) {
                     imagePreview.src = e.target.result;
                     imagePreview.style.display = 'block';
-                    imagePreviewContainer.style.display = 'block';
+                    revealElement(imagePreviewContainer);
+                    showUploadSuccess(dropArea);
                     decodeButton.style.opacity = '1';
                     decodeButton.style.cursor = 'pointer';
                     decodeResetButton.style.opacity = '1';
@@ -1361,7 +2804,8 @@
                     // 处理解码结果
                     if (code) {
                         decodeResult.value = code.data;
-                        decodeResultContainer.style.display = 'block';
+                        revealElement(decodeResultContainer);
+                        celebrateFox('解码成功啦');
                     } else {
                         alert('未检测到二维码或解码失败，请尝试其他图片');
                     }
@@ -1382,6 +2826,7 @@
                 imagePreviewContainer.style.display = 'none';
                 decodeResult.value = '';
                 decodeResultContainer.style.display = 'none';
+                dropArea.classList.remove('is-dragging', 'is-success');
                 selectedFile = null;
                 decodeButton.style.opacity = '0.5';
                 decodeButton.style.cursor = 'not-allowed';
@@ -1391,16 +2836,30 @@
             
             // 复制解码结果
             function copyDecodeResult() {
-                if (decodeResult.value) {
+                if (!decodeResult.value) return;
+
+                const showSuccess = () => {
+                    showCopyFeedback(decodeCopyButton, decodeResult);
+                    showToast('success', '解码结果已复制到剪贴板');
+                };
+                const fallbackCopy = () => {
                     decodeResult.select();
                     decodeResult.setSelectionRange(0, 99999);
-                    
                     try {
-                        document.execCommand('copy');
-                        alert('解码结果已复制到剪贴板');
+                        if (document.execCommand('copy')) {
+                            showSuccess();
+                        } else {
+                            showToast('error', '复制失败，请手动复制');
+                        }
                     } catch (err) {
-                        alert('复制失败，请手动复制');
+                        showToast('error', '复制失败，请手动复制');
                     }
+                };
+
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(decodeResult.value).then(showSuccess).catch(fallbackCopy);
+                } else {
+                    fallbackCopy();
                 }
             }
             
@@ -1408,6 +2867,12 @@
             // 点击上传区域触发文件选择
             dropArea.addEventListener('click', () => {
                 imageInput.click();
+            });
+            dropArea.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    imageInput.click();
+                }
             });
             
             // 文件选择事件
@@ -1448,14 +2913,13 @@
             
             // 添加拖拽样式
             function highlight() {
-                dropArea.classList.add('border-accent', 'bg-blue-50');
-                dropArea.classList.remove('border-gray-300', 'bg-gray-50', 'hover:bg-gray-100');
+                dropArea.classList.remove('is-success');
+                dropArea.classList.add('is-dragging');
             }
             
             // 移除拖拽样式
             function unhighlight() {
-                dropArea.classList.remove('border-accent', 'bg-blue-50');
-                dropArea.classList.add('border-gray-300', 'bg-gray-50', 'hover:bg-gray-100');
+                dropArea.classList.remove('is-dragging');
             }
             
             // 处理拖拽文件放置
@@ -1471,7 +2935,65 @@
                  }
              }
         }
+        function updateRangeProgress(range) {
+            const progress = ((range.value - range.min) / (range.max - range.min)) * 100;
+            range.style.setProperty('--range-progress', `${progress}%`);
+            range.parentElement.style.setProperty('--range-progress', `${progress}%`);
+            range.setAttribute('aria-valuetext', `${range.value}像素`);
+        }
+
+        function showCopyFeedback(button, field) {
+            const icon = button.querySelector('i');
+            if (!button.dataset.originalIcon) button.dataset.originalIcon = icon.className;
+            clearTimeout(button.copyFeedbackTimer);
+            button.classList.add('is-copied');
+            field.classList.remove('copy-success');
+            void field.offsetWidth;
+            field.classList.add('copy-success');
+            icon.className = 'fa fa-check';
+            button.copyFeedbackTimer = setTimeout(() => {
+                button.classList.remove('is-copied');
+                field.classList.remove('copy-success');
+                icon.className = button.dataset.originalIcon;
+            }, 1200);
+        }
+
+        function revealElement(element, display = 'block') {
+            element.classList.remove('hidden', 'ui-expand-in');
+            element.style.display = display;
+            void element.offsetWidth;
+            element.classList.add('ui-expand-in');
+            element.addEventListener('animationend', () => {
+                element.classList.remove('ui-expand-in');
+                element.style.removeProperty('display');
+            }, { once: true });
+        }
+
+        function showUploadSuccess(dropArea) {
+            const icon = dropArea.querySelector('.upload-icon i');
+            if (icon && !dropArea.dataset.originalIcon) dropArea.dataset.originalIcon = icon.className;
+            clearTimeout(dropArea.uploadSuccessTimer);
+            dropArea.classList.remove('is-dragging');
+            dropArea.classList.add('is-success');
+            if (icon) icon.className = 'fa fa-check';
+            dropArea.uploadSuccessTimer = setTimeout(() => {
+                dropArea.classList.remove('is-success');
+                if (icon) icon.className = dropArea.dataset.originalIcon;
+            }, 1300);
+        }
+
+        function setQRLoading(isLoading) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const qrcodeContainer = document.getElementById('qrcodeContainer');
+            const qrcode = document.getElementById('qrcode');
+            if (!loadingIndicator || !qrcodeContainer || !qrcode) return;
+            loadingIndicator.classList.toggle('hidden', !isLoading);
+            qrcodeContainer.classList.toggle('is-loading', isLoading);
+            qrcode.classList.toggle('is-refreshing', isLoading);
+        }
+
         // Toast 通知函数
+        let toastTimer;
         function showToast(type, message, duration = 3000) {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
@@ -1500,8 +3022,9 @@
             // 显示Toast
             toast.classList.add('show');
             
-            // 设置定时器自动隐藏
-            setTimeout(() => {
+            // 设置定时器自动隐藏，避免连续通知互相干扰
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
                 toast.classList.remove('show');
             }, duration);
         }
@@ -1571,6 +3094,8 @@
         }
         
         document.addEventListener('DOMContentLoaded', function() {
+            updateRangeProgress(document.getElementById('qrsize'));
+
             // 延迟执行，确保DOM完全渲染
             setTimeout(() => {
                 // 初始化模块导航
@@ -1614,7 +3139,7 @@
                     // 确保加载指示器被隐藏
                     const loadingIndicator = document.getElementById('loadingIndicator');
                     if (loadingIndicator) {
-                        loadingIndicator.classList.add('hidden');
+                        setQRLoading(false);
                     }
                     // 显示友好的错误提示
                     const qrcodeElement = document.getElementById('qrcode');
@@ -1817,6 +3342,7 @@
                         if (fieldId === 'qrsize') {
                             const sizeValue = this.value;
                             document.getElementById('qrsizeValue').textContent = sizeValue + 'px';
+                            updateRangeProgress(this);
                         }
                         
                         // 验证表单并实时生成二维码
@@ -1853,6 +3379,7 @@
                     // 尝试使用现代的 Clipboard API
                     if (navigator.clipboard && window.isSecureContext) {
                         navigator.clipboard.writeText(urlInput.value).then(() => {
+                            showCopyFeedback(document.getElementById('copyButton'), urlInput);
                             showToast('success', '链接已复制到剪贴板');
                         }).catch(() => {
                             // 降级到传统方法
@@ -1873,6 +3400,7 @@
                 inputElement.setSelectionRange(0, 99999); // 兼容移动设备
                 
                 if (document.execCommand('copy')) {
+                    showCopyFeedback(document.getElementById('copyButton'), inputElement);
                     showToast('success', '链接已复制到剪贴板');
                 } else {
                     showToast('error', '复制失败，请手动复制');
@@ -1894,18 +3422,6 @@
                     }
                 } else {
                     showToast('error', '二维码未生成，请先生成二维码');
-                }
-            });
-            
-            // 为二维码大小滑块添加实时更新功能
-            document.getElementById('qrsize').addEventListener('input', function() {
-                // 更新显示的大小值
-                const sizeValue = this.value;
-                document.getElementById('qrsizeValue').textContent = sizeValue + 'px';
-                
-                // 验证表单并实时更新二维码大小
-                if (validateForm()) {
-                    generateQRCode();
                 }
             });
             
@@ -1932,6 +3448,7 @@
                     document.getElementById('tableno').value = defaults.tableno || '001';
                     document.getElementById('qrsize').value = defaults.qrsize || 400;
                     document.getElementById('qrsizeValue').textContent = (defaults.qrsize || 400) + 'px';
+                    updateRangeProgress(document.getElementById('qrsize'));
                 }
                 
                 // 移除所有错误状态
@@ -1965,6 +3482,7 @@
         }
         
         // 生成二维码的函数
+        let qrGenerationSequence = 0;
         function generateQRCode() {
             // 检查必要的DOM元素是否存在
             const requiredElements = {
@@ -1985,8 +3503,9 @@
                 }
             }
             
-            // 显示加载指示器
-            requiredElements.loadingIndicator.classList.remove('hidden');
+            // 保留旧二维码，新二维码就绪后再平滑替换
+            const generationId = ++qrGenerationSequence;
+            setQRLoading(true);
             
             // 获取表单值（AppID支持下拉选择和输入框两种模式）
             const appid = getAppidValue() || 'wx713931c9accc58f1';
@@ -2042,7 +3561,7 @@
                 
                 if (urlLength > MAX_QRCODE_LENGTH) {
                     // URL过长，显示友好错误
-                    requiredElements.loadingIndicator.classList.add('hidden');
+                    setQRLoading(false);
                     requiredElements.qrcode.innerHTML = '<p class="text-red-500">生成二维码时出错，链接过长无法生成</p>';
                     showToast('error', `生成二维码失败：链接长度(${urlLength}字符)超过二维码最大限制(${MAX_QRCODE_LENGTH}字符)`);
                     console.error(`URL长度超过限制：${urlLength} > ${MAX_QRCODE_LENGTH}`, url);
@@ -2056,14 +3575,15 @@
                 
                 // 创建生成二维码的函数（支持重试）
                 function generateWithRetry() {
-                    // 清空之前的二维码并设置容器样式
-                    requiredElements.qrcode.innerHTML = '';
-                    // 确保容器有正确的尺寸
+                    if (generationId !== qrGenerationSequence) return;
                     requiredElements.qrcode.style.width = qrsize + 'px';
                     requiredElements.qrcode.style.height = qrsize + 'px';
+                    const renderTarget = document.createElement('div');
+                    renderTarget.style.width = qrsize + 'px';
+                    renderTarget.style.height = qrsize + 'px';
                     
-                    // 使用新的generateRealQRCode函数生成真实二维码
-                    generateRealQRCode(requiredElements.qrcode, url, {
+                    // 在离屏容器中生成，避免预览区域闪烁或空白
+                    generateRealQRCode(renderTarget, url, {
                         width: qrsize,
                         margin: 1,
                         color: {
@@ -2071,6 +3591,7 @@
                             light: '#ffffff'
                         }
                     }, function(error) {
+                        if (generationId !== qrGenerationSequence) return;
                         if (error) {
                             retryCount++;
                             console.warn(`二维码生成失败 (${retryCount}/${MAX_RETRIES}):`, error);
@@ -2078,7 +3599,7 @@
                             // 检查是否是长度溢出错误
                             if (error.message && error.message.includes('code length overflow')) {
                                 // 直接显示长度溢出错误，不再重试
-                                requiredElements.loadingIndicator.classList.add('hidden');
+                                setQRLoading(false);
                                 requiredElements.qrcode.innerHTML = '<p class="text-red-500">生成二维码时出错，链接过长无法生成</p>';
                                 showToast('error', `生成二维码失败：链接长度超过二维码最大限制`);
                                 return;
@@ -2091,19 +3612,18 @@
                             } else {
                                 // 达到最大重试次数
                                 console.error('已达到最大重试次数，二维码生成失败');
-                                requiredElements.loadingIndicator.classList.add('hidden');
+                                setQRLoading(false);
                                 requiredElements.qrcode.innerHTML = '<p class="text-red-500">生成二维码时出错，请检查网络连接或稍后重试</p>';
                                 showToast('error', '生成二维码失败，请检查网络连接或稍后重试');
                             }
                         } else {
-                            // 成功生成二维码
-                            requiredElements.loadingIndicator.classList.add('hidden');
-                            
-                            // 添加生成成功的动画效果
-                            requiredElements.qrcode.classList.add('animate-fadeIn');
-                            setTimeout(() => {
-                                requiredElements.qrcode.classList.remove('animate-fadeIn');
-                            }, 500);
+                            // 新二维码就绪后再替换旧内容
+                            requiredElements.qrcode.replaceChildren(...renderTarget.childNodes);
+                            setQRLoading(false);
+                            requiredElements.qrcode.classList.remove('is-updated');
+                            void requiredElements.qrcode.offsetWidth;
+                            requiredElements.qrcode.classList.add('is-updated');
+                            celebrateFox('二维码生成好啦');
                         }
                     });
                 }
@@ -2112,7 +3632,7 @@
                 generateWithRetry();
             } catch (err) {
                 // 隐藏加载指示器
-                requiredElements.loadingIndicator.classList.add('hidden');
+                setQRLoading(false);
                 console.error('生成过程中发生错误:', err);
                 showToast('error', '生成二维码时发生错误，请重试');
             }
@@ -2129,7 +3649,7 @@
             // DOM元素
             const excelFileInput = document.getElementById('excel-file');
             const fileInfo = document.getElementById('file-info');
-            const dropArea = document.getElementById('drop-area');
+            const dropArea = document.getElementById('excel-drop-area');
             const generateBtn = document.getElementById('generate-btn');
             const copyBtn = document.getElementById('copy-btn');
             const exportBtn = document.getElementById('export-btn');
@@ -2144,25 +3664,37 @@
             
             // 拖拽上传
             if (dropArea) {
+                let dragDepth = 0;
+                const stopDragging = () => {
+                    dragDepth = 0;
+                    dropArea.classList.remove('is-dragging');
+                };
+                dropArea.addEventListener('dragenter', (e) => {
+                    e.preventDefault();
+                    dragDepth++;
+                    dropArea.classList.remove('is-success');
+                    dropArea.classList.add('is-dragging');
+                });
                 dropArea.addEventListener('dragover', (e) => {
                     e.preventDefault();
-                    dropArea.style.borderColor = '#3b82f6';
-                    dropArea.style.backgroundColor = '#dbeafe';
+                    e.dataTransfer.dropEffect = 'copy';
+                    dropArea.classList.add('is-dragging');
                 });
-                dropArea.addEventListener('dragleave', () => {
-                    dropArea.style.borderColor = '#6366f1';
-                    dropArea.style.backgroundColor = 'transparent';
+                dropArea.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    dragDepth = Math.max(0, dragDepth - 1);
+                    if (dragDepth === 0) dropArea.classList.remove('is-dragging');
                 });
                 dropArea.addEventListener('drop', (e) => {
                     e.preventDefault();
-                    dropArea.style.borderColor = '#6366f1';
-                    dropArea.style.backgroundColor = 'transparent';
+                    stopDragging();
                     const file = e.dataTransfer.files[0];
                     if (file) {
                         excelFileInput.files = e.dataTransfer.files;
                         handleFileUpload({ target: { files: [file] } });
                     }
                 });
+                dropArea.addEventListener('dragend', stopDragging);
             }
             
             if (generateBtn) {
@@ -2182,7 +3714,7 @@
                 
                 // 显示文件名
                 fileInfo.textContent = `已选择: ${file.name}`;
-                fileInfo.classList.remove('hidden');
+                revealElement(fileInfo);
                 
                 const fileExt = file.name.split('.').pop().toLowerCase();
                 currentFileType = fileExt;
@@ -2256,14 +3788,15 @@
                         
                         // 启用生成按钮，改变样式
                         generateBtn.disabled = false;
-                        generateBtn.className = 'w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-8 rounded-2xl text-xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02]';
+                        generateBtn.className = 'w-full text-white font-semibold py-3 px-8 cursor-pointer';
                         
                         // 如果是XMind文件，直接显示预览
                         if (fileExt === 'xmind') {
                             showSimplePreview(xmindData);
-                            resultArea.classList.remove('hidden');
+                            revealElement(resultArea);
                         }
                         
+                        showUploadSuccess(dropArea);
                         showToast('success', '文件上传成功！');
                     } catch (error) {
                         console.error('文件读取失败:', error);
@@ -2578,8 +4111,9 @@
                         if (currentFileType === 'xmind') {
                             // 如果是XMind文件，直接显示已解析的内容
                             showSimplePreview(xmindData);
-                            resultArea.classList.remove('hidden');
+                            revealElement(resultArea);
                             loading.classList.add('hidden');
+                            celebrateFox('文档转换完成啦');
                             showToast('success', '转换完成！');
                         } else {
                             // 处理Excel文件
@@ -2634,8 +4168,9 @@
                             showSimplePreview(xmindData);
                             
                             loading.classList.add('hidden');
-                            resultArea.classList.remove('hidden');
+                            revealElement(resultArea);
                             
+                            celebrateFox('文档转换完成啦');
                             showToast('success', '转换完成！');
                         }
                     } catch (error) {
@@ -2811,8 +4346,334 @@ ${textContent}
             }
         }
         
+        // 低多边形 3D 小狐狸
+        let foxMascotController = null;
+        let mascotMessageTimer;
+
+        function showMascotMessage(message, duration = 1800) {
+            const bubble = document.getElementById('mascotBubble');
+            const messageElement = document.getElementById('mascotMessage');
+            if (!bubble || !messageElement) return;
+            clearTimeout(mascotMessageTimer);
+            messageElement.textContent = message;
+            bubble.classList.add('is-chatting');
+            mascotMessageTimer = setTimeout(() => {
+                messageElement.textContent = '所有工具已就绪';
+                bubble.classList.remove('is-chatting');
+            }, duration);
+        }
+
+        function celebrateFox(message = '二维码生成好啦') {
+            showMascotMessage(message);
+            if (foxMascotController) foxMascotController.celebrate();
+        }
+
+        function loadThreeLibrary() {
+            if (window.THREE) return Promise.resolve();
+            return import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js').then(module => {
+                window.THREE = module;
+            });
+        }
+
+        function createFoxMascot(container, reducedMotion) {
+            const THREE = window.THREE;
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-2.6, 2.6, 2.05, -2.05, 0.1, 100);
+            camera.position.set(0, 0.75, 8);
+            camera.lookAt(0, 0.55, 0);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+            renderer.setClearColor(0x000000, 0);
+            if (THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
+            renderer.domElement.setAttribute('aria-hidden', 'true');
+            container.appendChild(renderer.domElement);
+
+            scene.add(new THREE.HemisphereLight(0xfff5e8, 0x668071, 2.2));
+            const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
+            keyLight.position.set(-3, 5, 6);
+            scene.add(keyLight);
+            const fillLight = new THREE.DirectionalLight(0xa5e8c5, 0.8);
+            fillLight.position.set(4, 1, 3);
+            scene.add(fillLight);
+
+            const material = (color) => new THREE.MeshStandardMaterial({
+                color,
+                roughness: 0.82,
+                metalness: 0,
+                flatShading: true
+            });
+            const orange = material(0xdf884c);
+            const orangeDark = material(0xb95f36);
+            const cream = material(0xffefd2);
+            const innerEar = material(0x75453d);
+            const dark = material(0x26342e);
+            const sphere = new THREE.SphereGeometry(1, 8, 6);
+
+            function addMesh(parent, geometry, surface, position, scale) {
+                const mesh = new THREE.Mesh(geometry, surface);
+                mesh.position.set(...position);
+                if (scale) mesh.scale.set(...scale);
+                parent.add(mesh);
+                return mesh;
+            }
+
+            const fox = new THREE.Group();
+            fox.position.y = -0.08;
+            fox.rotation.order = 'YXZ';
+            scene.add(fox);
+
+            const tail = new THREE.Group();
+            tail.position.set(0.45, -0.5, -0.3);
+            const tailCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0.75, -0.12, 0),
+                new THREE.Vector3(1.02, 0.38, 0.12),
+                new THREE.Vector3(0.65, 0.78, 0.18)
+            ]);
+            addMesh(tail, new THREE.TubeGeometry(tailCurve, 8, 0.28, 6, false), orangeDark, [0, 0, 0]);
+            addMesh(tail, sphere, cream, [0.65, 0.78, 0.18], [0.34, 0.4, 0.3]);
+            fox.add(tail);
+
+            const body = addMesh(fox, sphere, orange, [0, -0.05, 0], [0.72, 0.92, 0.62]);
+            addMesh(fox, sphere, cream, [0, -0.14, 0.53], [0.46, 0.67, 0.25]);
+
+            [-1, 1].forEach(side => {
+                addMesh(fox, sphere, orangeDark, [side * 0.34, -0.75, 0.38], [0.22, 0.48, 0.24]);
+                addMesh(fox, sphere, cream, [side * 0.34, -1.07, 0.54], [0.25, 0.16, 0.32]);
+            });
+
+            const head = new THREE.Group();
+            head.position.set(0, 1.25, 0.08);
+            head.rotation.order = 'YXZ';
+            fox.add(head);
+            addMesh(head, sphere, orange, [0, 0, 0], [0.84, 0.72, 0.72]);
+
+            [-1, 1].forEach(side => {
+                const ear = addMesh(head, new THREE.ConeGeometry(0.38, 0.85, 4), orange,
+                    [side * 0.48, 0.66, -0.03]);
+                ear.rotation.set(0, Math.PI / 4, side * -0.14);
+                const inner = addMesh(head, new THREE.ConeGeometry(0.38, 0.85, 4), innerEar,
+                    [side * 0.48, 0.63, 0.13], [0.53, 0.64, 0.53]);
+                inner.rotation.copy(ear.rotation);
+                addMesh(head, sphere, cream, [side * 0.31, -0.2, 0.59], [0.38, 0.27, 0.25]);
+            });
+
+            const leftEye = addMesh(head, sphere, dark, [-0.29, 0.13, 0.68], [0.065, 0.095, 0.05]);
+            const rightEye = addMesh(head, sphere, dark, [0.29, 0.13, 0.68], [0.065, 0.095, 0.05]);
+            addMesh(head, sphere, dark, [0, -0.16, 0.86], [0.1, 0.075, 0.08]);
+
+            const shadowMaterial = new THREE.MeshBasicMaterial({ color: 0x527561, transparent: true, opacity: 0.13 });
+            const shadow = addMesh(scene, new THREE.CircleGeometry(1, 32), shadowMaterial,
+                [0, -1.17, -0.7], [1.25, 0.17, 1]);
+            shadow.renderOrder = -1;
+
+            let targetX = 0;
+            let targetY = 0;
+            let pointerX = 0;
+            let pointerY = 0;
+            let actionStart = -Infinity;
+            let nextBlink = 2.4;
+            let blinkStart = -Infinity;
+            const entranceStart = performance.now() / 1000;
+
+            if (!reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                window.addEventListener('pointermove', event => {
+                    targetX = (event.clientX / window.innerWidth - 0.5) * 2;
+                    targetY = (event.clientY / window.innerHeight - 0.5) * 2;
+                }, { passive: true });
+                document.documentElement.addEventListener('pointerleave', () => {
+                    targetX = 0;
+                    targetY = 0;
+                });
+            }
+
+            function renderFrame(time) {
+                const elapsedAction = time - actionStart;
+                const jumping = elapsedAction >= 0 && elapsedAction < 0.85;
+                const jumpProgress = jumping ? elapsedAction / 0.85 : 0;
+                const jump = jumping ? Math.sin(jumpProgress * Math.PI) * 0.58 : 0;
+                const entrance = reducedMotion ? 1 : Math.min(1, (time - entranceStart) / 0.7);
+                const entranceEase = 1 - Math.pow(1 - Math.max(0, entrance), 3);
+
+                pointerX += (targetX - pointerX) * 0.08;
+                pointerY += (targetY - pointerY) * 0.08;
+                head.rotation.y = pointerX * 0.42;
+                head.rotation.x = pointerY * 0.14;
+                fox.rotation.y = pointerX * 0.07;
+                fox.rotation.z = jumping ? Math.sin(jumpProgress * Math.PI * 2) * 0.07 : 0;
+                fox.position.y = -0.08 + Math.sin(time * 1.8) * 0.022 + jump;
+                fox.scale.setScalar(0.92 * entranceEase);
+                body.scale.y = 0.92 * (1 + Math.sin(time * 2) * 0.018);
+                head.position.y = 1.25 + Math.sin(time * 2) * 0.014;
+                tail.rotation.z = Math.sin(time * (jumping ? 10 : 3.1)) * (jumping ? 0.22 : 0.11);
+                tail.rotation.y = Math.sin(time * 2.2) * 0.06;
+
+                if (time >= nextBlink) {
+                    blinkStart = time;
+                    nextBlink = time + 2.5 + Math.random() * 2.5;
+                }
+                const blinkProgress = (time - blinkStart) / 0.18;
+                const eyeScale = blinkProgress < 1 ? Math.max(0.08, Math.abs(blinkProgress - 0.5) * 2) : 1;
+                leftEye.scale.y = rightEye.scale.y = 0.095 * eyeScale;
+
+                renderer.render(scene, camera);
+            }
+
+            function resize() {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                if (!width || !height) return;
+                const aspect = width / height;
+                camera.left = -2.05 * aspect;
+                camera.right = 2.05 * aspect;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height, false);
+                if (reducedMotion) renderFrame(performance.now() / 1000);
+            }
+
+            if ('ResizeObserver' in window) {
+                new ResizeObserver(resize).observe(container);
+            } else {
+                window.addEventListener('resize', resize);
+            }
+            resize();
+
+            if (!reducedMotion) {
+                let lastFrame = 0;
+                const animate = timestamp => {
+                    requestAnimationFrame(animate);
+                    if (document.hidden || container.offsetParent === null || timestamp - lastFrame < 1000 / 30) return;
+                    lastFrame = timestamp;
+                    renderFrame(timestamp / 1000);
+                };
+                requestAnimationFrame(animate);
+            } else {
+                renderFrame(performance.now() / 1000);
+            }
+
+            return {
+                celebrate() {
+                    if (!reducedMotion) actionStart = performance.now() / 1000;
+                }
+            };
+        }
+
+        function initFoxMascot() {
+            const container = document.getElementById('foxMascot');
+            if (!container) return;
+            const desktop = window.matchMedia('(min-width: 768px)');
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+            let started = false;
+
+            const interact = () => celebrateFox('你好，今天也要高效呀');
+            const start = () => {
+                if (started || !desktop.matches) return;
+                started = true;
+                container.addEventListener('click', interact);
+                container.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        interact();
+                    }
+                });
+
+                if (!window.WebGLRenderingContext) {
+                    container.setAttribute('aria-label', '静态小狐狸吉祥物');
+                    return;
+                }
+                loadThreeLibrary().then(() => {
+                    foxMascotController = createFoxMascot(container, reducedMotion.matches);
+                    container.classList.add('is-ready');
+                }).catch(error => {
+                    container.classList.add('is-fallback');
+                    container.setAttribute('aria-label', '静态小狐狸吉祥物');
+                    const hint = document.querySelector('.mascot-hint');
+                    if (hint) hint.textContent = '小狐狸正在休息';
+                    console.warn('3D 小狐狸暂时无法加载，已显示静态吉祥物。', error);
+                });
+            };
+
+            start();
+            desktop.addEventListener('change', start);
+        }
+
+        // 轻量前端交互：卡片光晕、头部视差和按钮涟漪
+        function initUIInteractions() {
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+            const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+            if (reducedMotion.matches) return;
+
+            if (finePointer.matches) {
+                document.querySelectorAll('.glass-card').forEach(card => {
+                    let frame = null;
+                    let pointer = { x: 0, y: 0 };
+
+                    card.addEventListener('pointerenter', () => card.classList.add('spotlight-active'));
+                    card.addEventListener('pointermove', event => {
+                        const rect = card.getBoundingClientRect();
+                        pointer = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+                        if (frame) return;
+                        frame = requestAnimationFrame(() => {
+                            card.style.setProperty('--pointer-x', `${pointer.x}px`);
+                            card.style.setProperty('--pointer-y', `${pointer.y}px`);
+                            frame = null;
+                        });
+                    });
+                    card.addEventListener('pointerleave', () => card.classList.remove('spotlight-active'));
+                });
+
+                const header = document.querySelector('.app-header');
+                header.addEventListener('pointermove', event => {
+                    const rect = header.getBoundingClientRect();
+                    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 24;
+                    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 12;
+                    header.style.setProperty('--header-x', `${x}px`);
+                    header.style.setProperty('--header-y', `${y}px`);
+                });
+                header.addEventListener('pointerleave', () => {
+                    header.style.setProperty('--header-x', '0px');
+                    header.style.setProperty('--header-y', '0px');
+                });
+            }
+
+            const range = document.getElementById('qrsize');
+            let rangeInteractionTimer;
+            const activateRange = () => {
+                clearTimeout(rangeInteractionTimer);
+                range.classList.add('is-dragging');
+            };
+            const deactivateRange = () => {
+                clearTimeout(rangeInteractionTimer);
+                rangeInteractionTimer = setTimeout(() => range.classList.remove('is-dragging'), 220);
+            };
+            range.addEventListener('pointerdown', activateRange);
+            range.addEventListener('input', activateRange);
+            range.addEventListener('change', deactivateRange);
+            range.addEventListener('blur', deactivateRange);
+            range.addEventListener('keyup', deactivateRange);
+            window.addEventListener('pointerup', deactivateRange);
+            window.addEventListener('pointercancel', deactivateRange);
+
+            document.addEventListener('click', event => {
+                const button = event.target.closest('button');
+                if (!button || button.disabled || getComputedStyle(button).cursor === 'not-allowed') return;
+                const rect = button.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const ripple = document.createElement('span');
+                ripple.className = 'ui-ripple';
+                ripple.style.width = ripple.style.height = `${size}px`;
+                ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+                ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+                button.appendChild(ripple);
+                ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+            });
+        }
+
         // 调用初始化函数
         initExcelToXMindTool();
+        document.addEventListener('DOMContentLoaded', initUIInteractions);
+        document.addEventListener('DOMContentLoaded', initFoxMascot);
     </script>
 </body>
 </html>
