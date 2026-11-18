@@ -2916,6 +2916,7 @@
                             <option value="tab">Tab 缩进</option>
                         </select>
                         <button id="jsonValidateButton" type="button" class="json-btn"><i class="fa fa-check-circle-o" aria-hidden="true"></i>语法校验</button>
+                        <button id="jsonLogParseButton" type="button" class="json-btn"><i class="fa fa-exchange" aria-hidden="true"></i>解析入参/出参</button>
                     </div>
                     <div class="json-toolbar-group">
                         <button id="jsonMinifyButton" type="button" class="json-btn"><i class="fa fa-compress" aria-hidden="true"></i>压缩 JSON</button>
@@ -4938,6 +4939,75 @@ ${textContent}
             document.getElementById('jsonFormatButton').addEventListener('click', () => processJSON('format'));
             document.getElementById('jsonMinifyButton').addEventListener('click', () => processJSON('minify'));
             document.getElementById('jsonValidateButton').addEventListener('click', validateJSON);
+            document.getElementById('jsonLogParseButton').addEventListener('click', parseLogJSON);
+
+            // 解析 SLS 日志 JSON：从 content 中提取入参(body=[...])和出参(出参={...})
+            function parseLogJSON() {
+                clearTimeout(validationTimer);
+                const source = input.value.trim();
+                if (!source) {
+                    setStatus('error', '内容为空');
+                    setFeedback('error', '请先粘贴包含 content 字段的日志 JSON。');
+                    input.focus();
+                    return;
+                }
+
+                let content;
+                try {
+                    const parsed = JSON.parse(source);
+                    content = typeof parsed.content === 'string' ? parsed.content : source;
+                } catch (e) {
+                    // 整体不是 JSON，直接当作日志原文处理
+                    content = source;
+                }
+
+                const indent = indentSelect.value === 'tab' ? '\t' : Number(indentSelect.value);
+                const sections = [];
+                let found = false;
+
+                // 提取入参：body=[ ... ]，到出参= 之前
+                const bodyIdx = content.indexOf('body=[');
+                const outIdx = content.indexOf('出参={');
+                if (bodyIdx !== -1) {
+                    const end = outIdx > bodyIdx ? outIdx : content.length;
+                    const bodyStr = content.slice(bodyIdx + 'body='.length, end).trim().replace(/,$/, '');
+                    try {
+                        const bodyVal = JSON.parse(bodyStr);
+                        sections.push('===== 入参 body =====\n' + JSON.stringify(bodyVal, null, indent));
+                        found = true;
+                    } catch (e) {
+                        sections.push('===== 入参 body（原始，解析失败）=====\n' + bodyStr);
+                        found = true;
+                    }
+                }
+
+                // 提取出参：出参={ ... } 到字符串结尾
+                if (outIdx !== -1) {
+                    const outStr = content.slice(outIdx + '出参='.length).trim();
+                    try {
+                        const outVal = JSON.parse(outStr);
+                        sections.push('===== 出参 =====\n' + JSON.stringify(outVal, null, indent));
+                        found = true;
+                    } catch (e) {
+                        sections.push('===== 出参（原始，解析失败）=====\n' + outStr);
+                        found = true;
+                    }
+                }
+
+                if (!found) {
+                    setStatus('error', '未找到入参/出参');
+                    setFeedback('error', '未在内容中找到 body=[...] 或 出参={...} 标记，请确认粘贴的是接口日志。');
+                    showToast('error', '未找到入参/出参标记');
+                    return;
+                }
+
+                setOutput(sections.join('\n\n'));
+                setStatus('valid', '解析完成');
+                const message = '已提取入参/出参并格式化完成。';
+                setFeedback('success', message);
+                celebrateFox('入参/出参解析完成');
+                showToast('success', message);
+            }
             copyButton.addEventListener('click', copyOutput);
             downloadButton.addEventListener('click', downloadOutput);
             input.addEventListener('input', handleInputChange);
