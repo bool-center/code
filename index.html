@@ -2018,6 +2018,61 @@
             background: #f7faf8;
         }
 
+        /* 高亮模式下覆盖默认配色（ID 优先级问题修复） */
+        #jsonOutput {
+            color: transparent;
+            background: transparent;
+            caret-color: #24543c;
+        }
+
+        /* JSON 输出高亮渲染层 */
+        .json-output-wrap {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+        }
+
+        .json-output-wrap .json-editor,
+        .json-output-wrap #jsonOutput {
+            flex: 1;
+            position: relative;
+            z-index: 2;
+            background: transparent !important;
+            color: transparent !important;
+            caret-color: #24543c;
+            resize: none;
+        }
+
+        #jsonOutputHighlight {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            margin: 0;
+            padding: 20px;
+            overflow: auto;
+            white-space: pre;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 13px;
+            line-height: 1.75;
+            tab-size: 2;
+            color: #24543c;
+            background: #f7faf8;
+            pointer-events: none;
+            word-break: normal;
+            overflow-wrap: normal;
+        }
+
+        #jsonOutputHighlight::-webkit-scrollbar { width: 8px; height: 8px; }
+
+        #jsonOutputHighlight .j-key { color: #9d388d; }
+        #jsonOutputHighlight .j-str { color: #1a7f37; }
+        #jsonOutputHighlight .j-num { color: #c05621; }
+        #jsonOutputHighlight .j-bool { color: #b42318; }
+        #jsonOutputHighlight .j-null { color: #8a6d00; }
+        #jsonOutputHighlight .j-punc { color: #5f6b64; }
+        #jsonOutputHighlight .j-header { color: #0b5fff; font-weight: 600; }
+
         .json-editor-footer {
             display: flex;
             align-items: center;
@@ -2947,7 +3002,10 @@
                                 <button id="jsonDownloadButton" type="button" class="json-icon-button" disabled><i class="fa fa-download" aria-hidden="true"></i>下载</button>
                             </div>
                         </div>
-                        <textarea id="jsonOutput" class="json-editor" placeholder="格式化结果将在这里显示" readonly spellcheck="false" aria-label="JSON 格式化结果"></textarea>
+                        <div class="json-output-wrap">
+                            <pre id="jsonOutputHighlight" aria-hidden="true"></pre>
+                            <textarea id="jsonOutput" class="json-editor" placeholder="格式化结果将在这里显示" readonly spellcheck="false" aria-label="JSON 格式化结果"></textarea>
+                        </div>
                         <div class="json-editor-footer"><span id="jsonOutputStats">0 字符 · 0 行</span><span>OUTPUT</span></div>
                     </div>
                 </div>
@@ -4801,12 +4859,63 @@ ${textContent}
                 feedbackText.textContent = message;
             }
 
+            const outputHighlight = document.getElementById('jsonOutputHighlight');
+
+            // JSON 语法高亮：key 紫 / string 绿 / number 橙 / bool 红 / null 黄 / 标题蓝
+            function escapeHtml(str) {
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
+            function highlightJsonText(text) {
+                const headerRegex = /^===== .+ =====$/;
+                const lines = text.split('\n');
+                return lines.map(line => {
+                    if (headerRegex.test(line)) {
+                        return '<span class="j-header">' + escapeHtml(line) + '</span>';
+                    }
+                    // 逐段匹配 JSON 词法
+                    const parts = line.match(/"(?:[^"\\]|\\.)*"(?:\s*:)?|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|true|false|null|[{}\[\],:]/g);
+                    if (!parts) return escapeHtml(line);
+                    let result = '';
+                    let rest = line;
+                    for (const part of parts) {
+                        const idx = rest.indexOf(part);
+                        result += escapeHtml(rest.slice(0, idx));
+                        if (part.endsWith(':')) {
+                            result += '<span class="j-key">' + escapeHtml(part.slice(0, -1)) + '</span><span class="j-punc">:</span>';
+                        } else if (part.startsWith('"')) {
+                            result += '<span class="j-str">' + escapeHtml(part) + '</span>';
+                        } else if (part === 'true' || part === 'false') {
+                            result += '<span class="j-bool">' + part + '</span>';
+                        } else if (part === 'null') {
+                            result += '<span class="j-null">' + part + '</span>';
+                        } else if (/^[{}\[\],:]$/.test(part)) {
+                            result += '<span class="j-punc">' + escapeHtml(part) + '</span>';
+                        } else {
+                            result += '<span class="j-num">' + escapeHtml(part) + '</span>';
+                        }
+                        rest = rest.slice(idx + part.length);
+                    }
+                    result += escapeHtml(rest);
+                    return result;
+                }).join('\n');
+            }
+
             function setOutput(value) {
                 output.value = value;
+                outputHighlight.innerHTML = value ? highlightJsonText(value) : '';
+                outputHighlight.scrollTop = 0;
+                outputHighlight.scrollLeft = 0;
                 updateStats(output, outputStats);
                 copyButton.disabled = !value;
                 downloadButton.disabled = !value;
             }
+
+            // 滚动同步：textarea 滚动时高亮层跟随
+            output.addEventListener('scroll', () => {
+                outputHighlight.scrollTop = output.scrollTop;
+                outputHighlight.scrollLeft = output.scrollLeft;
+            });
 
             function getErrorMessage(error, source) {
                 const message = error.message || 'JSON 语法错误';
