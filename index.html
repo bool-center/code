@@ -5425,7 +5425,65 @@ ${textContent}
             document.getElementById('jsonValidateButton').addEventListener('click', validateJSON);
             document.getElementById('jsonLogParseButton').addEventListener('click', parseLogJSON);
 
-            // 解析 SLS 日志 JSON：从 content 中提取入参(body=[...])和出参(出参={...})
+            // 从字符串 start 位置提取一段平衡的 JSON 对象/数组
+            function extractBalancedJson(text, start) {
+                while (start < text.length && /\s/.test(text[start])) start++;
+                const open = text[start];
+                if (open !== '{' && open !== '[') return null;
+                const close = open === '{' ? '}' : ']';
+                let depth = 0;
+                let inString = false;
+                let escaped = false;
+                for (let i = start; i < text.length; i++) {
+                    const ch = text[i];
+                    if (inString) {
+                        if (escaped) {
+                            escaped = false;
+                        } else if (ch === '\\') {
+                            escaped = true;
+                        } else if (ch === '"') {
+                            inString = false;
+                        }
+                        continue;
+                    }
+                    if (ch === '"') {
+                        inString = true;
+                        continue;
+                    }
+                    if (ch === open) depth++;
+                    else if (ch === close) {
+                        depth--;
+                        if (depth === 0) {
+                            return { raw: text.slice(start, i + 1), end: i + 1 };
+                        }
+                    }
+                }
+                return null;
+            }
+
+            // 按多个标记名查找「key=JSON」片段
+            function findMarkedJson(content, markers) {
+                let best = null;
+                markers.forEach(marker => {
+                    let from = 0;
+                    while (from < content.length) {
+                        const idx = content.indexOf(marker, from);
+                        if (idx === -1) break;
+                        const jsonStart = idx + marker.length;
+                        const extracted = extractBalancedJson(content, jsonStart);
+                        if (extracted) {
+                            if (!best || idx < best.index) {
+                                best = { marker: marker.replace(/=$/, ''), index: idx, raw: extracted.raw, end: extracted.end };
+                            }
+                            break;
+                        }
+                        from = idx + marker.length;
+                    }
+                });
+                return best;
+            }
+
+            // 解析 SLS / 接口日志：支持 body / params / 入参 与 出参 / result 等
             function parseLogJSON() {
                 clearTimeout(validationTimer);
                 const source = input.value.trim();
@@ -5449,45 +5507,54 @@ ${textContent}
                 const sections = [];
                 let found = false;
 
-                // 提取入参：body=[ ... ]，到出参= 之前
-                const bodyIdx = content.indexOf('body=[');
-                const outIdx = content.indexOf('出参={');
-                if (bodyIdx !== -1) {
-                    const end = outIdx > bodyIdx ? outIdx : content.length;
-                    const bodyStr = content.slice(bodyIdx + 'body='.length, end).trim().replace(/,$/, '');
+                const inMarkers = ['body=', 'params=', 'param=', '入参=', 'request=', 'req=', 'requestBody=', 'args='];
+                const outMarkers = ['出参=', 'result=', 'response=', 'resp=', 'return=', 'res=', 'responseBody='];
+
+                const inHit = findMarkedJson(content, inMarkers);
+                const outHit = findMarkedJson(content, outMarkers);
+
+                if (inHit) {
                     try {
-                        const bodyVal = JSON.parse(bodyStr);
-                        sections.push('===== 入参 body =====\n' + JSON.stringify(bodyVal, null, indent));
-                        found = true;
+                        sections.push('===== 入参 ' + inHit.marker + ' =====\n' + JSON.stringify(JSON.parse(inHit.raw), null, indent));
                     } catch (e) {
-                        sections.push('===== 入参 body（原始，解析失败）=====\n' + bodyStr);
-                        found = true;
+                        sections.push('===== 入参 ' + inHit.marker + '（原始，解析失败）=====\n' + inHit.raw);
                     }
+                    found = true;
                 }
 
-                // 提取出参：出参={ ... } 到字符串结尾
-                if (outIdx !== -1) {
-                    const outStr = content.slice(outIdx + '出参='.length).trim();
+                if (outHit) {
                     try {
-                        const outVal = JSON.parse(outStr);
-                        sections.push('===== 出参 =====\n' + JSON.stringify(outVal, null, indent));
-                        found = true;
+                        sections.push('===== 出参 ' + outHit.marker + ' =====\n' + JSON.stringify(JSON.parse(outHit.raw), null, indent));
                     } catch (e) {
-                        sections.push('===== 出参（原始，解析失败）=====\n' + outStr);
-                        found = true;
+                        sections.push('===== 出参 ' + outHit.marker + '（原始，解析失败）=====\n' + outHit.raw);
                     }
+                    found = true;
+                }
+
+                // 兜底：content 本身就是可解析 JSON
+                if (!found) {
+                    try {
+                        const alone = JSON.parse(content);
+                        sections.push('===== content =====\n' + JSON.stringify(alone, null, indent));
+                        found = true;
+                    } catch (e) { /* ignore */ }
                 }
 
                 if (!found) {
                     setStatus('error', '未找到入参/出参');
-                    setFeedback('error', '未在内容中找到 body=[...] 或 出参={...} 标记，请确认粘贴的是接口日志。');
+                    setFeedback('error', '未识别到 body/params/入参 或 出参/result 等标记，请确认粘贴的是接口日志。');
                     showToast('error', '未找到入参/出参标记');
                     return;
                 }
 
                 setOutput(sections.join('\n\n'));
                 setStatus('valid', '解析完成');
-                const message = '已提取入参/出参并格式化完成。';
+                const labels = [];
+                if (inHit) labels.push('入参(' + inHit.marker + ')');
+                if (outHit) labels.push('出参(' + outHit.marker + ')');
+                const message = labels.length
+                    ? '已提取' + labels.join('、') + '并格式化完成。'
+                    : '已提取日志内容并格式化完成。';
                 setFeedback('success', message);
                 celebrateFox('入参/出参解析完成');
                 showToast('success', message);
