@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0b1714">
-    <meta name="description" content="二维码生成、解码、文档转换与 JSON 格式化，一站式效率工具工作台。">
-    <title>QR Studio · 效率工具工作台</title>
+    <meta name="description" content="二维码、JSON、URL、时间戳、编码、Diff 与测试清单，一站式本地效率工具工作台。">
+    <title>QR Studio · 测试与效率工作台</title>
     <!-- 添加网站图标 -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2307C160' d='M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0zm8.485 19.492c-.293.293-.677.439-1.061.439-.383 0-.768-.146-1.061-.439l-5.485-5.485-5.485 5.485c-.293.293-.677.439-1.061.439s-.768-.146-1.061-.439c-.586-.586-.586-1.535 0-2.121l7.596-7.596c.586-.586 1.535-.586 2.121 0l7.596 7.596c.586.586.586 1.535 0 2.121z'/%3E%3C/svg%3E" type="image/svg+xml">
     <!-- 引入Tailwind CSS -->
@@ -16,61 +16,7 @@
     <script>
     // 定义一个简单的备用QRCode生成器（使用Canvas API）
     // 这个简化版实现了基本的二维码生成功能，作为CDN加载失败时的备用方案
-    const SimpleQRCode = {
-        // 简单的二维码数据编码（仅用于演示，真实情况需要更复杂的编码）
-        encode: function(text) {
-            // 这里使用一个简单的示例图案作为备用
-            // 真实应用中应该实现完整的QR码编码算法
-            const size = 256;
-            const modules = Math.floor(size / 8);
-            
-            // 创建一个简单的黑白方块图案
-            const pattern = [];
-            for (let i = 0; i < modules; i++) {
-                pattern[i] = [];
-                for (let j = 0; j < modules; j++) {
-                    // 创建一个简单的棋盘格图案
-                    pattern[i][j] = (i + j) % 2 === 0;
-                }
-            }
-            
-            return { modules: pattern, size: size };
-        },
-        
-        // 绘制二维码到Canvas
-        draw: function(canvas, text, options) {
-            const size = options.width || 256;
-            canvas.width = size;
-            canvas.height = size;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = options.color.light || '#ffffff';
-            ctx.fillRect(0, 0, size, size);
-            
-            // 使用简单的图案绘制
-            const modules = Math.floor(size / 8);
-            const moduleSize = size / modules;
-            
-            ctx.fillStyle = options.color.dark || '#000000';
-            
-            // 绘制中心的简单图案
-            for (let i = 0; i < modules; i++) {
-                for (let j = 0; j < modules; j++) {
-                    // 简单的波浪图案
-                    if (Math.abs(Math.sin(i / 3) + Math.cos(j / 3)) > 0.5) {
-                        ctx.fillRect(i * moduleSize, j * moduleSize, moduleSize, moduleSize);
-                    }
-                }
-            }
-            
-            // 在中心绘制文本
-            ctx.fillStyle = options.color.dark || '#000000';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('QR码生成中...', size / 2, size / 2);
-        }
-    };
-    
+    // 已移除演示用假二维码兜底：CDN 失败时直接报错，避免输出不可扫图案
     // 使用Promise跟踪QRCode库的加载状态
     window.qrcodeLoadedPromise = new Promise((resolve, reject) => {
         // 尝试从主要CDN加载QRCode库
@@ -88,10 +34,7 @@
                 } else {
                     console.error('QRCode库加载完成但QRCode对象不可用');
                     if (isFallback) {
-                        // CDN加载失败，使用本地备用实现
-                        console.log('使用本地备用QRCode实现');
-                        window.QRCode = SimpleQRCode;
-                        resolve();
+                        reject(new Error('QRCode 库加载失败，请检查网络后刷新页面'));
                     } else {
                         loadScript('https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js', true);
                     }
@@ -100,12 +43,8 @@
             script.onerror = () => {
                 console.error(`QRCode库从${isFallback ? '备用' : '主要'}CDN加载失败:`, src);
                 if (isFallback) {
-                    // CDN加载失败，使用本地备用实现
-                    console.log('使用本地备用QRCode实现');
-                    window.QRCode = SimpleQRCode;
-                    resolve();
+                    reject(new Error('QRCode 库加载失败，请检查网络后刷新页面'));
                 } else {
-                    // 主要CDN加载失败，尝试备用CDN
                     loadScript('https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js', true);
                 }
             };
@@ -400,25 +339,8 @@
                         callback(qrErr);
                     }
                 } else if (typeof QRCode.draw === 'function') {
-                    // 使用SimpleQRCode备用实现的API
-                    let canvas;
-                    if (container.tagName === 'CANVAS') {
-                        canvas = container;
-                    } else {
-                        // 如果container不是canvas，创建一个canvas元素
-                        canvas = document.createElement('canvas');
-                        container.innerHTML = '';
-                        container.appendChild(canvas);
-                    }
-                    
-                    try {
-                        QRCode.draw(canvas, text, options);
-                        console.log('二维码生成成功 (使用本地备用实现)');
-                        callback(null);
-                    } catch (drawErr) {
-                        console.error('本地备用QRCode实现生成失败:', drawErr);
-                        callback(drawErr);
-                    }
+                    // 演示用图案不是真实二维码，禁止作为兜底输出
+                    callback(new Error('QRCode 库不可用：无法生成真实二维码'));
                 } else {
                     // 未知的QRCode库API
                     console.error('未知的QRCode库API类型:', QRCode);
@@ -704,9 +626,30 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         }
         
-        /* 平滑滚动 */
+        /* 平滑滚动 + 铺满视口（避免底部白边） */
         html {
             scroll-behavior: smooth;
+            height: 100%;
+            height: -webkit-fill-available;
+            background: var(--sidebar, #0b1714);
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        body.bg-gray-50,
+        body {
+            display: flex !important;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+            min-height: -webkit-fill-available;
+            overflow: hidden;
         }
         
         /* 加载动画 */
@@ -796,6 +739,16 @@
             text-rendering: optimizeLegibility;
         }
 
+        /* 壳层固定铺满，彻底消除底部空隙 */
+        .app-shell {
+            display: flex;
+            flex: 1 1 auto;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            overflow: hidden;
+        }
+
         button, a, input, select, textarea {
             -webkit-tap-highlight-color: transparent;
         }
@@ -812,6 +765,10 @@
 
         .app-sidebar {
             width: 268px;
+            flex: 0 0 268px;
+            align-self: stretch;
+            height: 100%;
+            min-height: 0;
             color: #d7e4dd;
             background:
                 radial-gradient(circle at 20% 0%, rgba(32, 201, 137, 0.13), transparent 30%),
@@ -821,12 +778,42 @@
         }
 
         .app-sidebar-inner {
-            position: sticky;
-            top: 0;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            padding: 28px 18px 20px;
+            box-sizing: border-box;
+            height: 100%;
+            min-height: 0;
+            padding: 28px 14px 0;
+            overflow: hidden;
+        }
+
+        .sidebar-scroll {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 0 4px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(125, 170, 148, 0.35) transparent;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            border-radius: 999px;
+            background: rgba(125, 170, 148, 0.35);
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .app-sidebar-inner .sidebar-foot {
+            flex-shrink: 0;
+            margin: 12px 4px 14px;
         }
 
         .brand {
@@ -1008,10 +995,17 @@
 
         .workspace {
             position: relative;
-            height: 100vh;
+            flex: 1 1 auto;
+            align-self: stretch;
+            min-width: 0;
+            min-height: 0;
+            height: 100%;
             overflow-x: hidden;
             overflow-y: auto;
             scroll-behavior: smooth;
+            background:
+                radial-gradient(circle at 78% 0%, rgba(16, 185, 129, 0.07), transparent 30%),
+                #f4f7f5;
         }
 
         .app-header {
@@ -2562,7 +2556,7 @@
         }
 
         @media (max-width: 767px) {
-            .workspace { height: 100dvh; }
+            .workspace { height: 100%; }
             .header-inner { min-height: 0; }
             .header-mascot { display: none !important; }
             .header-inner { align-items: flex-start; padding: 16px 20px 14px !important; }
@@ -2613,19 +2607,22 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="tools-extra.css">
 </head>
-<body class="bg-gray-50 min-h-screen flex">
+<body class="bg-gray-50">
+    <div class="app-shell">
     <!-- 左侧导航栏 -->
     <aside class="app-sidebar flex-shrink-0 hidden md:block" aria-label="主导航">
         <div class="app-sidebar-inner">
             <div class="brand">
                 <div class="brand-mark"><i class="fa fa-qrcode" aria-hidden="true"></i></div>
                 <div>
-                    <div class="brand-title-row"><div class="brand-name">QR Studio</div><span class="version-badge">v2.0</span></div>
+                    <div class="brand-title-row"><div class="brand-name">QR Studio</div><span class="version-badge">v2.1</span></div>
                     <div class="brand-subtitle">Utility workspace</div>
                 </div>
             </div>
-            <div class="nav-section-label">工作区</div>
+            <div class="sidebar-scroll">
+            <div class="nav-section-label">二维码</div>
             <nav class="sidebar-nav">
                 <ul>
                     <li>
@@ -2640,6 +2637,11 @@
                             <span class="nav-copy"><strong>解码工具</strong><small>识别图片中的二维码</small></span>
                         </a>
                     </li>
+                </ul>
+            </nav>
+            <div class="nav-section-label is-sub">数据与调试</div>
+            <nav class="sidebar-nav">
+                <ul>
                     <li>
                         <a href="#excel-to-xmind" id="nav-excel-to-xmind" class="nav-link text-gray-600 border-transparent">
                             <i class="fa fa-files-o nav-icon" aria-hidden="true"></i>
@@ -2649,11 +2651,36 @@
                     <li>
                         <a href="#json-formatter" id="nav-json-formatter" class="nav-link text-gray-600 border-transparent">
                             <i class="fa fa-code nav-icon" aria-hidden="true"></i>
-                            <span class="nav-copy"><strong>JSON 格式化</strong><small>校验、格式化与压缩 JSON</small></span>
+                            <span class="nav-copy"><strong>JSON 格式化</strong><small>校验、格式化与压缩</small></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#diff-tool" id="nav-diff-tool" class="nav-link text-gray-600 border-transparent">
+                            <i class="fa fa-columns nav-icon" aria-hidden="true"></i>
+                            <span class="nav-copy"><strong>文本 Diff</strong><small>对比 JSON / 配置差异</small></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#url-tool" id="nav-url-tool" class="nav-link text-gray-600 border-transparent">
+                            <i class="fa fa-link nav-icon" aria-hidden="true"></i>
+                            <span class="nav-copy"><strong>URL 工具</strong><small>解析与拼装查询参数</small></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#timestamp" id="nav-timestamp" class="nav-link text-gray-600 border-transparent">
+                            <i class="fa fa-clock-o nav-icon" aria-hidden="true"></i>
+                            <span class="nav-copy"><strong>时间戳</strong><small>秒/毫秒与日期互转</small></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#encode-tool" id="nav-encode-tool" class="nav-link text-gray-600 border-transparent">
+                            <i class="fa fa-lock nav-icon" aria-hidden="true"></i>
+                            <span class="nav-copy"><strong>编码工具箱</strong><small>Base64 / URL / Unicode</small></span>
                         </a>
                     </li>
                 </ul>
             </nav>
+            </div><!-- /.sidebar-scroll -->
             <div class="sidebar-foot">
                 <div class="privacy-title"><span class="status-dot"></span>本地处理，安全无忧</div>
                 <p>文件与数据仅在当前浏览器中处理，不会上传至服务器。</p>
@@ -2668,18 +2695,19 @@
                 <div class="brand">
                     <div class="brand-mark"><i class="fa fa-qrcode" aria-hidden="true"></i></div>
                     <div>
-                        <div class="brand-title-row"><div class="brand-name">QR Studio</div><span class="version-badge">v2.0</span></div>
+                        <div class="brand-title-row"><div class="brand-name">QR Studio</div><span class="version-badge">v2.1</span></div>
                         <div class="brand-subtitle">Utility workspace</div>
                     </div>
                     <button id="close-mobile-nav" type="button" aria-label="关闭导航">
                         <i class="fa fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
-                <div class="nav-section-label">工作区</div>
+            <div class="sidebar-scroll">
+            <div class="nav-section-label">二维码</div>
                 <nav class="sidebar-nav">
                     <ul>
                         <li>
-                            <a href="#generate" id="mobile-nav-generate" class="nav-link text-primary bg-primary/5 border-primary">
+                            <a href="#generate" id="mobile-nav-generate" class="nav-link text-primary bg-primary/5 border-primary" aria-current="page">
                                 <i class="fa fa-plus-circle nav-icon" aria-hidden="true"></i>
                                 <span class="nav-copy"><strong>生码工具</strong><small>创建微信小程序二维码</small></span>
                             </a>
@@ -2690,6 +2718,11 @@
                                 <span class="nav-copy"><strong>解码工具</strong><small>识别图片中的二维码</small></span>
                             </a>
                         </li>
+                    </ul>
+                </nav>
+                <div class="nav-section-label is-sub">数据与调试</div>
+                <nav class="sidebar-nav">
+                    <ul>
                         <li>
                             <a href="#excel-to-xmind" id="mobile-nav-excel-to-xmind" class="nav-link text-gray-600 border-transparent">
                                 <i class="fa fa-files-o nav-icon" aria-hidden="true"></i>
@@ -2699,11 +2732,36 @@
                         <li>
                             <a href="#json-formatter" id="mobile-nav-json-formatter" class="nav-link text-gray-600 border-transparent">
                                 <i class="fa fa-code nav-icon" aria-hidden="true"></i>
-                                <span class="nav-copy"><strong>JSON 格式化</strong><small>校验、格式化与压缩 JSON</small></span>
+                                <span class="nav-copy"><strong>JSON 格式化</strong><small>校验、格式化与压缩</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#diff-tool" id="mobile-nav-diff-tool" class="nav-link text-gray-600 border-transparent">
+                                <i class="fa fa-columns nav-icon" aria-hidden="true"></i>
+                                <span class="nav-copy"><strong>文本 Diff</strong><small>对比 JSON / 配置差异</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#url-tool" id="mobile-nav-url-tool" class="nav-link text-gray-600 border-transparent">
+                                <i class="fa fa-link nav-icon" aria-hidden="true"></i>
+                                <span class="nav-copy"><strong>URL 工具</strong><small>解析与拼装查询参数</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#timestamp" id="mobile-nav-timestamp" class="nav-link text-gray-600 border-transparent">
+                                <i class="fa fa-clock-o nav-icon" aria-hidden="true"></i>
+                                <span class="nav-copy"><strong>时间戳</strong><small>秒/毫秒与日期互转</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#encode-tool" id="mobile-nav-encode-tool" class="nav-link text-gray-600 border-transparent">
+                                <i class="fa fa-lock nav-icon" aria-hidden="true"></i>
+                                <span class="nav-copy"><strong>编码工具箱</strong><small>Base64 / URL / Unicode</small></span>
                             </a>
                         </li>
                     </ul>
                 </nav>
+                </div><!-- /.sidebar-scroll -->
                 <div class="sidebar-foot">
                     <div class="privacy-title"><span class="status-dot"></span>本地处理，安全无忧</div>
                     <p>文件与数据仅在当前浏览器中处理。</p>
@@ -3020,13 +3078,187 @@
             </section>
         </div>
 
-        <footer class="workspace-footer"><span>QR Studio v2.0 · 让日常工具更简单、更高效</span><span>LOCAL &amp; SECURE</span></footer>
+
+        <!-- URL 工具 -->
+        <div id="url-tool-module" class="tool-module hidden">
+            <section class="glass-card extra-tool-card card-hover" aria-labelledby="url-heading">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <i class="fa fa-link panel-icon" aria-hidden="true"></i>
+                        <div><h2 id="url-heading" class="panel-title">URL 解析与拼装</h2><div class="panel-subtitle">拆解查询参数，编辑后重新生成链接</div></div>
+                    </div>
+                    <span class="panel-badge">URL WORKBENCH</span>
+                </div>
+                <div class="extra-grid-3">
+                    <div>
+                        <div class="extra-field">
+                            <label for="urlToolInput">原始 URL</label>
+                            <textarea id="urlToolInput" placeholder="粘贴完整链接，例如微信体验版扫码 URL"></textarea>
+                        </div>
+                        <div class="extra-actions">
+                            <button type="button" id="urlToolParse" class="extra-btn is-primary"><i class="fa fa-search"></i>解析</button>
+                            <button type="button" id="urlToolBuild" class="extra-btn"><i class="fa fa-wrench"></i>重新拼装</button>
+                            <button type="button" id="urlToolCopy" class="extra-btn"><i class="fa fa-copy"></i>复制</button>
+                            <button type="button" id="urlToolClear" class="extra-btn is-ghost"><i class="fa fa-trash-o"></i>清空</button>
+                        </div>
+                        <div id="urlToolMeta" class="extra-meta"></div>
+                        <div class="extra-field" style="margin-top:14px">
+                            <label for="urlToolBase">基础地址（origin + path）</label>
+                            <input type="text" id="urlToolBase" placeholder="https://example.com/path">
+                        </div>
+                        <div class="extra-field" style="margin-top:12px">
+                            <label for="urlToolHash">Hash</label>
+                            <input type="text" id="urlToolHash" placeholder="#wechat-redirect">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="extra-field">
+                            <label>查询参数（可直接编辑）</label>
+                        </div>
+                        <div id="urlToolKv" class="extra-kv"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 时间戳 -->
+        <div id="timestamp-module" class="tool-module hidden">
+            <section class="glass-card extra-tool-card card-hover" aria-labelledby="ts-heading">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <i class="fa fa-clock-o panel-icon" aria-hidden="true"></i>
+                        <div><h2 id="ts-heading" class="panel-title">时间戳转换</h2><div class="panel-subtitle">秒 / 毫秒时间戳与日期互转</div></div>
+                    </div>
+                    <span class="panel-badge">TIME LAB</span>
+                </div>
+                <div class="extra-grid">
+                    <div>
+                        <div class="extra-field">
+                            <label for="tsInput">输入时间戳或日期</label>
+                            <input type="text" id="tsInput" placeholder="1710000000 / 1710000000000 / 2024-01-01 12:00:00">
+                        </div>
+                        <div class="extra-field" style="margin-top:12px">
+                            <label for="tsUnit">数字单位</label>
+                            <select id="tsUnit">
+                                <option value="auto" selected>自动识别</option>
+                                <option value="s">秒</option>
+                                <option value="ms">毫秒</option>
+                            </select>
+                        </div>
+                        <div class="extra-actions">
+                            <button type="button" id="tsConvert" class="extra-btn is-primary"><i class="fa fa-exchange"></i>转换</button>
+                            <button type="button" id="tsNow" class="extra-btn"><i class="fa fa-bolt"></i>填入当前</button>
+                            <button type="button" id="tsClear" class="extra-btn is-ghost"><i class="fa fa-trash-o"></i>清空</button>
+                        </div>
+                        <div id="tsNowBox" class="timestamp-now"></div>
+                    </div>
+                    <div>
+                        <div class="extra-field"><label for="tsLocal">本地时间</label><div style="display:grid;grid-template-columns:1fr auto;gap:8px"><input type="text" id="tsLocal" readonly><button type="button" class="extra-btn" data-copy-ts="tsLocal">复制</button></div></div>
+                        <div class="extra-field" style="margin-top:10px"><label for="tsUtc">UTC</label><div style="display:grid;grid-template-columns:1fr auto;gap:8px"><input type="text" id="tsUtc" readonly><button type="button" class="extra-btn" data-copy-ts="tsUtc">复制</button></div></div>
+                        <div class="extra-field" style="margin-top:10px"><label for="tsIso">ISO</label><div style="display:grid;grid-template-columns:1fr auto;gap:8px"><input type="text" id="tsIso" readonly><button type="button" class="extra-btn" data-copy-ts="tsIso">复制</button></div></div>
+                        <div class="extra-field" style="margin-top:10px"><label for="tsSec">秒时间戳</label><div style="display:grid;grid-template-columns:1fr auto;gap:8px"><input type="text" id="tsSec" readonly><button type="button" class="extra-btn" data-copy-ts="tsSec">复制</button></div></div>
+                        <div class="extra-field" style="margin-top:10px"><label for="tsMs">毫秒时间戳</label><div style="display:grid;grid-template-columns:1fr auto;gap:8px"><input type="text" id="tsMs" readonly><button type="button" class="extra-btn" data-copy-ts="tsMs">复制</button></div></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 编码工具箱 -->
+        <div id="encode-tool-module" class="tool-module hidden">
+            <section class="glass-card extra-tool-card card-hover" aria-labelledby="encode-heading">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <i class="fa fa-lock panel-icon" aria-hidden="true"></i>
+                        <div><h2 id="encode-heading" class="panel-title">编码工具箱</h2><div class="panel-subtitle">Base64 / URL / Unicode / HTML 本地编解码</div></div>
+                    </div>
+                    <span class="panel-badge">CODEC BOX</span>
+                </div>
+                <div id="encodeModeTabs" class="encode-mode-tabs">
+                    <button type="button" data-mode="base64" class="is-active">Base64</button>
+                    <button type="button" data-mode="url">URL Encode</button>
+                    <button type="button" data-mode="unicode">Unicode</button>
+                    <button type="button" data-mode="html">HTML 实体</button>
+                </div>
+                <div class="extra-grid">
+                    <div class="extra-field">
+                        <label for="encodeInput">输入</label>
+                        <textarea id="encodeInput" placeholder="粘贴需要编码或解码的文本"></textarea>
+                    </div>
+                    <div class="extra-field">
+                        <label for="encodeOutput">输出</label>
+                        <textarea id="encodeOutput" placeholder="结果将显示在这里" readonly></textarea>
+                    </div>
+                </div>
+                <div class="extra-actions">
+                    <button type="button" id="encodeDo" class="extra-btn is-primary"><i class="fa fa-arrow-right"></i>编码</button>
+                    <button type="button" id="encodeUndo" class="extra-btn"><i class="fa fa-arrow-left"></i>解码</button>
+                    <button type="button" id="encodeSwap" class="extra-btn"><i class="fa fa-exchange"></i>上下交换</button>
+                    <button type="button" id="encodeCopy" class="extra-btn"><i class="fa fa-copy"></i>复制结果</button>
+                    <button type="button" id="encodeClear" class="extra-btn is-ghost"><i class="fa fa-trash-o"></i>清空</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Diff -->
+        <div id="diff-tool-module" class="tool-module hidden">
+            <section class="glass-card diff-tool-card" aria-labelledby="diff-heading">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <i class="fa fa-columns panel-icon" aria-hidden="true"></i>
+                        <div><h2 id="diff-heading" class="panel-title">文本 / JSON Diff</h2><div class="panel-subtitle">全宽并排对比，差异行与字符都会高亮标记</div></div>
+                    </div>
+                    <span class="panel-badge">DIFF VIEW</span>
+                </div>
+                <div class="diff-toolbar">
+                    <div class="diff-toolbar-group">
+                        <button type="button" id="diffRun" class="extra-btn is-primary"><i class="fa fa-search"></i>开始对比</button>
+                        <button type="button" id="diffPretty" class="extra-btn"><i class="fa fa-magic"></i>JSON 美化</button>
+                        <button type="button" id="diffSwap" class="extra-btn"><i class="fa fa-exchange"></i>左右交换</button>
+                        <button type="button" id="diffClear" class="extra-btn is-ghost"><i class="fa fa-trash-o"></i>清空</button>
+                    </div>
+                    <div id="diffSummary" class="diff-summary" aria-live="polite">
+                        <span class="diff-chip">等待对比</span>
+                    </div>
+                </div>
+                <div class="diff-editors">
+                    <div class="extra-field diff-editor-pane">
+                        <label for="diffLeft">左侧 · 旧内容</label>
+                        <textarea id="diffLeft" placeholder="粘贴旧内容 / 旧 JSON"></textarea>
+                    </div>
+                    <div class="extra-field diff-editor-pane">
+                        <label for="diffRight">右侧 · 新内容</label>
+                        <textarea id="diffRight" placeholder="粘贴新内容 / 新 JSON"></textarea>
+                    </div>
+                </div>
+                <div class="diff-result-head">
+                    <strong>对比结果</strong>
+                    <span class="diff-legend">
+                        <i class="diff-dot is-del"></i>删除
+                        <i class="diff-dot is-add"></i>新增
+                        <i class="diff-dot is-chg"></i>修改
+                    </span>
+                </div>
+                <div class="diff-panels" aria-live="polite">
+                    <div class="diff-panel-wrap">
+                        <div class="diff-panel-title">旧</div>
+                        <div id="diffOutLeft" class="diff-out"></div>
+                    </div>
+                    <div class="diff-panel-wrap">
+                        <div class="diff-panel-title">新</div>
+                        <div id="diffOutRight" class="diff-out"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+                        <footer class="workspace-footer"><span>QR Studio v2.1 · 本地效率与调试工作台</span><span>LOCAL &amp; SECURE</span></footer>
     </main>
 
     <!-- 页脚 -->
 
     </div>
     </div>
+    </div><!-- /.app-shell -->
 
     <!-- Toast 通知元素 -->
     <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
@@ -3036,14 +3268,40 @@
     
     <!-- JavaScript -->
     <script>
+        window.QR_STUDIO_DEBUG = localStorage.getItem('qr-studio-debug') === '1';
+        if (!window.QR_STUDIO_DEBUG) {
+            const __silentLog = () => {};
+            console.log = __silentLog;
+        }
         // 模块切换功能 - 全局变量
         let generateModule, decodeModule, excelToXMindModule, jsonFormatterModule, pageTitle, pageDescription;
         let navGenerate, navDecode, navExcelToXMind, navJsonFormatter;
         let mobileNavGenerate, mobileNavDecode, mobileNavExcelToXMind, mobileNavJsonFormatter, mobileNavToggle, mobileNav, mobileNavContent, closeMobileNav;
         let mobileNavTimer;
+        let coreModules = [];
+        let coreNavPairs = [];
 
-        function activateModule(activeModule, activeNav, activeMobileNav, title, description, kicker) {
-            [generateModule, decodeModule, excelToXMindModule, jsonFormatterModule].forEach(module => {
+        function getAllModules() {
+            const extras = (window.QRStudioExtra && window.QRStudioExtra.modules || []).map(m => document.getElementById(m.moduleId)).filter(Boolean);
+            return [generateModule, decodeModule, excelToXMindModule, jsonFormatterModule, ...extras].filter(Boolean);
+        }
+
+        function getAllNavPairs() {
+            const extras = (window.QRStudioExtra && window.QRStudioExtra.modules || []).map(m => [
+                document.getElementById(m.navId),
+                document.getElementById(m.mobileNavId)
+            ]).filter(pair => pair[0] && pair[1]);
+            return [
+                [navGenerate, mobileNavGenerate],
+                [navDecode, mobileNavDecode],
+                [navExcelToXMind, mobileNavExcelToXMind],
+                [navJsonFormatter, mobileNavJsonFormatter],
+                ...extras
+            ];
+        }
+
+        function activateModule(activeModule, activeNav, activeMobileNav, title, description, kicker, hash) {
+            getAllModules().forEach(module => {
                 const isActive = module === activeModule;
                 module.classList.toggle('hidden', !isActive);
                 module.style.display = '';
@@ -3051,8 +3309,9 @@
                 module.style.opacity = '';
             });
 
-            [[navGenerate, mobileNavGenerate], [navDecode, mobileNavDecode], [navExcelToXMind, mobileNavExcelToXMind], [navJsonFormatter, mobileNavJsonFormatter]].forEach(pair => {
+            getAllNavPairs().forEach(pair => {
                 pair.forEach(navItem => {
+                    if (!navItem) return;
                     const isActive = navItem === activeNav || navItem === activeMobileNav;
                     navItem.classList.toggle('text-primary', isActive);
                     navItem.classList.toggle('bg-primary/5', isActive);
@@ -3067,39 +3326,53 @@
                 });
             });
 
-            document.querySelector('.workspace-main').classList.toggle('json-workspace-active', activeModule === jsonFormatterModule);
+            const main = document.querySelector('.workspace-main');
+            main.classList.toggle('json-workspace-active', activeModule === jsonFormatterModule);
+            main.classList.toggle('diff-workspace-active', activeModule && activeModule.id === 'diff-tool-module');
             pageTitle.textContent = title;
             pageDescription.textContent = description;
             document.querySelector('.page-kicker').textContent = kicker;
             document.title = `${title} · QR Studio`;
+            if (hash && window.location.hash !== hash) {
+                history.replaceState(null, '', hash);
+            }
+            try {
+                localStorage.setItem('qr-studio-last-module', hash || '#generate');
+            } catch (e) {}
             activeModule.classList.remove('module-enter');
             void activeModule.offsetWidth;
             activeModule.classList.add('module-enter');
             closeMobileMenu();
         }
 
-        // 切换到生码工具
         function switchToGenerate() {
             activateModule(generateModule, navGenerate, mobileNavGenerate,
-                '微信二维码生码工具', '配置业务参数，实时生成清晰、可下载的小程序二维码。', 'WECHAT TOOLKIT');
+                '微信二维码生码工具', '配置业务参数，实时生成清晰、可下载的小程序二维码。', 'WECHAT TOOLKIT', '#generate');
         }
 
-        // 切换到解码工具
         function switchToDecode() {
             activateModule(decodeModule, navDecode, mobileNavDecode,
-                '二维码解码工具', '上传二维码图片，在本地快速识别并复制其中的内容。', 'IMAGE DECODER');
+                '二维码解码工具', '上传二维码图片，在本地快速识别并复制其中的内容。', 'IMAGE DECODER', '#decode');
         }
 
-        // 切换到文档转换工具
         function switchToExcelToXMind() {
             activateModule(excelToXMindModule, navExcelToXMind, mobileNavExcelToXMind,
-                '文档转换工具', '将 Excel、CSV 或 XMind 内容整理为结构清晰的 Word 文档。', 'DOCUMENT CONVERTER');
+                '文档转换工具', '将 Excel、CSV 或 XMind 内容整理为结构清晰的 Word 文档。', 'DOCUMENT CONVERTER', '#excel-to-xmind');
         }
 
-        // 切换到 JSON 格式化工具
         function switchToJsonFormatter() {
             activateModule(jsonFormatterModule, navJsonFormatter, mobileNavJsonFormatter,
-                'JSON 格式化工具', '在本地校验、格式化和压缩 JSON，让数据结构更清晰。', 'JSON WORKSPACE');
+                'JSON 格式化工具', '在本地校验、格式化和压缩 JSON，让数据结构更清晰。', 'JSON WORKSPACE', '#json-formatter');
+        }
+
+        function switchToExtraModule(moduleDef) {
+            if (!moduleDef) return;
+            const moduleEl = document.getElementById(moduleDef.moduleId);
+            const navEl = document.getElementById(moduleDef.navId);
+            const mobileEl = document.getElementById(moduleDef.mobileNavId);
+            if (!moduleEl || !navEl || !mobileEl) return;
+            if (window.QRStudioExtra) window.QRStudioExtra.ensureInit(moduleDef);
+            activateModule(moduleEl, navEl, mobileEl, moduleDef.title, moduleDef.description, moduleDef.kicker, moduleDef.hash);
         }
 
         // 打开移动端菜单
@@ -3129,13 +3402,18 @@
         
         // 处理URL hash
         function handleHashChange() {
-            const hash = window.location.hash;
+            let hash = window.location.hash;
+            if (!hash) {
+                try { hash = localStorage.getItem('qr-studio-last-module') || '#generate'; } catch (e) { hash = '#generate'; }
+            }
             if (hash === '#decode') {
                 switchToDecode();
             } else if (hash === '#excel-to-xmind') {
                 switchToExcelToXMind();
             } else if (hash === '#json-formatter') {
                 switchToJsonFormatter();
+            } else if (window.QRStudioExtra && window.QRStudioExtra.findByHash(hash)) {
+                switchToExtraModule(window.QRStudioExtra.findByHash(hash));
             } else {
                 switchToGenerate();
             }
@@ -3175,6 +3453,16 @@
             mobileNavDecode.addEventListener('click', (e) => { e.preventDefault(); switchToDecode(); });
             mobileNavExcelToXMind.addEventListener('click', (e) => { e.preventDefault(); switchToExcelToXMind(); });
             mobileNavJsonFormatter.addEventListener('click', (e) => { e.preventDefault(); switchToJsonFormatter(); });
+
+            if (window.QRStudioExtra && Array.isArray(window.QRStudioExtra.modules)) {
+                window.QRStudioExtra.modules.forEach(moduleDef => {
+                    const navEl = document.getElementById(moduleDef.navId);
+                    const mobileEl = document.getElementById(moduleDef.mobileNavId);
+                    const open = (e) => { e.preventDefault(); switchToExtraModule(moduleDef); };
+                    if (navEl) navEl.addEventListener('click', open);
+                    if (mobileEl) mobileEl.addEventListener('click', open);
+                });
+            }
             mobileNavToggle.addEventListener('click', openMobileMenu);
             closeMobileNav.addEventListener('click', closeMobileMenu);
             mobileNav.addEventListener('click', (e) => { if (e.target === mobileNav) closeMobileMenu(); });
@@ -3593,6 +3881,14 @@
                     console.log('业务类型下拉框初始化完成');
                 } catch (error) {
                     console.error('初始化业务类型下拉框失败:', error);
+                }
+
+                try {
+                    if (window.QRStudioExtra && typeof window.QRStudioExtra.restoreGenerateParams === 'function') {
+                        window.QRStudioExtra.restoreGenerateParams();
+                    }
+                } catch (error) {
+                    console.error('恢复生码参数失败:', error);
                 }
                 
                 // 初始化默认二维码，添加错误处理以防止页面加载失败
@@ -5514,5 +5810,6 @@ ${textContent}
         document.addEventListener('DOMContentLoaded', initFoxMascot);
         document.addEventListener('DOMContentLoaded', initJsonFormatter);
     </script>
+    <script src="tools-extra.js"></script>
 </body>
 </html>
