@@ -2927,16 +2927,16 @@
             <div class="decode-layout">
                 <div>
                     <label class="field-label" for="qr-image-input">上传二维码图片</label>
-                    <div id="qr-drop-area" class="text-center cursor-pointer" role="button" tabindex="0" aria-label="点击或拖拽上传二维码图片">
+                    <div id="qr-drop-area" class="text-center cursor-pointer" role="button" tabindex="0" aria-label="点击、拖拽或粘贴上传二维码图片">
                         <input type="file" id="qr-image-input" accept="image/*" style="display: none;">
                         <div class="upload-icon"><i class="fa fa-cloud-upload" aria-hidden="true"></i></div>
-                        <p class="upload-title">点击或拖拽图片到此处</p>
-                        <p class="upload-hint">支持 JPG、PNG、GIF，文件不超过 5MB</p>
+                        <p class="upload-title">点击、拖拽或粘贴图片</p>
+                        <p class="upload-hint">支持 Ctrl / Cmd + V 粘贴截图 · JPG / PNG / GIF · 不超过 5MB</p>
                     </div>
                 </div>
 
                 <div class="decode-side">
-                    <div class="decode-tip"><strong><i class="fa fa-lightbulb-o mr-2" aria-hidden="true"></i>获得更好的识别效果</strong>请上传清晰、完整且未被裁切的二维码图片，识别过程仅在本地浏览器中完成。</div>
+                    <div class="decode-tip"><strong><i class="fa fa-lightbulb-o mr-2" aria-hidden="true"></i>获得更好的识别效果</strong>可直接复制二维码图片后粘贴识别；请使用清晰、完整的图片，过程仅在本地完成。</div>
 
                     <div id="image-preview-container" class="hidden">
                         <label class="field-label">图片预览</label>
@@ -3352,7 +3352,13 @@
 
         function switchToDecode() {
             activateModule(decodeModule, navDecode, mobileNavDecode,
-                '二维码解码工具', '上传二维码图片，在本地快速识别并复制其中的内容。', 'IMAGE DECODER', '#decode');
+                '二维码解码工具', '上传、拖拽或粘贴二维码图片，在本地快速识别并复制内容。', 'IMAGE DECODER', '#decode');
+            const dropArea = document.getElementById('qr-drop-area');
+            if (dropArea) {
+                requestAnimationFrame(function() {
+                    try { dropArea.focus({ preventScroll: true }); } catch (e) { dropArea.focus(); }
+                });
+            }
         }
 
         function switchToExcelToXMind() {
@@ -3480,6 +3486,7 @@
         // 初始化解码工具功能
         function initDecodeTool() {
             // 获取DOM元素
+            const decodeModule = document.getElementById('decode-module');
             const dropArea = document.getElementById('qr-drop-area');
             const imageInput = document.getElementById('qr-image-input');
             const imagePreview = document.getElementById('image-preview');
@@ -3491,45 +3498,101 @@
             const decodeCopyButton = document.getElementById('decode-copy-button');
             
             let selectedFile = null;
+            let pendingAutoDecode = false;
             
-            // 处理图片上传
-            function handleImageUpload(file) {
+            function isDecodeModuleActive() {
+                return decodeModule && !decodeModule.classList.contains('hidden');
+            }
+
+            function enableDecodeActions() {
+                decodeButton.style.opacity = '1';
+                decodeButton.style.cursor = 'pointer';
+                decodeResetButton.style.opacity = '1';
+                decodeResetButton.style.cursor = 'pointer';
+            }
+            
+            // 处理图片上传（支持文件选择 / 拖拽 / 粘贴）
+            function handleImageUpload(file, options) {
                 if (!file) return;
+                const autoDecode = !!(options && options.autoDecode);
                 
                 // 验证文件类型
-                if (!file.type.match('image.*')) {
-                    alert('请上传有效的图片文件');
+                if (!file.type || !file.type.match(/^image\//)) {
+                    showToast('error', '请使用图片文件（可粘贴截图）');
                     return;
                 }
                 
                 // 验证文件大小 (最大 5MB)
                 if (file.size > 5 * 1024 * 1024) {
-                    alert('图片文件大小不能超过 5MB');
+                    showToast('error', '图片文件大小不能超过 5MB');
                     return;
                 }
                 
                 selectedFile = file;
+                pendingAutoDecode = autoDecode;
                 
                 // 显示预览
                 const reader = new FileReader();
                 reader.onload = function(e) {
+                    imagePreview.onload = function() {
+                        imagePreview.onload = null;
+                        if (pendingAutoDecode) {
+                            decodeQRCode({ silentEmpty: false });
+                        }
+                    };
                     imagePreview.src = e.target.result;
                     imagePreview.style.display = 'block';
                     revealElement(imagePreviewContainer);
                     showUploadSuccess(dropArea);
-                    decodeButton.style.opacity = '1';
-                    decodeButton.style.cursor = 'pointer';
-                    decodeResetButton.style.opacity = '1';
-                    decodeResetButton.style.cursor = 'pointer';
+                    enableDecodeActions();
                     decodeResultContainer.style.display = 'none';
+                    decodeResultContainer.classList.add('hidden');
+                };
+                reader.onerror = function() {
+                    showToast('error', '图片读取失败，请重试');
                 };
                 reader.readAsDataURL(file);
             }
+
+            function pickImageFromClipboard(clipboardData) {
+                if (!clipboardData) return null;
+                const items = clipboardData.items || [];
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item && item.type && item.type.indexOf('image') === 0) {
+                        const blob = item.getAsFile();
+                        if (blob) {
+                            const ext = (blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+                            return new File([blob], 'pasted-qr.' + ext, { type: blob.type || 'image/png' });
+                        }
+                    }
+                }
+                if (clipboardData.files && clipboardData.files.length) {
+                    const file = clipboardData.files[0];
+                    if (file && file.type && file.type.indexOf('image') === 0) return file;
+                }
+                return null;
+            }
+
+            function handlePasteImage(event) {
+                if (!isDecodeModuleActive()) return;
+                // 在输入框里粘贴文字时不拦截
+                const tag = (event.target && event.target.tagName || '').toLowerCase();
+                if (tag === 'textarea' || tag === 'input' || (event.target && event.target.isContentEditable)) {
+                    if (event.target !== dropArea) return;
+                }
+                const file = pickImageFromClipboard(event.clipboardData || window.clipboardData);
+                if (!file) return;
+                event.preventDefault();
+                handleImageUpload(file, { autoDecode: true });
+                showToast('info', '已粘贴图片，正在识别…');
+            }
             
             // 解码二维码
-            function decodeQRCode() {
-                if (!selectedFile) {
-                    alert('请先上传图片');
+            function decodeQRCode(options) {
+                const silentEmpty = options && options.silentEmpty;
+                if (!selectedFile && !imagePreview.src) {
+                    if (!silentEmpty) showToast('error', '请先上传或粘贴图片');
                     return;
                 }
                 
@@ -3549,23 +3612,29 @@
                     // 获取图像数据
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     
-                    // 使用jsQR解码
-                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                        inversionAttempts: "dontInvert"
-                    });
+                    // 使用jsQR解码（尝试反色，提升截图识别率）
+                    let code = null;
+                    if (typeof jsQR === 'function') {
+                        code = jsQR(imageData.data, imageData.width, imageData.height, {
+                            inversionAttempts: 'attemptBoth'
+                        });
+                    }
                     
                     // 处理解码结果
                     if (code) {
                         decodeResult.value = code.data;
                         revealElement(decodeResultContainer);
                         celebrateFox('解码成功啦');
+                        showToast('success', '二维码识别成功');
                     } else {
-                        alert('未检测到二维码或解码失败，请尝试其他图片');
+                        showToast('error', '未检测到二维码，请换一张更清晰的图片');
                     }
+                    pendingAutoDecode = false;
                 };
                 
                 img.onerror = function() {
-                    alert('图片加载失败，请重试');
+                    showToast('error', '图片加载失败，请重试');
+                    pendingAutoDecode = false;
                 };
                 
                 img.src = imagePreview.src;
@@ -3630,7 +3699,7 @@
             
             // 文件选择事件
             imageInput.addEventListener('change', () => {
-                handleImageUpload(imageInput.files[0]);
+                handleImageUpload(imageInput.files[0], { autoDecode: true });
             });
             
             // 解码按钮事件
@@ -3684,9 +3753,19 @@
                  const files = dt.files;
                  
                  if (files.length > 0) {
-                     handleImageUpload(files[0]);
+                     handleImageUpload(files[0], { autoDecode: true });
                  }
              }
+
+            // 粘贴截图 / 剪贴板图片识别
+            document.addEventListener('paste', handlePasteImage);
+            dropArea.addEventListener('paste', handlePasteImage);
+            dropArea.addEventListener('focus', function() {
+                dropArea.classList.add('is-dragging');
+            });
+            dropArea.addEventListener('blur', function() {
+                if (!selectedFile) dropArea.classList.remove('is-dragging');
+            });
         }
         function updateRangeProgress(range) {
             const progress = ((range.value - range.min) / (range.max - range.min)) * 100;
